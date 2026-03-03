@@ -1838,5 +1838,205 @@
         "primary_code": "S37.001A",
         "pmjay_eligible": true,
         "package_rate_available": false
+    },
+    {
+        "id": "URO-003",
+        "specialty": "Urology",
+        "condition_name": "Bladder Cancer",
+        "primary_code": "C67.9",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-004",
+        "specialty": "Urology",
+        "condition_name": "Carcinoma of Prostate",
+        "primary_code": "C61",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-005",
+        "specialty": "Urology",
+        "condition_name": "Benign Prostatic Hyperplasia requiring TURP",
+        "primary_code": "N40.1",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-006",
+        "specialty": "Urology",
+        "condition_name": "Urosepsis",
+        "primary_code": "N39.0",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "URO-007",
+        "specialty": "Urology",
+        "condition_name": "Pyelonephritis with Perinephric Abscess",
+        "primary_code": "N13.6",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-008",
+        "specialty": "Urology",
+        "condition_name": "Urolithiasis requiring PCNL",
+        "primary_code": "N20.0",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-009",
+        "specialty": "Urology",
+        "condition_name": "Ureteral Injury",
+        "primary_code": "S37.10XA",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "URO-010",
+        "specialty": "Urology",
+        "condition_name": "Testicular Torsion",
+        "primary_code": "N44.00",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-011",
+        "specialty": "Urology",
+        "condition_name": "Priapism",
+        "primary_code": "N48.30",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "URO-012",
+        "specialty": "Urology",
+        "condition_name": "Bladder Injury",
+        "primary_code": "S37.20XA",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "URO-013",
+        "specialty": "Urology",
+        "condition_name": "Urethral Stricture requiring Urethroplasty",
+        "primary_code": "N35.919",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-014",
+        "specialty": "Urology",
+        "condition_name": "Renal Cell Carcinoma",
+        "primary_code": "C64.9",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "URO-015",
+        "specialty": "Urology",
+        "condition_name": "Vesicovaginal Fistula",
+        "primary_code": "N82.0",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "DERM-004",
+        "specialty": "Dermatology",
+        "condition_name": "Toxic Epidermal Necrolysis",
+        "primary_code": "L51.2",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-005",
+        "specialty": "Dermatology",
+        "condition_name": "Severe Cellulitis with Sepsis",
+        "primary_code": "L03.90",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-006",
+        "specialty": "Dermatology",
+        "condition_name": "Exfoliative Dermatitis (Erythroderma)",
+        "primary_code": "L26",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-007",
+        "specialty": "Dermatology",
+        "condition_name": "Generalized Pustular Psoriasis",
+        "primary_code": "L40.1",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-008",
+        "specialty": "Dermatology",
+        "condition_name": "Cutaneous Vasculitis",
+        "primary_code": "L95.9",
+        "pmjay_eligible": false,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-009",
+        "specialty": "Dermatology",
+        "condition_name": "Leprosy (Hansen's Disease)",
+        "primary_code": "A30.9",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-010",
+        "specialty": "Dermatology",
+        "condition_name": "Herpes Zoster with Neurological Complications",
+        "primary_code": "B02.9",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-011",
+        "specialty": "Dermatology",
+        "condition_name": "DRESS Syndrome (Drug Reaction with Eosinophilia)",
+        "primary_code": "L27.0",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-012",
+        "specialty": "Dermatology",
+        "condition_name": "Severe Urticaria with Angioedema",
+        "primary_code": "L50.0",
+        "pmjay_eligible": false,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-013",
+        "specialty": "Dermatology",
+        "condition_name": "Extensive Pressure Ulcer",
+        "primary_code": "L89.90",
+        "pmjay_eligible": true,
+        "package_rate_available": true
+    },
+    {
+        "id": "DERM-014",
+        "specialty": "Dermatology",
+        "condition_name": "Scabies with Secondary Infection",
+        "primary_code": "B86",
+        "pmjay_eligible": true,
+        "package_rate_available": false
+    },
+    {
+        "id": "DERM-015",
+        "specialty": "Dermatology",
+        "condition_name": "Malignant Melanoma requiring Surgery",
+        "primary_code": "C43.9",
+        "pmjay_eligible": true,
+        "package_rate_available": true
     }
 ]

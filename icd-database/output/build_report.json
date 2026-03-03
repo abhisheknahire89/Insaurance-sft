@@ -1,5 +1,5 @@
 {
-  "total_built": 230,
+  "total_built": 255,
   "invalid_codes": [],
   "missing_variants": [],
   "needs_review": [],
@@ -19,7 +19,7 @@
     "Oncology": 10,
     "Psychiatry": 10,
     "Emergency Medicine": 10,
-    "Dermatology": 3,
-    "Urology": 2
+    "Dermatology": 15,
+    "Urology": 15
   }
 }

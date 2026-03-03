@@ -2,8 +2,8 @@
   "metadata": {
     "schema_version": "1.0.0",
     "icd_version": "ICD-10-CM 2024",
-    "generated_at": "2026-03-03T13:56:12.475Z",
-    "total_conditions": 230,
+    "generated_at": "2026-03-03T14:00:59.879Z",
+    "total_conditions": 255,
     "target_market": "Indian private hospitals",
     "tpa_compatibility": [
       "Medi Assist",
@@ -26907,6 +26907,2818 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-003",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "C67.9",
+          "description": "Malignant neoplasm of bladder, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "C67.9",
+            "description": "Malignant neoplasm of bladder, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Bladder Cancer",
+      "keywords": [
+        "bladder cancer"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-004",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "C61",
+          "description": "Malignant neoplasm of prostate",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "C61",
+            "description": "Malignant neoplasm of prostate",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Carcinoma of Prostate",
+      "keywords": [
+        "carcinoma of prostate"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-005",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N40.1",
+          "description": "Benign prostatic hyperplasia with lower urinary tract symptoms",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N40.1",
+            "description": "Benign prostatic hyperplasia with lower urinary tract symptoms",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Benign Prostatic Hyperplasia requiring TURP",
+      "keywords": [
+        "benign prostatic hyperplasia requiring turp"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-006",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N39.0",
+          "description": "Urinary tract infection, site not specified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          },
+          {
+            "code": "E11.9",
+            "description": "Type 2 diabetes mellitus without complications"
+          }
+        ]
+      },
+      "condition_name": "Urosepsis",
+      "keywords": [
+        "urosepsis"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-007",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N13.6",
+          "description": "Pyonephrosis",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N13.6",
+            "description": "Pyonephrosis",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Pyelonephritis with Perinephric Abscess",
+      "keywords": [
+        "pyelonephritis with perinephric abscess"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-008",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N20.0",
+          "description": "Calculus of kidney",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N20.0",
+            "description": "Calculus of kidney",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Urolithiasis requiring PCNL",
+      "keywords": [
+        "urolithiasis requiring pcnl"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-009",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "S37.10XA",
+          "description": "Unspecified injury of ureter, initial encounter",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "S37.10XA",
+            "description": "Unspecified injury of ureter, initial encounter",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Ureteral Injury",
+      "keywords": [
+        "ureteral injury"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-010",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N44.00",
+          "description": "Torsion of testis, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N44.00",
+            "description": "Torsion of testis, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Testicular Torsion",
+      "keywords": [
+        "testicular torsion"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-011",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N48.30",
+          "description": "Priapism, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N48.30",
+            "description": "Priapism, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Priapism",
+      "keywords": [
+        "priapism"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-012",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "S37.20XA",
+          "description": "Unspecified injury of bladder, initial encounter",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "S37.20XA",
+            "description": "Unspecified injury of bladder, initial encounter",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Bladder Injury",
+      "keywords": [
+        "bladder injury"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-013",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N35.919",
+          "description": "Unspecified urethral stricture, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N35.919",
+            "description": "Unspecified urethral stricture, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Urethral Stricture requiring Urethroplasty",
+      "keywords": [
+        "urethral stricture requiring urethroplasty"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-014",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "C64.9",
+          "description": "Malignant neoplasm of unspecified kidney, except renal pelvis",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "C64.9",
+            "description": "Malignant neoplasm of unspecified kidney, except renal pelvis",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Renal Cell Carcinoma",
+      "keywords": [
+        "renal cell carcinoma"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "URO-015",
+      "specialty": "Urology",
+      "icd_codes": {
+        "primary": {
+          "code": "N82.0",
+          "description": "Vesicovaginal fistula",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "N82.0",
+            "description": "Vesicovaginal fistula",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R33.9",
+            "description": "Retention of urine, unspecified"
+          },
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "N39.0",
+            "description": "Urinary tract infection, site not specified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "R65.21",
+            "description": "Severe sepsis with septic shock"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Vesicovaginal Fistula",
+      "keywords": [
+        "vesicovaginal fistula"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Complete urinary retention with renal compromise",
+        "Urosepsis with haemodynamic instability",
+        "Stone with obstructive uropathy and AKI"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 2,
+        "typical_days": 4,
+        "icu_days_if_applicable": 0,
+        "note": "Post-procedure observation"
+      },
+      "expected_procedures": [
+        "Urinary catheterisation",
+        "Urethroscopy",
+        "PCNL",
+        "Ureteric stenting",
+        "USG KUB",
+        "CT urography",
+        "Cystoscopy",
+        "IV antibiotics"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "USG KUB or CT urography",
+        "Urine culture sensitivity",
+        "Urological specialist note",
+        "Pre-procedure creatinine"
+      ],
+      "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-004",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L51.2",
+          "description": "Toxic epidermal necrolysis [Lyell]",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L51.2",
+            "description": "Toxic epidermal necrolysis [Lyell]",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Toxic Epidermal Necrolysis",
+      "keywords": [
+        "toxic epidermal necrolysis"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-005",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L03.90",
+          "description": "Cellulitis, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L03.90",
+            "description": "Cellulitis, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Severe Cellulitis with Sepsis",
+      "keywords": [
+        "severe cellulitis with sepsis"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-006",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L26",
+          "description": "Exfoliative dermatitis",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L26",
+            "description": "Exfoliative dermatitis",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Exfoliative Dermatitis (Erythroderma)",
+      "keywords": [
+        "exfoliative dermatitis (erythroderma)"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-007",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L40.1",
+          "description": "Generalized pustular psoriasis",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L40.1",
+            "description": "Generalized pustular psoriasis",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Generalized Pustular Psoriasis",
+      "keywords": [
+        "generalized pustular psoriasis"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-008",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L95.9",
+          "description": "Vasculitis limited to skin, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L95.9",
+            "description": "Vasculitis limited to skin, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Cutaneous Vasculitis",
+      "keywords": [
+        "cutaneous vasculitis"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": false,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-009",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "A30.9",
+          "description": "Leprosy, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "A30.9",
+            "description": "Leprosy, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Leprosy (Hansen's Disease)",
+      "keywords": [
+        "leprosy (hansen's disease)"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-010",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "B02.9",
+          "description": "Zoster without complications",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "B02.9",
+            "description": "Zoster without complications",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Herpes Zoster with Neurological Complications",
+      "keywords": [
+        "herpes zoster with neurological complications"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-011",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L27.0",
+          "description": "Generalized skin eruption due to drugs and medicaments taken internally",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L27.0",
+            "description": "Generalized skin eruption due to drugs and medicaments taken internally",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "DRESS Syndrome (Drug Reaction with Eosinophilia)",
+      "keywords": [
+        "dress syndrome (drug reaction with eosinophilia)"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-012",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L50.0",
+          "description": "Allergic urticaria",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L50.0",
+            "description": "Allergic urticaria",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Severe Urticaria with Angioedema",
+      "keywords": [
+        "severe urticaria with angioedema"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": false,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-013",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "L89.90",
+          "description": "Pressure ulcer of unspecified site, unspecified stage",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "L89.90",
+            "description": "Pressure ulcer of unspecified site, unspecified stage",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Extensive Pressure Ulcer",
+      "keywords": [
+        "extensive pressure ulcer"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-014",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "B86",
+          "description": "Scabies",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "B86",
+            "description": "Scabies",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Scabies with Secondary Infection",
+      "keywords": [
+        "scabies with secondary infection"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": false,
+      "typical_package_codes": [],
+      "coding_systems_supported": [
+        "ICD-10-CM 2024"
+      ],
+      "needs_manual_review": false
+    },
+    {
+      "id": "DERM-015",
+      "specialty": "Dermatology",
+      "icd_codes": {
+        "primary": {
+          "code": "C43.9",
+          "description": "Malignant melanoma of skin, unspecified",
+          "version": "ICD-10-CM 2024"
+        },
+        "specific_variants": [
+          {
+            "code": "C43.9",
+            "description": "Malignant melanoma of skin, unspecified",
+            "use_when": "Default — use when no specific subtype identified"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism",
+            "use_when": "When sepsis complicates the primary condition"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified",
+            "use_when": "When AKI develops as a complication"
+          }
+        ],
+        "associated_codes": [
+          {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+          },
+          {
+            "code": "R11.2",
+            "description": "Nausea with vomiting, unspecified"
+          },
+          {
+            "code": "R04.2",
+            "description": "Hemoptysis"
+          },
+          {
+            "code": "A41.9",
+            "description": "Sepsis, unspecified organism"
+          },
+          {
+            "code": "J96.00",
+            "description": "Acute respiratory failure, unspecified whether with hypoxia or hypercapnia"
+          },
+          {
+            "code": "N17.9",
+            "description": "Acute kidney failure, unspecified"
+          },
+          {
+            "code": "D65",
+            "description": "Disseminated intravascular coagulation [defibrination syndrome]"
+          }
+        ]
+      },
+      "condition_name": "Malignant Melanoma requiring Surgery",
+      "keywords": [
+        "malignant melanoma requiring surgery"
+      ],
+      "admission_criteria": [
+        "Failed adequate outpatient/OPD treatment",
+        "Requires IV medications or continuous monitoring",
+        "Vitals unstable: HR >100 or <50, SBP <90 or >180 mmHg, SpO₂ <94%, RR >25/min, Temp >38.5°C",
+        "Skin detachment >10% BSA (SJS/TEN)",
+        "Mucosal involvement with sepsis risk",
+        "Rapidly spreading necrotising infection",
+        "Inability to take oral medications"
+      ],
+      "expected_length_of_stay": {
+        "minimum_days": 5,
+        "typical_days": 14,
+        "icu_days_if_applicable": 3,
+        "note": "SJS/TEN needs burn care protocol"
+      },
+      "expected_procedures": [
+        "Skin biopsy",
+        "Wound culture",
+        "IV steroids",
+        "IVIG infusion",
+        "Wound dressing Burns protocol",
+        "Ophthalmology consult for SJS",
+        "Nutritional support",
+        "Slit-lamp exam"
+      ],
+      "tpa_query_triggers": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification"
+      ],
+      "must_include_in_documentation": [
+        "Signed pre-authorization request form",
+        "Admission note with past medical/surgical history",
+        "Vitals chart at admission (BP, HR, RR, SpO₂, Temp)",
+        "Treating doctor's name and registration number",
+        "Clinical photographs at admission",
+        "Skin biopsy report",
+        "Ophthalmology review note for SJS",
+        "Wound culture results"
+      ],
+      "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
+      "pmjay_eligible": true,
+      "package_rate_available": true,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
