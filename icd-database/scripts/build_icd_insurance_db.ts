@@ -12,6 +12,7 @@ const assocLib: any = read('data/templates/associated_codes_library.json');
 const losLib: any = read('data/templates/los_templates.json');
 const tqLib: any = read('data/templates/tpa_query_templates.json');
 const procLib: any = read('data/templates/expected_procedures_templates.json');
+const pmjayLib: any = read('data/pmjay_packages.json');
 
 // ── Variant rules per specialty ──────────────────────────────────────────────
 const VARIANT_RULES: Record<string, (seed: any) => any[]> = {
@@ -270,7 +271,10 @@ function buildCondition(seed: any): any {
         india_specific_notes: indiaNotes,
         pmjay_eligible: seed.pmjay_eligible,
         package_rate_available: seed.package_rate_available,
-        typical_package_codes: [],
+        pmjay_package: pmjayLib.packages[seed.id] ?? null,
+        typical_package_codes: pmjayLib.packages[seed.id]
+            ? [pmjayLib.packages[seed.id].hbp_code]
+            : [],
         coding_systems_supported: ['ICD-10-CM 2024'],
         needs_manual_review: !icdDict[primaryCode],
     };
@@ -293,10 +297,13 @@ const conditions = seeds.map(seed => {
 
 const output = {
     metadata: {
-        schema_version: '1.0.0',
+        schema_version: '1.1.0',
         icd_version: 'ICD-10-CM 2024',
+        pmjay_version: pmjayLib.metadata.version,
+        pmjay_effective_date: pmjayLib.metadata.effective_date,
         generated_at: new Date().toISOString(),
         total_conditions: conditions.length,
+        pmjay_packaged_conditions: conditions.filter(c => c.pmjay_package).length,
         target_market: 'Indian private hospitals',
         tpa_compatibility: ['Medi Assist', 'MD India', 'FHPL', 'Paramount', 'Health India TPA'],
         specialties_covered: [...new Set(seeds.map(s => s.specialty))].length,
@@ -308,6 +315,10 @@ const report = {
     total_built: conditions.length,
     invalid_codes: invalidCodes,
     missing_variants: missingVariants,
+    pmjay_packaged: conditions.filter(c => c.pmjay_package).length,
+    pmjay_package_total_inr: conditions
+        .filter(c => c.pmjay_package)
+        .reduce((sum, c) => sum + (c.pmjay_package?.package_rate_inr ?? 0), 0),
     needs_review: conditions.filter(c => c.needs_manual_review).map(c => c.id),
     by_specialty: Object.fromEntries(
         [...new Set(seeds.map(s => s.specialty))].map(sp => [

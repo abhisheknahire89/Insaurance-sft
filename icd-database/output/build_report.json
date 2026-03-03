@@ -2,6 +2,8 @@
   "total_built": 255,
   "invalid_codes": [],
   "missing_variants": [],
+  "pmjay_packaged": 55,
+  "pmjay_package_total_inr": 3230000,
   "needs_review": [],
   "by_specialty": {
     "Respiratory": 20,

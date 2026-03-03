@@ -1,9 +1,12 @@
 {
   "metadata": {
-    "schema_version": "1.0.0",
+    "schema_version": "1.1.0",
     "icd_version": "ICD-10-CM 2024",
-    "generated_at": "2026-03-03T14:00:59.879Z",
+    "pmjay_version": "2.0",
+    "pmjay_effective_date": "2023-11-01",
+    "generated_at": "2026-03-03T14:53:37.254Z",
     "total_conditions": 255,
+    "pmjay_packaged_conditions": 55,
     "target_market": "Indian private hospitals",
     "tpa_compatibility": [
       "Medi Assist",
@@ -136,7 +139,39 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-MDM-1-1-001",
+        "package_name": "Community Acquired Pneumonia — Medical Management",
+        "package_rate_inr": 15000,
+        "includes": [
+          "Hospitalisation up to 7 days",
+          "IV antibiotics",
+          "Oxygen therapy",
+          "Chest X-ray",
+          "CBC, ABG"
+        ],
+        "excludes": [
+          "ICU beyond package",
+          "Ventilator support"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 20000,
+            "max": 35000
+          },
+          "md_india": {
+            "min": 18000,
+            "max": 30000
+          },
+          "fhpl": {
+            "min": 18000,
+            "max": 32000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-MDM-1-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -253,6 +288,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -370,6 +406,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -487,6 +524,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -604,6 +642,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -721,7 +760,37 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-MDM-1-1-006",
+        "package_name": "Spontaneous Pneumothorax — ICD/Intercostal Drain",
+        "package_rate_inr": 18000,
+        "includes": [
+          "Intercostal drain insertion",
+          "Up to 5-day stay",
+          "Chest X-ray series",
+          "Pleurodesis if needed"
+        ],
+        "excludes": [
+          "Video-assisted thoracoscopy (VATS)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 25000,
+            "max": 45000
+          },
+          "md_india": {
+            "min": 22000,
+            "max": 40000
+          },
+          "fhpl": {
+            "min": 20000,
+            "max": 38000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-MDM-1-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -838,7 +907,38 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-MDM-1-1-007",
+        "package_name": "Pulmonary Tuberculosis — Inpatient Initiation",
+        "package_rate_inr": 17000,
+        "includes": [
+          "Diagnosis confirmation",
+          "Category I/II drugs initiation",
+          "Up to 7-day stay",
+          "Sputum AFB/GeneXpert"
+        ],
+        "excludes": [
+          "Drug-resistant TB (separate package)",
+          "Surgical intervention"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 20000,
+            "max": 30000
+          },
+          "md_india": {
+            "min": 18000,
+            "max": 28000
+          },
+          "fhpl": {
+            "min": 18000,
+            "max": 27000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-MDM-1-1-007"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -955,6 +1055,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1072,6 +1173,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1189,6 +1291,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1306,6 +1409,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1423,6 +1527,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1540,6 +1645,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1657,6 +1763,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1774,6 +1881,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -1891,6 +1999,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -2008,7 +2117,37 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-MDM-1-1-017",
+        "package_name": "Aspiration Pneumonia — Medical Management",
+        "package_rate_inr": 15000,
+        "includes": [
+          "Up to 7-day stay",
+          "IV antibiotics",
+          "Physiotherapy",
+          "Nutritional support"
+        ],
+        "excludes": [
+          "ICU/ventilator beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 20000,
+            "max": 35000
+          },
+          "md_india": {
+            "min": 18000,
+            "max": 30000
+          },
+          "fhpl": {
+            "min": 18000,
+            "max": 32000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-MDM-1-1-017"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -2125,7 +2264,37 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-SUR-1-1-018",
+        "package_name": "Empyema Thoracis — Surgical Drainage",
+        "package_rate_inr": 30000,
+        "includes": [
+          "Surgical decortication or VATS",
+          "ICD",
+          "Up to 10-day stay",
+          "Antibiotics"
+        ],
+        "excludes": [
+          "Ventilator beyond 48hrs"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 40000,
+            "max": 70000
+          },
+          "md_india": {
+            "min": 38000,
+            "max": 65000
+          },
+          "fhpl": {
+            "min": 35000,
+            "max": 60000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-SUR-1-1-018"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -2242,6 +2411,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -2359,6 +2529,7 @@
       "india_specific_notes": "TB is endemic in India — always rule out TB with sputum AFB/CBNAAT before starting empiric antibiotics. PMJAY covers pneumonia hospitalization. COVID-19 protocols were mandated 2020-23.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -2476,7 +2647,39 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-001",
+        "package_name": "STEMI — PTCA/Primary Angioplasty",
+        "package_rate_inr": 110000,
+        "includes": [
+          "Coronary angiography",
+          "PTCA with stent (DES)",
+          "Up to 5-day stay",
+          "Cardiac monitoring"
+        ],
+        "excludes": [
+          "CABG",
+          "Additional stents beyond 2",
+          "IABP"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 150000,
+            "max": 300000
+          },
+          "md_india": {
+            "min": 140000,
+            "max": 280000
+          },
+          "fhpl": {
+            "min": 140000,
+            "max": 260000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -2593,7 +2796,38 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-002",
+        "package_name": "NSTEMI — Coronary Angiography + PCI",
+        "package_rate_inr": 75000,
+        "includes": [
+          "Coronary angiogram",
+          "PCI if indicated",
+          "Up to 5-day stay",
+          "Cardiac enzymes, ECG"
+        ],
+        "excludes": [
+          "CABG",
+          "Stent cost beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 100000,
+            "max": 220000
+          },
+          "md_india": {
+            "min": 95000,
+            "max": 200000
+          },
+          "fhpl": {
+            "min": 90000,
+            "max": 190000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -2710,6 +2944,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -2827,6 +3062,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -2944,6 +3180,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3061,6 +3298,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3178,6 +3416,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3295,6 +3534,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3412,7 +3652,37 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-009",
+        "package_name": "Complete Heart Block — Permanent Pacemaker Implantation",
+        "package_rate_inr": 150000,
+        "includes": [
+          "Single/dual chamber pacemaker implant",
+          "Device cost up to package",
+          "Up to 5-day stay"
+        ],
+        "excludes": [
+          "CRT device",
+          "ICD implant"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 200000,
+            "max": 400000
+          },
+          "md_india": {
+            "min": 190000,
+            "max": 380000
+          },
+          "fhpl": {
+            "min": 180000,
+            "max": 360000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-009"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -3529,6 +3799,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3646,6 +3917,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -3763,7 +4035,38 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-012",
+        "package_name": "Severe Aortic Stenosis — Valve Replacement (AVR)",
+        "package_rate_inr": 180000,
+        "includes": [
+          "Open-heart surgery",
+          "Mechanical/bioprosthetic valve",
+          "Cardiopulmonary bypass",
+          "Up to 14-day stay"
+        ],
+        "excludes": [
+          "TAVI/TAVR",
+          "Prosthetic valve cost above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 350000,
+            "max": 700000
+          },
+          "md_india": {
+            "min": 320000,
+            "max": 650000
+          },
+          "fhpl": {
+            "min": 300000,
+            "max": 600000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-012"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -3880,7 +4183,36 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-013",
+        "package_name": "Mitral Regurgitation — Valve Repair/Replacement",
+        "package_rate_inr": 150000,
+        "includes": [
+          "Open-heart surgery",
+          "Mitral valve repair or bioprosthetic replacement",
+          "Up to 14-day stay"
+        ],
+        "excludes": [
+          "Prosthetic valve cost above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 300000,
+            "max": 600000
+          },
+          "md_india": {
+            "min": 280000,
+            "max": 550000
+          },
+          "fhpl": {
+            "min": 260000,
+            "max": 520000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-013"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -3997,6 +4329,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4114,6 +4447,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4231,6 +4565,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4348,7 +4683,36 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-017",
+        "package_name": "HOCM — Septal Myectomy / Alcohol Septal Ablation",
+        "package_rate_inr": 210000,
+        "includes": [
+          "Surgical septal myectomy or catheter ablation",
+          "Up to 14-day stay",
+          "Echo-guided procedure"
+        ],
+        "excludes": [
+          "ICD implantation"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 350000,
+            "max": 650000
+          },
+          "md_india": {
+            "min": 320000,
+            "max": 600000
+          },
+          "fhpl": {
+            "min": 300000,
+            "max": 580000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-017"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -4465,7 +4829,36 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-CAR-2-1-018",
+        "package_name": "Rheumatic Heart Disease — Valve Surgery",
+        "package_rate_inr": 150000,
+        "includes": [
+          "Open-heart valve repair/replacement",
+          "Up to 14-day stay",
+          "Cardiopulmonary bypass"
+        ],
+        "excludes": [
+          "Prosthetic valve cost above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 250000,
+            "max": 500000
+          },
+          "md_india": {
+            "min": 230000,
+            "max": 470000
+          },
+          "fhpl": {
+            "min": 220000,
+            "max": 450000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-CAR-2-1-018"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -4582,6 +4975,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4699,6 +5093,7 @@
       "india_specific_notes": "Rheumatic heart disease prevalence is high in India. PMJAY covers many cardiac procedures including PTCA and valve replacement. Urban hospitals see high STEMI burden with delayed presentations.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4816,6 +5211,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -4933,6 +5329,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5050,6 +5447,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5167,6 +5565,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5284,6 +5683,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5401,6 +5801,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5518,6 +5919,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5635,6 +6037,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5752,6 +6155,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -5869,7 +6273,37 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-NEU-3-1-010",
+        "package_name": "Acute Subdural Hematoma — Craniotomy / Burr Hole",
+        "package_rate_inr": 100000,
+        "includes": [
+          "Emergency craniotomy or burr hole evacuation",
+          "Up to 14-day stay",
+          "Neuro-ICU monitoring"
+        ],
+        "excludes": [
+          "ICP monitoring device",
+          "Interventional neuroradiology"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 180000,
+            "max": 350000
+          },
+          "md_india": {
+            "min": 160000,
+            "max": 320000
+          },
+          "fhpl": {
+            "min": 150000,
+            "max": 300000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-NEU-3-1-010"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -5986,6 +6420,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6103,6 +6538,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6220,6 +6656,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6337,6 +6774,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6454,6 +6892,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6571,6 +7010,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6688,6 +7128,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6805,6 +7246,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -6922,6 +7364,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -7039,6 +7482,7 @@
       "india_specific_notes": "Cysticercosis (NCC) is a common cause of seizures in India. Availability of IV tPA is limited to select centres. Stroke rehabilitation is a PMJAY covered service.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -7156,6 +7600,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -7273,6 +7718,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -7390,6 +7836,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -7507,7 +7954,38 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-004",
+        "package_name": "Esophageal Variceal Bleeding — Endoscopic Band Ligation/Sclerotherapy",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Emergency endoscopy",
+          "Band ligation or sclerotherapy",
+          "Up to 7-day stay",
+          "Blood transfusion if needed"
+        ],
+        "excludes": [
+          "TIPS procedure",
+          "Liver transplant evaluation"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 50000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 45000,
+            "max": 90000
+          },
+          "fhpl": {
+            "min": 43000,
+            "max": 85000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-004"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -7624,7 +8102,37 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-005",
+        "package_name": "Acute Appendicitis with Peritonitis — Appendicectomy",
+        "package_rate_inr": 25000,
+        "includes": [
+          "Laparoscopic or open appendicectomy",
+          "Peritoneal lavage",
+          "Up to 7-day stay",
+          "Antibiotics"
+        ],
+        "excludes": [
+          "ICU beyond 48 hours"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 40000,
+            "max": 80000
+          },
+          "md_india": {
+            "min": 35000,
+            "max": 70000
+          },
+          "fhpl": {
+            "min": 33000,
+            "max": 65000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-005"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -7741,7 +8249,37 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-006",
+        "package_name": "Acute Cholangitis — ERCP + Stenting",
+        "package_rate_inr": 30000,
+        "includes": [
+          "ERCP with stone extraction or stent",
+          "Sphincterotomy",
+          "Up to 7-day stay",
+          "Antibiotics"
+        ],
+        "excludes": [
+          "Cholecystectomy (separate package)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 45000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 40000,
+            "max": 80000
+          },
+          "fhpl": {
+            "min": 38000,
+            "max": 75000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -7858,7 +8396,37 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-007",
+        "package_name": "Acute Cholecystitis — Laparoscopic Cholecystectomy",
+        "package_rate_inr": 25000,
+        "includes": [
+          "Laparoscopic cholecystectomy",
+          "General anaesthesia",
+          "Up to 5-day stay"
+        ],
+        "excludes": [
+          "Open conversion (additional charges)",
+          "ERCP"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 40000,
+            "max": 75000
+          },
+          "md_india": {
+            "min": 35000,
+            "max": 65000
+          },
+          "fhpl": {
+            "min": 33000,
+            "max": 62000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-007"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -7975,6 +8543,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8092,6 +8661,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8209,6 +8779,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8326,7 +8897,36 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-011",
+        "package_name": "Intestinal Obstruction — Surgical Decompression",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Exploratory laparotomy / laparoscopy",
+          "Bowel resection if needed",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "Colostomy appliances beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 110000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 100000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 95000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-011"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -8443,6 +9043,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8560,6 +9161,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8677,7 +9279,37 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-014",
+        "package_name": "Peptic Ulcer with Perforation — Laparotomy + Repair",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Emergency laparotomy",
+          "Omental patch repair",
+          "Peritoneal lavage",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "ICU beyond 48 hours"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 95000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 90000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-014"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -8794,6 +9426,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -8911,6 +9544,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9028,6 +9662,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9145,7 +9780,36 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-GAS-4-1-018",
+        "package_name": "Volvulus — Surgical Detorsion / Resection",
+        "package_rate_inr": 30000,
+        "includes": [
+          "Emergency laparotomy",
+          "Detorsion or bowel resection",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "Colostomy appliances"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 50000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 45000,
+            "max": 85000
+          },
+          "fhpl": {
+            "min": 42000,
+            "max": 80000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-GAS-4-1-018"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -9262,6 +9926,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9379,6 +10044,7 @@
       "india_specific_notes": "Typhoid, hepatitis A, and amoebic liver abscess are endemic. Alcohol-related liver disease is common. PMJAY covers ERCP and endoscopic interventions.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9496,6 +10162,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9613,7 +10280,37 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-NEP-5-1-002",
+        "package_name": "CKD Stage 5 — Hemodialysis (per session)",
+        "package_rate_inr": 1500,
+        "includes": [
+          "Per-session hemodialysis",
+          "Dialyzer and consumables",
+          "Erythropoietin if required"
+        ],
+        "excludes": [
+          "Fistula creation (separate package)",
+          "Central line"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 2000,
+            "max": 3500
+          },
+          "md_india": {
+            "min": 1800,
+            "max": 3200
+          },
+          "fhpl": {
+            "min": 1800,
+            "max": 3000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-NEP-5-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -9730,6 +10427,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9847,6 +10545,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -9964,6 +10663,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10081,7 +10781,37 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-NEP-5-1-006",
+        "package_name": "Renal Calculus — PCNL / ESWL / URS",
+        "package_rate_inr": 35000,
+        "includes": [
+          "PCNL or ESWL or Ureteroscopy",
+          "Stent if needed",
+          "Up to 5-day stay",
+          "Anaesthesia"
+        ],
+        "excludes": [
+          "Open stone surgery"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 50000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 45000,
+            "max": 90000
+          },
+          "fhpl": {
+            "min": 42000,
+            "max": 85000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-NEP-5-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -10198,6 +10928,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10315,6 +11046,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10432,6 +11164,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10549,6 +11282,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10666,6 +11400,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10783,6 +11518,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -10900,6 +11636,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11017,6 +11754,7 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11134,7 +11872,37 @@
       "india_specific_notes": "CKD secondary to diabetes and hypertension is rising rapidly. Haemodialysis is covered under PMJAY. Aristolochic acid nephropathy reported in herbal medicine users.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-NEP-5-1-015",
+        "package_name": "End Stage Renal Disease — Hemodialysis Session",
+        "package_rate_inr": 1500,
+        "includes": [
+          "Hemodialysis session",
+          "Dialyzer",
+          "Consumables"
+        ],
+        "excludes": [
+          "Peritoneal dialysis supplies",
+          "AV fistula creation"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 2000,
+            "max": 3500
+          },
+          "md_india": {
+            "min": 1800,
+            "max": 3200
+          },
+          "fhpl": {
+            "min": 1800,
+            "max": 3000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-NEP-5-1-015"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -11251,6 +12019,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11368,6 +12137,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11485,6 +12255,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11602,6 +12373,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11719,6 +12491,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11836,6 +12609,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -11953,7 +12727,37 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-END-6-1-007",
+        "package_name": "Diabetic Foot — Debridement / Amputation",
+        "package_rate_inr": 25000,
+        "includes": [
+          "Wound debridement or minor amputation",
+          "Wound care",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "Major amputation (separate package)",
+          "Vascular surgery"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 40000,
+            "max": 80000
+          },
+          "md_india": {
+            "min": 35000,
+            "max": 70000
+          },
+          "fhpl": {
+            "min": 33000,
+            "max": 65000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-END-6-1-007"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -12070,6 +12874,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12187,6 +12992,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12304,6 +13110,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12421,6 +13228,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12538,7 +13346,37 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": false,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-END-6-1-012",
+        "package_name": "Adrenal Crisis — ICU Management",
+        "package_rate_inr": 25000,
+        "includes": [
+          "ICU stay",
+          "IV hydrocortisone",
+          "Monitoring",
+          "Investigations"
+        ],
+        "excludes": [
+          "Surgical intervention"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 35000,
+            "max": 65000
+          },
+          "md_india": {
+            "min": 30000,
+            "max": 60000
+          },
+          "fhpl": {
+            "min": 28000,
+            "max": 55000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-END-6-1-012"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -12655,6 +13493,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12772,6 +13611,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -12889,6 +13729,7 @@
       "india_specific_notes": "India has 77+ million people with T2DM. DKA may present in newly diagnosed T2DM (ketosis-prone DM in South Asians). PMJAY covers diabetic foot management.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -13006,7 +13847,36 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-001",
+        "package_name": "Hip Fracture — ORIF / Hemiarthroplasty",
+        "package_rate_inr": 65000,
+        "includes": [
+          "Surgery + implant (DHS/Nail/hemiarthroplasty within limit)",
+          "Up to 10-day stay",
+          "Physiotherapy"
+        ],
+        "excludes": [
+          "Implant cost above ₹40,000"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 100000,
+            "max": 200000
+          },
+          "md_india": {
+            "min": 90000,
+            "max": 180000
+          },
+          "fhpl": {
+            "min": 85000,
+            "max": 170000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13123,7 +13993,37 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-002",
+        "package_name": "Total Knee Replacement (TKR)",
+        "package_rate_inr": 80000,
+        "includes": [
+          "Total knee prosthesis (within package)",
+          "Surgery",
+          "Up to 10-day stay",
+          "Physiotherapy"
+        ],
+        "excludes": [
+          "High-end implant cost above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 150000,
+            "max": 320000
+          },
+          "md_india": {
+            "min": 140000,
+            "max": 300000
+          },
+          "fhpl": {
+            "min": 130000,
+            "max": 280000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13240,7 +14140,37 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-003",
+        "package_name": "Total Hip Replacement (THR)",
+        "package_rate_inr": 90000,
+        "includes": [
+          "Total hip prosthesis (within package)",
+          "Surgery",
+          "Up to 10-day stay",
+          "Physiotherapy"
+        ],
+        "excludes": [
+          "Ceramic/metal-on-metal implants above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 150000,
+            "max": 350000
+          },
+          "md_india": {
+            "min": 140000,
+            "max": 320000
+          },
+          "fhpl": {
+            "min": 130000,
+            "max": 300000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-003"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13357,7 +14287,35 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-004",
+        "package_name": "Femur Fracture — ORIF with IM Nail/Plate",
+        "package_rate_inr": 50000,
+        "includes": [
+          "Surgery + implant (within package)",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "Implant cost above ₹30,000"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 80000,
+            "max": 160000
+          },
+          "md_india": {
+            "min": 75000,
+            "max": 150000
+          },
+          "fhpl": {
+            "min": 70000,
+            "max": 140000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-004"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13474,7 +14432,36 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-005",
+        "package_name": "Spine Surgery — Discectomy / Decompression",
+        "package_rate_inr": 75000,
+        "includes": [
+          "Surgical decompression/discectomy",
+          "Up to 10-day stay",
+          "Implant within package"
+        ],
+        "excludes": [
+          "Spinal fusion with instrumentation (separate package)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 130000,
+            "max": 280000
+          },
+          "md_india": {
+            "min": 120000,
+            "max": 260000
+          },
+          "fhpl": {
+            "min": 110000,
+            "max": 240000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-005"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13591,7 +14578,36 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-006",
+        "package_name": "ACL Reconstruction",
+        "package_rate_inr": 50000,
+        "includes": [
+          "Arthroscopic ACL repair",
+          "Graft material (within package)",
+          "Up to 5-day stay"
+        ],
+        "excludes": [
+          "Implant cost above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 80000,
+            "max": 160000
+          },
+          "md_india": {
+            "min": 75000,
+            "max": 150000
+          },
+          "fhpl": {
+            "min": 70000,
+            "max": 140000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13708,7 +14724,37 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-007",
+        "package_name": "Bone Infection (Osteomyelitis) — Debridement + Sequestrectomy",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Surgical debridement",
+          "Bone sequestrectomy",
+          "Up to 14-day stay",
+          "IV antibiotics"
+        ],
+        "excludes": [
+          "External fixation above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 110000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 100000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 95000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-007"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13825,7 +14871,37 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ORT-7-1-008",
+        "package_name": "Compound Fracture — ORIF + External Fixation",
+        "package_rate_inr": 55000,
+        "includes": [
+          "Emergency surgery",
+          "External fixator or IM nail",
+          "Wound management",
+          "Up to 10-day stay"
+        ],
+        "excludes": [
+          "High-end implant above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 90000,
+            "max": 180000
+          },
+          "md_india": {
+            "min": 85000,
+            "max": 170000
+          },
+          "fhpl": {
+            "min": 80000,
+            "max": 160000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ORT-7-1-008"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -13942,6 +15018,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14059,6 +15136,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14176,6 +15254,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14293,6 +15372,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14410,6 +15490,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14527,6 +15608,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14644,6 +15726,7 @@
       "india_specific_notes": "Road traffic accidents are a leading cause of orthopedic admissions. PMJAY covers hip and knee replacements. Bone cement implantable classifiers require prior approval.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14761,6 +15844,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14878,6 +15962,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -14995,6 +16080,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15112,6 +16198,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15229,6 +16316,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15346,6 +16434,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15463,6 +16552,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15580,6 +16670,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15697,6 +16788,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15814,6 +16906,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -15931,6 +17024,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16048,6 +17142,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16165,6 +17260,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16282,6 +17378,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16399,6 +17496,7 @@
       "india_specific_notes": "Appendicitis, hernia, and gallbladder disease are high-volume procedures. PMJAY covers most elective and emergency surgical procedures. Laparoscopy preferred over open.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16516,7 +17614,38 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-OBG-9-1-001",
+        "package_name": "Normal Delivery",
+        "package_rate_inr": 12000,
+        "includes": [
+          "Labour room charges",
+          "Normal delivery",
+          "Up to 3-day stay",
+          "Neonatal care (uncomplicated)"
+        ],
+        "excludes": [
+          "NICU",
+          "Instrumental delivery (separate)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 15000,
+            "max": 35000
+          },
+          "md_india": {
+            "min": 13000,
+            "max": 30000
+          },
+          "fhpl": {
+            "min": 12000,
+            "max": 28000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-OBG-9-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -16633,7 +17762,37 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-OBG-9-1-002",
+        "package_name": "Caesarean Section (LSCS)",
+        "package_rate_inr": 28000,
+        "includes": [
+          "LSCS",
+          "Anaesthesia",
+          "Up to 5-day stay",
+          "Neonatal care (uncomplicated)"
+        ],
+        "excludes": [
+          "High-risk/ICU admission beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 40000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 35000,
+            "max": 80000
+          },
+          "fhpl": {
+            "min": 33000,
+            "max": 75000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-OBG-9-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -16750,7 +17909,36 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-OBG-9-1-003",
+        "package_name": "Ectopic Pregnancy — Laparoscopic/Open Surgery",
+        "package_rate_inr": 25000,
+        "includes": [
+          "Emergency surgery",
+          "Up to 5-day stay",
+          "Blood transfusion if needed"
+        ],
+        "excludes": [
+          "ICU beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 35000,
+            "max": 65000
+          },
+          "md_india": {
+            "min": 30000,
+            "max": 60000
+          },
+          "fhpl": {
+            "min": 28000,
+            "max": 55000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-OBG-9-1-003"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -16867,6 +18055,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -16984,7 +18173,37 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-OBG-9-1-005",
+        "package_name": "Hysterectomy (TAH/VH/TLH)",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Total abdominal or laparoscopic hysterectomy",
+          "Up to 7-day stay",
+          "Anaesthesia"
+        ],
+        "excludes": [
+          "Robotic surgery",
+          "Pelvic floor repair (separate)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 110000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 100000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 90000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-OBG-9-1-005"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -17101,7 +18320,35 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-OBG-9-1-006",
+        "package_name": "Fibroid Uterus — Myomectomy",
+        "package_rate_inr": 30000,
+        "includes": [
+          "Laparoscopic or open myomectomy",
+          "Up to 5-day stay"
+        ],
+        "excludes": [
+          "Robotic surgery"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 50000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 45000,
+            "max": 90000
+          },
+          "fhpl": {
+            "min": 42000,
+            "max": 85000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-OBG-9-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -17218,6 +18465,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17335,6 +18583,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17452,6 +18701,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17569,6 +18819,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17686,6 +18937,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17803,6 +19055,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -17920,6 +19173,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18037,6 +19291,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18154,6 +19409,7 @@
       "india_specific_notes": "India has high maternal mortality ratio — PPH and eclampsia are leading causes. PMJAY Janani Suraksha Yojana covers institutional deliveries. LSCS rate rising.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18271,6 +19527,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18388,6 +19645,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18505,6 +19763,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18622,6 +19881,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18739,6 +19999,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18856,6 +20117,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -18973,6 +20235,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19090,6 +20353,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19207,6 +20471,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19324,6 +20589,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19441,6 +20707,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19558,6 +20825,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19675,6 +20943,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19792,6 +21061,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -19909,6 +21179,7 @@
       "india_specific_notes": "Neonatal sepsis and PEM are major paediatric burdens. Malnutrition management (SAM) is PMJAY covered. Kawasaki should be considered in prolonged fever > 5 days.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20026,6 +21297,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20143,6 +21415,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20260,6 +21533,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20377,6 +21651,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20494,6 +21769,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20611,6 +21887,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20728,6 +22005,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20845,6 +22123,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -20962,6 +22241,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21079,6 +22359,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21196,6 +22477,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21313,6 +22595,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21430,6 +22713,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21547,6 +22831,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21664,6 +22949,7 @@
       "india_specific_notes": "Dengue, malaria (P. falciparum/vivax), scrub typhus, and leptospirosis are seasonal. Mucormycosis incidence surged post-COVID in India. HIV prevalence high in certain states (AP, Maharashtra).",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -21781,7 +23067,36 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-HEM-12-1-001",
+        "package_name": "Thalassemia Major — Inpatient Blood Transfusion",
+        "package_rate_inr": 12000,
+        "includes": [
+          "2-unit packed RBC transfusion",
+          "Pre-transfusion workup",
+          "Chelation if indicated"
+        ],
+        "excludes": [
+          "Bone marrow transplant"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 15000,
+            "max": 30000
+          },
+          "md_india": {
+            "min": 13000,
+            "max": 27000
+          },
+          "fhpl": {
+            "min": 12000,
+            "max": 25000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-HEM-12-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -21898,7 +23213,37 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-HEM-12-1-002",
+        "package_name": "Sickle Cell Disease Crisis — Inpatient Care",
+        "package_rate_inr": 15000,
+        "includes": [
+          "Analgesia protocol",
+          "Blood transfusion if needed",
+          "Hydration",
+          "Up to 7-day stay"
+        ],
+        "excludes": [
+          "Exchange transfusion (separate)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 20000,
+            "max": 40000
+          },
+          "md_india": {
+            "min": 18000,
+            "max": 35000
+          },
+          "fhpl": {
+            "min": 17000,
+            "max": 33000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-HEM-12-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -22015,6 +23360,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22132,6 +23478,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22249,6 +23596,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22366,7 +23714,38 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-HEM-12-1-006",
+        "package_name": "Bone Marrow Transplant (Allogeneic/Autologous)",
+        "package_rate_inr": 500000,
+        "includes": [
+          "Conditioning regimen",
+          "Stem cell infusion",
+          "GVHD prophylaxis",
+          "Up to 90-day admission"
+        ],
+        "excludes": [
+          "Donor workup beyond package",
+          "Post-BMT OPD"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 800000,
+            "max": 2000000
+          },
+          "md_india": {
+            "min": 750000,
+            "max": 1800000
+          },
+          "fhpl": {
+            "min": 700000,
+            "max": 1700000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-HEM-12-1-006"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -22483,6 +23862,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22600,6 +23980,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22717,6 +24098,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22834,6 +24216,7 @@
       "india_specific_notes": "Sickle cell disease is prevalent in tribal populations (Odisha, MP, Maharashtra). Thalassemia major burden is high. PMJAY covers blood products and bone marrow transplant.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -22951,7 +24334,37 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ONC-13-1-001",
+        "package_name": "Chemotherapy — per Cycle",
+        "package_rate_inr": 15000,
+        "includes": [
+          "Chemotherapy drugs (within package)",
+          "Day care or short stay",
+          "Pre-medications",
+          "Monitoring"
+        ],
+        "excludes": [
+          "High-cost agents above package (separate reimbursement)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 20000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 18000,
+            "max": 90000
+          },
+          "fhpl": {
+            "min": 17000,
+            "max": 85000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ONC-13-1-001"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -23068,7 +24481,36 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ONC-13-1-002",
+        "package_name": "Radiation Therapy — per Fraction",
+        "package_rate_inr": 5000,
+        "includes": [
+          "External beam radiation therapy",
+          "Simulation and planning",
+          "Treatment"
+        ],
+        "excludes": [
+          "IMRT/IGRT additional charges"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 7000,
+            "max": 15000
+          },
+          "md_india": {
+            "min": 6500,
+            "max": 14000
+          },
+          "fhpl": {
+            "min": 6000,
+            "max": 13000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ONC-13-1-002"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -23185,7 +24627,37 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-ONC-13-1-003",
+        "package_name": "Oncological Surgery — Tumour Resection",
+        "package_rate_inr": 60000,
+        "includes": [
+          "Tumour excision with margins",
+          "Lymph node dissection if needed",
+          "Up to 14-day stay"
+        ],
+        "excludes": [
+          "Reconstruction",
+          "Prosthesis"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 100000,
+            "max": 250000
+          },
+          "md_india": {
+            "min": 90000,
+            "max": 230000
+          },
+          "fhpl": {
+            "min": 85000,
+            "max": 210000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-ONC-13-1-003"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -23302,6 +24774,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -23419,6 +24892,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -23536,6 +25010,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -23653,6 +25128,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -23770,6 +25246,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -23887,6 +25364,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24004,6 +25482,7 @@
       "india_specific_notes": "Head & neck cancers and cervical cancer are leading in India. Tobacco/betel nut use correlates. PMJAY covers chemotherapy, radiation, and surgical oncology packages.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24121,6 +25600,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24238,6 +25718,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24355,6 +25836,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24472,6 +25954,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24589,6 +26072,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24706,6 +26190,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24823,6 +26308,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -24940,6 +26426,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25057,6 +26544,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25174,6 +26662,7 @@
       "india_specific_notes": "Mental health beds are critically scarce in India. PMHANS scheme provides some coverage. Suicide risk assessment is mandatory per MHA 2017 guidelines.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25291,6 +26780,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25408,6 +26898,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25525,6 +27016,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25642,6 +27134,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25759,6 +27252,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25876,6 +27370,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -25993,6 +27488,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26110,6 +27606,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26227,6 +27724,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26344,6 +27842,7 @@
       "india_specific_notes": "Road traffic injuries are the leading cause of trauma in India. Snake envenomation (Russel viper/Cobra/Krait) is a significant rural emergency. Polytrauma PMJAY covered.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26457,6 +27956,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26570,6 +28070,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26683,6 +28184,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26795,6 +28297,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -26907,6 +28410,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -27019,7 +28523,36 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-003",
+        "package_name": "Bladder Cancer — TURBT / Cystectomy",
+        "package_rate_inr": 50000,
+        "includes": [
+          "TURBT or radical cystectomy",
+          "Up to 10-day stay",
+          "Histopathology"
+        ],
+        "excludes": [
+          "Urinary diversion reconstruction beyond package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 80000,
+            "max": 180000
+          },
+          "md_india": {
+            "min": 75000,
+            "max": 165000
+          },
+          "fhpl": {
+            "min": 70000,
+            "max": 155000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-003"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27131,7 +28664,37 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-004",
+        "package_name": "Carcinoma Prostate — Radical Prostatectomy",
+        "package_rate_inr": 80000,
+        "includes": [
+          "Radical open or laparoscopic prostatectomy",
+          "Up to 10-day stay",
+          "Histopathology"
+        ],
+        "excludes": [
+          "Robotic surgery",
+          "Hormonal therapy"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 150000,
+            "max": 350000
+          },
+          "md_india": {
+            "min": 140000,
+            "max": 320000
+          },
+          "fhpl": {
+            "min": 130000,
+            "max": 300000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-004"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27243,7 +28806,38 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-005",
+        "package_name": "BPH — TURP (Transurethral Resection of Prostate)",
+        "package_rate_inr": 30000,
+        "includes": [
+          "TURP",
+          "Urological endoscopy",
+          "Up to 5-day stay",
+          "Catheter management"
+        ],
+        "excludes": [
+          "Laser TURP (additional)",
+          "Holmium laser"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 45000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 40000,
+            "max": 80000
+          },
+          "fhpl": {
+            "min": 38000,
+            "max": 75000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-005"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27355,6 +28949,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -27467,7 +29062,36 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-007",
+        "package_name": "Pyelonephritis with Abscess — Percutaneous Drainage / Surgery",
+        "package_rate_inr": 30000,
+        "includes": [
+          "Percutaneous drainage or open surgical drainage",
+          "Up to 7-day stay",
+          "IV antibiotics"
+        ],
+        "excludes": [
+          "Nephrectomy (separate package)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 45000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 40000,
+            "max": 80000
+          },
+          "fhpl": {
+            "min": 38000,
+            "max": 75000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-007"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27579,7 +29203,37 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-008",
+        "package_name": "Urolithiasis — PCNL (Percutaneous Nephrolithotomy)",
+        "package_rate_inr": 40000,
+        "includes": [
+          "PCNL procedure",
+          "Nephrostomy tube",
+          "Up to 5-day stay",
+          "Anaesthesia"
+        ],
+        "excludes": [
+          "Auxiliary PCNL (additional session)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 65000,
+            "max": 130000
+          },
+          "md_india": {
+            "min": 60000,
+            "max": 120000
+          },
+          "fhpl": {
+            "min": 55000,
+            "max": 110000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-008"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27691,6 +29345,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -27803,7 +29458,34 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-010",
+        "package_name": "Testicular Torsion — Emergency Orchidopexy",
+        "package_rate_inr": 20000,
+        "includes": [
+          "Emergency orchidopexy or orchidectomy",
+          "Up to 3-day stay",
+          "Anaesthesia"
+        ],
+        "excludes": [],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 30000,
+            "max": 60000
+          },
+          "md_india": {
+            "min": 28000,
+            "max": 55000
+          },
+          "fhpl": {
+            "min": 25000,
+            "max": 50000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-010"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -27915,6 +29597,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28027,6 +29710,7 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28139,7 +29823,36 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-013",
+        "package_name": "Urethral Stricture — Urethroplasty",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Anastomotic or substitution urethroplasty",
+          "Up to 7-day stay",
+          "Catheter management"
+        ],
+        "excludes": [
+          "Internal urethrotomy (separate, simpler)"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 110000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 100000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 90000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-013"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -28251,7 +29964,37 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-014",
+        "package_name": "Renal Cell Carcinoma — Radical / Partial Nephrectomy",
+        "package_rate_inr": 70000,
+        "includes": [
+          "Laparoscopic or open nephrectomy",
+          "Up to 10-day stay",
+          "Histopathology"
+        ],
+        "excludes": [
+          "Robotic surgery",
+          "IVC thrombectomy"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 120000,
+            "max": 280000
+          },
+          "md_india": {
+            "min": 110000,
+            "max": 260000
+          },
+          "fhpl": {
+            "min": 100000,
+            "max": 240000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-014"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -28363,7 +30106,36 @@
       "india_specific_notes": "Urinary tract stones prevalent due to dietary habits and climate. BPH is common in men > 50. PMJAY covers PCNL, ureteroscopy, TURP.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-URO-16-1-015",
+        "package_name": "Vesicovaginal Fistula — Surgical Repair",
+        "package_rate_inr": 35000,
+        "includes": [
+          "Surgical VVF repair (transvaginal/transabdominal)",
+          "Up to 10-day stay",
+          "Catheter"
+        ],
+        "excludes": [
+          "Complex multi-fistula repairs"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 55000,
+            "max": 100000
+          },
+          "md_india": {
+            "min": 50000,
+            "max": 90000
+          },
+          "fhpl": {
+            "min": 45000,
+            "max": 85000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-URO-16-1-015"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -28476,6 +30248,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28589,6 +30362,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28702,6 +30476,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28815,6 +30590,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -28928,6 +30704,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29041,6 +30818,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29154,6 +30932,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29267,6 +31046,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29380,6 +31160,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": false,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29493,7 +31274,37 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-DRM-15-1-013",
+        "package_name": "Extensive Pressure Ulcer — Surgical Debridement / Skin Grafting",
+        "package_rate_inr": 30000,
+        "includes": [
+          "Surgical debridement",
+          "Split-thickness skin graft",
+          "VAC dressing if available",
+          "Up to 14-day stay"
+        ],
+        "excludes": [
+          "Flap reconstruction above package"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 45000,
+            "max": 90000
+          },
+          "md_india": {
+            "min": 40000,
+            "max": 80000
+          },
+          "fhpl": {
+            "min": 38000,
+            "max": 75000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-DRM-15-1-013"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
@@ -29606,6 +31417,7 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": false,
+      "pmjay_package": null,
       "typical_package_codes": [],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
@@ -29719,7 +31531,38 @@
       "india_specific_notes": "SJS/TEN risk high with allopurinol, sulfonamides, carbamazepine - common in India. Leprosy (Hansen disease) elimination achieved but still exists. PMJAY covers skin procedures.",
       "pmjay_eligible": true,
       "package_rate_available": true,
-      "typical_package_codes": [],
+      "pmjay_package": {
+        "hbp_code": "HBP-DRM-15-1-015",
+        "package_name": "Malignant Melanoma — Wide Local Excision + SNB",
+        "package_rate_inr": 50000,
+        "includes": [
+          "Wide local excision with margins",
+          "Sentinel node biopsy",
+          "Up to 7-day stay",
+          "Histopathology"
+        ],
+        "excludes": [
+          "Adjuvant immunotherapy",
+          "Reconstruction"
+        ],
+        "private_tpa_rates": {
+          "medi_assist": {
+            "min": 80000,
+            "max": 160000
+          },
+          "md_india": {
+            "min": 75000,
+            "max": 150000
+          },
+          "fhpl": {
+            "min": 70000,
+            "max": 140000
+          }
+        }
+      },
+      "typical_package_codes": [
+        "HBP-DRM-15-1-015"
+      ],
       "coding_systems_supported": [
         "ICD-10-CM 2024"
       ],
