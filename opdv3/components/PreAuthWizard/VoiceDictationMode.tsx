@@ -35,6 +35,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
     const [errorMsg, setErrorMsg] = useState('');
     const [elapsed, setElapsed] = useState(0);
     const recognitionRef = useRef<any>(null);
+    const shouldRestartRef = useRef(false);   // stable flag survives instance recreation
     const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -57,53 +58,69 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
             setPhase('error');
             return;
         }
-        const rec = new SpeechRecognition();
-        rec.lang = 'en-IN';
-        rec.continuous = true;
-        rec.interimResults = true;
-        rec.maxAlternatives = 1;
 
-        let finalText = transcript;
+        shouldRestartRef.current = true;   // mark that we want recording to keep going
 
-        rec.onresult = (e: any) => {
-            let interim = '';
-            for (let i = e.resultIndex; i < e.results.length; i++) {
-                if (e.results[i].isFinal) {
-                    finalText += e.results[i][0].transcript + ' ';
-                    setTranscript(finalText);
-                } else {
-                    interim = e.results[i][0].transcript;
+        const launchRec = () => {
+            if (!shouldRestartRef.current) return;   // bail if user stopped
+
+            const rec = new SpeechRecognition();
+            rec.lang = 'en-IN';
+            rec.continuous = true;
+            rec.interimResults = true;
+            rec.maxAlternatives = 1;
+
+            let finalText = transcript;
+
+            rec.onresult = (e: any) => {
+                let interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    if (e.results[i].isFinal) {
+                        finalText += e.results[i][0].transcript + ' ';
+                        setTranscript(finalText);
+                    } else {
+                        interim = e.results[i][0].transcript;
+                    }
                 }
-            }
-            setInterimText(interim);
-        };
+                setInterimText(interim);
+            };
 
-        rec.onerror = (e: any) => {
-            if (e.error !== 'no-speech') {
+            rec.onerror = (e: any) => {
+                // 'no-speech' and 'aborted' are normal — just restart; don't surface as error
+                if (e.error === 'no-speech' || e.error === 'aborted') return;
                 setErrorMsg(`Mic error: ${e.error}. Please try again.`);
                 setPhase('error');
+                shouldRestartRef.current = false;
+            };
+
+            // onend fires whenever recognition stops (timeout, network hiccup, pause)
+            // auto-restart as long as user hasn't clicked Stop
+            rec.onend = () => {
+                if (shouldRestartRef.current) {
+                    setTimeout(launchRec, 100);   // slight delay avoids rapid spinning
+                }
+            };
+
+            try {
+                rec.start();
+                recognitionRef.current = rec;
+            } catch (err) {
+                // ignore "already started" errors
             }
         };
 
-        rec.onend = () => {
-            // auto-restart if still recording (speech pauses cause onend)
-            if (recognitionRef.current?._active) {
-                try { rec.start(); } catch { }
-            }
-        };
-
-        rec.start();
-        rec._active = true;
-        recognitionRef.current = rec;
+        launchRec();
         setElapsed(0);
         setPhase('recording');
     }, [transcript]);
 
     // ── stop recording ─────────────────────────────────────────────────────────
     const stopRecording = () => {
+        shouldRestartRef.current = false;   // prevent auto-restart
         if (recognitionRef.current) {
-            recognitionRef.current._active = false;
+            recognitionRef.current.onend = null;   // detach before calling stop
             recognitionRef.current.stop();
+            recognitionRef.current = null;
         }
         setInterimText('');
         setPhase('recorded');
