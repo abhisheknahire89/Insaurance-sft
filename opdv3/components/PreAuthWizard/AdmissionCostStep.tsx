@@ -245,14 +245,14 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
 
                             <div className="mt-3 flex gap-2">
                                 <button
-                                    onClick={() => applyPackage(matchedPackage.package_rate_inr, matchedPackage.package_name, matchedPackage.hbp_code)}
+                                    onClick={() => applyPackage({ package_rate_inr: matchedPackage.package_rate_inr, package_name: matchedPackage.package_name, hbp_code: matchedPackage.hbp_code })}
                                     className={`flex-1 py-1.5 text-xs font-medium rounded transition-colors ${cost.isPackageRate && cost.packageCode === matchedPackage.hbp_code ? 'bg-emerald-600 text-white' : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'}`}
                                 >
                                     {cost.isPackageRate && cost.packageCode === matchedPackage.hbp_code ? '✓ Selected Govt Package' : 'Apply Govt Package'}
                                 </button>
                                 {matchedPackage.private_tpa_rates?.medi_assist && (
                                     <button
-                                        onClick={() => applyPackage(matchedPackage.private_tpa_rates.medi_assist.min, matchedPackage.package_name + ' (Private)', '')}
+                                        onClick={() => applyPackage({ package_rate_inr: matchedPackage.private_tpa_rates.medi_assist.min, package_name: matchedPackage.package_name + ' (Private)', hbp_code: '' })}
                                         className={`flex-1 py-1.5 text-xs font-medium rounded transition-colors ${cost.isPackageRate && cost.packageAmount === matchedPackage.private_tpa_rates.medi_assist.min ? 'bg-blue-600 text-white' : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'}`}
                                     >
                                         Apply TPA Base Rate

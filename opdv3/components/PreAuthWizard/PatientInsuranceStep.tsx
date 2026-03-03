@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
-import {
-    PatientRecord, InsurancePolicyDetails, EntryPath, OCRResult
-} from '../PreAuthWizard/types';
+import { PatientRecord, InsurancePolicyDetails, EntryPath } from '../PreAuthWizard/types';
 import { INSURER_LIST, INDIAN_STATES, TPA_NAMES } from '../../config/tpaRegistry';
 import { calculateAge, isPolicyActive, isPolicyExpiringSoon, todayISO } from '../../utils/formatters';
+import { extractFromDocument } from '../../services/documentExtractionService';
 
 interface PatientInsuranceStepProps {
     patient: Partial<PatientRecord>;
@@ -17,10 +16,13 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
     patient, insurance, onPatientChange, onInsuranceChange, onNext
 }) => {
     const [entryPath, setEntryPath] = useState<EntryPath | null>(insurance.policyNumber ? 'manual' : null);
-    const [ocrLoading, setOcrLoading] = useState(false);
+    const [isExtracting, setIsExtracting] = useState(false);
     const [ocrDone, setOcrDone] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [policyDateWarning, setPolicyDateWarning] = useState('');
+    const [extractionException, setExtractionException] = useState('');
+    const [extractionResult, setExtractionResult] = useState<{ filled: string[], pending: string[] } | null>(null);
+
     const fileRef = useRef<HTMLInputElement>(null);
 
     const handleDOBChange = (dob: string) => {
@@ -38,16 +40,58 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
         }
     };
 
-    const handleImageUpload = async (file: File) => {
-        setOcrLoading(true);
-        // Simulate OCR parsing (in production, send to Gemini vision API via ocrService)
-        await new Promise(r => setTimeout(r, 1500));
-        // demo auto-fill
-        onPatientChange({ ...patient, patientName: patient.patientName || 'Ramesh Patil', age: patient.age || 50, gender: patient.gender || 'Male' });
-        onInsuranceChange({ ...insurance, dataSource: 'ocr', ocrConfidence: 0.87 });
-        setOcrLoading(false);
-        setOcrDone(true);
-        setEntryPath('manual');
+    const handleDocumentUpload = async (file: File) => {
+        setIsExtracting(true);
+        setExtractionException('');
+        setExtractionResult(null);
+        
+        try {
+            const extracted = await extractFromDocument(file);
+            
+            if (extracted.document_type === 'unknown' || extracted.confidence < 40) {
+                 setExtractionException("Could not read document clearly or invalid type. Please enter details manually.");
+                 setIsExtracting(false);
+                 return;
+            }
+            
+            const dob = extracted.patient?.dob || patient.dateOfBirth;
+            // Map according to requested mapping
+            onPatientChange({
+                ...patient,
+                patientName: extracted.patient?.name || patient.patientName,
+                dateOfBirth: dob,
+                age: extracted.patient?.age || (dob ? calculateAge(dob) : patient.age),
+                gender: (extracted.patient?.gender as any) || patient.gender,
+                mobileNumber: extracted.patient?.phone || patient.mobileNumber,
+                city: patient.city, 
+                state: patient.state
+            });
+
+            const endDate = extracted.insurance?.valid_till || insurance.policyEndDate;
+            onInsuranceChange({
+                ...insurance,
+                insurerName: extracted.insurance?.insurance_company || insurance.insurerName,
+                tpaName: extracted.insurance?.tpa_name || insurance.tpaName,
+                policyNumber: extracted.insurance?.policy_number || insurance.policyNumber,
+                sumInsured: extracted.insurance?.sum_insured || insurance.sumInsured,
+                policyEndDate: endDate,
+                dataSource: 'ocr',
+                ocrConfidence: extracted.confidence
+            });
+            if (endDate) handlePolicyEndDate(endDate);
+
+            setExtractionResult({
+                filled: extracted.extracted_fields,
+                pending: extracted.missing_fields
+            });
+
+            setOcrDone(true);
+            setEntryPath('manual');
+        } catch (error: any) {
+             setExtractionException(error.message || "Failed to parse document. Please try a clearer image.");
+        } finally {
+             setIsExtracting(false);
+        }
     };
 
     const isValid = !!(
@@ -64,7 +108,7 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                     {[
-                        { path: 'scan_card' as EntryPath, icon: '📷', title: 'Scan Insurance Card', desc: 'Fastest — photograph the insurance card and auto-extract all details', badge: '⚡ Recommended' },
+                        { path: 'scan_card' as EntryPath, icon: '📄', title: 'Extract from PDF / Card', desc: 'Fastest — Upload hospital registration PDF or Insurance Card to auto-extract details', badge: '⚡ Recommended' },
                         { path: 'manual' as EntryPath, icon: '✏️', title: 'Enter Manually', desc: 'Type patient & policy details by hand', badge: '' },
                         { path: 'search_existing' as EntryPath, icon: '🔍', title: 'Search Existing Patient', desc: 'Reuse previously created patient from Aivana database', badge: '' },
                     ].map(opt => (
@@ -87,42 +131,81 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
         return (
             <div className="space-y-6">
                 <button onClick={() => setEntryPath(null)} className="text-gray-400 hover:text-white text-sm flex items-center gap-1">← Back</button>
-                <h2 className="text-xl font-bold text-white">Scan Insurance Card</h2>
-                <div
-                    onClick={() => fileRef.current?.click()}
-                    className="border-2 border-dashed border-blue-500/40 rounded-2xl p-16 text-center cursor-pointer hover:border-blue-400 transition-colors"
-                >
-                    {ocrLoading ? (
+                <h2 className="text-xl font-bold text-white">Extract from PDF or Card</h2>
+                
+                {isExtracting ? (
+                  <div className="flex items-center gap-3 p-4 bg-blue-900/30 rounded-lg border border-blue-500/30">
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div>
+                      <p className="font-medium text-white">Extracting information...</p>
+                      <p className="text-sm text-gray-400">Reading document with AI</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                      onClick={() => { if (!isExtracting) fileRef.current?.click() }}
+                      className={`border-2 border-dashed ${extractionException ? 'border-red-500/40 hover:border-red-400 bg-red-500/5' : 'border-blue-500/40 hover:border-blue-400'} rounded-2xl p-10 text-center cursor-pointer transition-colors`}
+                  >
                         <div className="space-y-3">
-                            <div className="text-4xl animate-pulse">🔍</div>
-                            <div className="text-blue-300 font-semibold">Extracting details from card...</div>
-                            <div className="text-gray-400 text-sm">AI is reading your insurance card</div>
+                            <div className="text-4xl mb-4">📄</div>
+                            <div className="text-white font-semibold">Drop PDF or Image here, or click to upload</div>
+                            <div className="text-gray-500 text-sm">Upload Hospital Registration PDF, TPA Card, ID Card, or Policy Document</div>
+                            {extractionException && <div className="text-red-400 mt-3 text-sm font-medium">{extractionException}</div>}
                         </div>
-                    ) : (
-                        <div className="space-y-3">
-                            <div className="text-5xl">📷</div>
-                            <div className="text-white font-semibold">Drop card image here or click to upload</div>
-                            <div className="text-gray-500 text-sm">JPG, PNG, HEIC, PDF (max 10MB)</div>
-                        </div>
-                    )}
-                </div>
+                  </div>
+                )}
+
                 <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden"
-                    onChange={e => e.target.files?.[0] && handleImageUpload(e.target.files[0])} />
-                <button onClick={() => setEntryPath('manual')} className="text-sm text-gray-500 hover:text-gray-300 underline">Skip OCR — enter manually instead</button>
+                    onChange={e => e.target.files?.[0] && handleDocumentUpload(e.target.files[0])} />
+                <button onClick={() => setEntryPath('manual')} className="text-sm text-gray-500 hover:text-gray-300 underline">Skip Extraction — enter manually instead</button>
             </div>
         );
     }
 
-    // Full form (manual entry or after OCR)
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-xl font-bold text-white">Step 1: Patient & Insurance Details</h2>
-                    {ocrDone && <p className="text-green-400 text-xs mt-1">✅ Card scanned (87% confidence) — verify fields below</p>}
                 </div>
                 <button onClick={() => setEntryPath(null)} className="text-xs text-gray-500 hover:text-gray-300">Change entry method</button>
             </div>
+
+            {/* Extraction Results Summary */}
+            {ocrDone && extractionResult && (
+                <div className="bg-gray-800/80 border border-blue-500/20 rounded-xl p-5 mb-4 font-mono text-sm max-w-full overflow-x-hidden">
+                    <div className="flex gap-4 mb-4 items-center">
+                        <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg text-xl">✨</div>
+                        <div>
+                            <h3 className="text-white font-medium text-base">Extraction Complete</h3>
+                            <p className="text-gray-400 text-xs">AI successfully processed the document</p>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-6 bg-black/40 p-4 rounded-lg">
+                        <div>
+                            <div className="text-green-400 mb-2 font-bold flex items-center gap-2"><span>✅</span> Auto-filled from document:</div>
+                            <ul className="text-green-200/80 text-xs space-y-1.5 ml-6 list-disc">
+                                {extractionResult.filled.length > 0 ? (
+                                    extractionResult.filled.map(f => (<li key={f}>{f}</li>))
+                                ) : (
+                                    <li className="text-gray-500 list-none -ml-4">No fields reliably found.</li>
+                                )}
+                            </ul>
+                        </div>
+                        <div>
+                            <div className="text-amber-400 mb-2 font-bold flex items-center gap-2"><span>⚠️</span> Please fill manually:</div>
+                            <ul className="text-amber-200/80 text-xs space-y-1.5 ml-6 list-disc">
+                                {extractionResult.pending.length > 0 ? (
+                                    extractionResult.pending.map(f => (<li key={f}>{f}</li>))
+                                ) : (
+                                    <li className="text-gray-500 list-none -ml-4">All required fields extracted successfully.</li>
+                                )}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Patient Demographics */}
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
