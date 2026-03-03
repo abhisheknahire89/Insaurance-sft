@@ -1,5 +1,6 @@
 import { PreAuthRecord, MedicalNecessityStatement } from '../components/PreAuthWizard/types';
 import { scoreNecessityStrength } from '../utils/strengthScorer';
+import { getConditionByCode, getConditionByName } from '../config/icd10Database';
 
 /**
  * Auto-generates a medical necessity statement from collected data.
@@ -41,6 +42,41 @@ export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): Medica
     if (plt?.surgical) treatmentLines.push('Surgical management');
     if (plt?.intensiveCare) treatmentLines.push('Intensive care');
     if (plt?.investigation) treatmentLines.push('Investigation');
+
+    // ── ICD Database enrichment (255-condition database) ────────────────────
+    const icdCondition = selectedDx?.icd10Code
+        ? getConditionByCode(selectedDx.icd10Code)
+        : selectedDx?.diagnosis
+            ? getConditionByName(selectedDx.diagnosis)
+            : undefined;
+
+    let icdEnrichment = '';
+    if (icdCondition) {
+        const admissionCriteria = (icdCondition.admission_criteria ?? []).slice(0, 5);
+        const procedures = (icdCondition.expected_procedures ?? []).slice(0, 5);
+        const tpaRisks = (icdCondition.tpa_query_triggers ?? []).slice(0, 3);
+        const mustDocs = (icdCondition.must_include_docs ?? []).slice(0, 5);
+        const los = icdCondition.los;
+        const pmjayNote = icdCondition.pmjay_eligible ? 'Eligible for PMJAY (Ayushman Bharat) coverage.' : '';
+        icdEnrichment = `
+
+CONDITION-SPECIFIC ADMISSION CRITERIA (ICD-10-CM 2024: ${icdCondition.primary_code}):
+${admissionCriteria.map((c: string) => `• ${c}`).join('\n') || '• Clinical severity warrants inpatient monitoring'}
+
+EXPECTED INVESTIGATIONS & PROCEDURES:
+${procedures.map((p: string) => `• ${p}`).join('\n')}
+
+EXPECTED LENGTH OF STAY: ${los.min}\u2013${los.typical} days${los.icu_days > 0 ? ` (up to ${los.icu_days} ICU days)` : ''}.
+${los.note ? `Clinical Note: ${los.note}` : ''}
+
+INDIA-SPECIFIC CONTEXT: ${icdCondition.india_notes} ${pmjayNote}
+
+DOCUMENTATION THAT MUST BE ATTACHED:
+${mustDocs.map((d: string) => `\u2610 ${d}`).join('\n')}
+
+\u26A0\uFE0F COMMON TPA QUERY TRIGGERS (preemptively addressed):
+${tpaRisks.map((t: string) => `• ${t}`).join('\n')}`;
+    }
 
     const text = `MEDICAL NECESSITY STATEMENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -84,7 +120,7 @@ ${treatmentLines.length > 0 ? treatmentLines.map(l => `• ${l}`).join('\n') : '
 • Admission: ${admission?.admissionType ?? 'N/A'} - ${admission?.roomCategory ?? 'General Ward'}
 • Expected Length of Stay: ${admission?.expectedLengthOfStay ?? 'N/A'} days (${admission?.expectedDaysInRoom ?? 0} ward + ${admission?.expectedDaysInICU ?? 0} ICU days)
 • Total Estimated Cost: ₹${(cost?.totalEstimatedCost ?? 0).toLocaleString('en-IN')}
-`;
+${icdEnrichment}`;
 
     const { strength, reasons } = scoreNecessityStrength(record);
 
