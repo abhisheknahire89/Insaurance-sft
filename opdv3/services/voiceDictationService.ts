@@ -83,8 +83,8 @@ export interface VoiceExtractedData {
 }
 
 export async function parseTranscriptWithGemini(transcript: string): Promise<VoiceExtractedData> {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_API_KEY;
-  if (!apiKey) throw new Error('Gemini API key not configured. Please set VITE_GEMINI_API_KEY in your environment variables.');
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error('Gemini API key not configured. Please set GEMINI_API_KEY in your .env file.');
   const ai = new GoogleGenAI({ apiKey });
 
   const result = await ai.models.generateContent({

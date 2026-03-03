@@ -198,6 +198,7 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
     const pendingSegmentsQueue = useRef<Blob[]>([]);
     const processedSegmentsRef = useRef<number>(0);
     const transcriptEndRef = useRef<HTMLDivElement>(null);
+    const sharedStreamRef = useRef<MediaStream | null>(null);
 
     const { isRecording, startRecording, stopRecording } = useAudioRecorder();
     const { startListening, stopListening, interimTranscript } = useSpeechRecognition({ lang: language });
@@ -283,12 +284,20 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
         };
     }, [language, doctorProfile, transcriptHistory]);
 
+    const stopSharedStream = useCallback(() => {
+        if (sharedStreamRef.current) {
+            sharedStreamRef.current.getTracks().forEach((t) => t.stop());
+            sharedStreamRef.current = null;
+        }
+    }, []);
+
     // Cleanup previous session on mount
     useEffect(() => {
         handleStartSession();
         return () => {
             stopRecording();
             stopListening();
+            stopSharedStream();
         };
     }, []);
 
@@ -299,7 +308,18 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
         setClinicalNote('');
         processedSegmentsRef.current = 0;
         pendingSegmentsQueue.current = [];
+        stopSharedStream();
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+                sampleRate: 16000,
+                channelCount: 1,
+                echoCancellation: true,
+                noiseSuppression: true
+            }
+        });
+        sharedStreamRef.current = stream;
         await startRecording({
+            stream,
             segmentDuration: 30000,
             vadThreshold: 0.02,
             minSegmentDuration: 2000,
@@ -309,13 +329,14 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
                 processSegment(blob, idx);
             }
         });
-        startListening();
+        startListening(stream);
     };
 
     const handleStopSession = async () => {
         setPhase('processing');
         stopListening();
         const finalBlob = await stopRecording();
+        stopSharedStream();
         if (finalBlob) {
             const idx = pendingSegmentsQueue.current.length;
             pendingSegmentsQueue.current.push(finalBlob);

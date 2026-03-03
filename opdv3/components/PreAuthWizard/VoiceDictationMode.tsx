@@ -53,6 +53,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
 
     // ── start recording ────────────────────────────────────────────────────────
     const startRecording = useCallback(() => {
+        setErrorMsg('');   // clear any previous error when retrying
         if (!SpeechRecognition) {
             setErrorMsg('Your browser does not support voice input. Please use Chrome and try again.');
             setPhase('error');
@@ -88,7 +89,10 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
             rec.onerror = (e: any) => {
                 // 'no-speech' and 'aborted' are normal — just restart; don't surface as error
                 if (e.error === 'no-speech' || e.error === 'aborted') return;
-                setErrorMsg(`Mic error: ${e.error}. Please try again.`);
+                const reason = e.error === 'network'
+                    ? 'Browser speech service could not be reached (check connection or try again).'
+                    : e.error;
+                setErrorMsg(`Mic error: ${reason} Please try again.`);
                 setPhase('error');
                 shouldRestartRef.current = false;
             };
@@ -136,7 +140,12 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
             setExtracted(data);
             setPhase('review');
         } catch (err: any) {
-            setErrorMsg(`AI processing failed: ${err?.message ?? 'Unknown error'}. You can still edit the transcript manually.`);
+            const raw = err?.message ?? err?.toString?.() ?? 'Unknown error';
+            const isQuota = /429|RESOURCE_EXHAUSTED|quota exceeded/i.test(raw);
+            const msg = isQuota
+                ? 'Gemini API quota exceeded. Try again in a minute or check your plan and billing at ai.google.dev/gemini-api.'
+                : `AI processing failed: ${raw.length > 200 ? raw.slice(0, 200) + '…' : raw}`;
+            setErrorMsg(`${msg} You can still edit the transcript manually.`);
             setPhase('error');
         }
     };

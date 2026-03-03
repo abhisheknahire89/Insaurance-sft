@@ -15,7 +15,7 @@ interface UseSpeechRecognitionReturn {
   isListening: boolean;
   transcript: string;
   interimTranscript: string;
-  startListening: () => void;
+  startListening: (sharedStream?: MediaStream | null) => void;
   stopListening: () => void;
   resetTranscript: () => void;
   error: string | null;
@@ -63,6 +63,7 @@ export const useSpeechRecognition = (options: { lang?: string } = {}): UseSpeech
   
   const shouldBeListeningRef = useRef(false);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const streamOwnedRef = useRef(true);
 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -86,7 +87,9 @@ export const useSpeechRecognition = (options: { lang?: string } = {}): UseSpeech
         }
 
         if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
+            if (streamOwnedRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+            }
             streamRef.current = null;
             setStream(null);
         }
@@ -120,11 +123,12 @@ export const useSpeechRecognition = (options: { lang?: string } = {}): UseSpeech
     }
   }, []);
 
-  const startListening = useCallback(async () => {
+  const startListening = useCallback(async (sharedStream?: MediaStream | null) => {
     if (isCleaningUpRef.current) return;
     
     shouldBeListeningRef.current = true;
     setError(null);
+    streamOwnedRef.current = !sharedStream;
 
     try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -195,7 +199,7 @@ export const useSpeechRecognition = (options: { lang?: string } = {}): UseSpeech
         const session = await sessionPromise;
         wsRef.current = session;
 
-        const micStream = await navigator.mediaDevices.getUserMedia({ 
+        const micStream = sharedStream ?? await navigator.mediaDevices.getUserMedia({ 
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
