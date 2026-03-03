@@ -1,0 +1,14 @@
+{
+    "name": "icd-insurance-db-builder",
+    "version": "1.0.0",
+    "description": "ICD-10-CM 2024 Insurance Database Generator for Indian Hospitals",
+    "scripts": {
+        "build": "ts-node scripts/build_icd_insurance_db.ts",
+        "validate": "ts-node scripts/validate_icd_codes.ts"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.2",
+        "typescript": "~5.8.2",
+        "@types/node": "^22.0.0"
+    }
+}

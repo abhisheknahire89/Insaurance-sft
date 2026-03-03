@@ -1,0 +1,110 @@
+{
+    "tpa_universal": [
+        "No objective severity criteria documented (vitals/SpO2/labs)",
+        "No supporting investigation reports attached",
+        "LOS beyond typical range without documented complication",
+        "ICU admission without documented SOFA score or organ failure",
+        "IV antibiotics requested without culture sensitivity report",
+        "High-cost implant without brand justification",
+        "Surgical procedure without pre-operative optimization record",
+        "Repeated hospitalisation for same condition within 30 days"
+    ],
+    "by_specialty": {
+        "Respiratory": [
+            "No PFT report for COPD/Asthma cases",
+            "SpO2 not documented at admission",
+            "ABG not done for respiratory failure",
+            "Sputum culture not sent",
+            "Chest X-ray/CT not attached"
+        ],
+        "Cardiac": [
+            "ECG at admission not attached",
+            "Troponin value not mentioned",
+            "Echo report not attached for cardiac cases",
+            "Coronary angiogram report missing for STEMI",
+            "Stress test not done before elective PCI"
+        ],
+        "Neurology": [
+            "NIHSS score not documented for Stroke",
+            "CT/MRI brain report not attached",
+            "EEG report missing for seizure cases",
+            "Nerve conduction study not done for GBS",
+            "CSF report not attached for meningitis"
+        ],
+        "Gastroenterology": [
+            "Endoscopy report not attached for GI bleed",
+            "LFT/Amylase values not mentioned",
+            "ERCP report missing for cholangitis",
+            "Histopathology report not attached",
+            "USG abdomen not attached"
+        ],
+        "Nephrology": [
+            "Serum creatinine trend not documented",
+            "Urine output chart missing",
+            "Dialysis plan not documented",
+            "Renal biopsy report not attached for GN",
+            "24-hr protein report missing for nephrotic"
+        ],
+        "Endocrinology": [
+            "Blood glucose log not attached",
+            "HbA1c not mentioned",
+            "Insulin protocol not documented",
+            "Thyroid function tests missing",
+            "Cortisol level not measured"
+        ],
+        "Orthopedics": [
+            "Implant cost quotation not attached",
+            "X-ray pre and post not attached",
+            "Surgical need for fracture not justified",
+            "Specialist opinion for joint replacement missing"
+        ],
+        "General Surgery": [
+            "Pre-operative investigations incomplete",
+            "Anaesthesia fitness not documented",
+            "HPE report missing for cancer surgeries",
+            "Intraoperative findings not described"
+        ],
+        "Obstetrics and Gynecology": [
+            "Antenatal records not attached",
+            "Partogram not attached for delivery cases",
+            "Consent for LSCS not documented",
+            "USG report not attached"
+        ],
+        "Pediatrics": [
+            "Weight and growth chart missing",
+            "Vaccination history not stated",
+            "Neonatology referral not documented",
+            "Sepsis screen results not attached"
+        ],
+        "Infectious Disease": [
+            "Widal/dengue NS1 report not attached",
+            "Blood culture report missing",
+            "Malaria smear or RDT result not attached",
+            "HIV status not documented where relevant"
+        ],
+        "Hematology": [
+            "CBC trend chart not attached",
+            "Blood bank records missing",
+            "Bone marrow biopsy report not attached",
+            "Coagulation profile not sent"
+        ],
+        "Oncology": [
+            "Histopathology/biopsy report mandatory",
+            "Staging investigations not attached",
+            "Chemotherapy protocol not documented",
+            "Performance status (ECOG) not stated"
+        ],
+        "Psychiatry": [
+            "Psychiatric assessment form not completed",
+            "Risk assessment not documented",
+            "Medication chart not attached",
+            "Substance use history not documented"
+        ],
+        "Emergency Medicine": [
+            "Mechanism of injury not described",
+            "Toxicology screen not sent",
+            "ATLS/APLS assessment not documented",
+            "GCS at admission not recorded"
+        ]
+    }
+}

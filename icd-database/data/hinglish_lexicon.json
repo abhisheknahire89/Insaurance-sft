@@ -1,0 +1,143 @@
+{
+    "Respiratory": [
+        "saans phoolna",
+        "saans chadhna",
+        "seene mein dard",
+        "khansi aana",
+        "balgam aana",
+        "saas lene mein taklif",
+        "seene mein bhaari pan",
+        "khoon aana khansi mein",
+        "bukhar ke saath khansi"
+    ],
+    "Cardiac": [
+        "chhati mein dard",
+        "seene mein dard",
+        "dil ki dhadkan tez hona",
+        "ghabrahat hona",
+        "pasina aana achanak",
+        "haath-pair mein sunn hona",
+        "dil ka dauraa",
+        "BP bohot zyada banana"
+    ],
+    "Neurology": [
+        "chakkar aana",
+        "behoshi aana",
+        "fits padna",
+        "haath-pair kamzor hona",
+        "bolne mein takleef",
+        "chehra tedha hona",
+        "sar mein dard",
+        "yaadash kamzor hona",
+        "aankh ki roshni jaana"
+    ],
+    "Gastroenterology": [
+        "pet mein dard",
+        "ulti hona",
+        "dast lagana",
+        "piliya hona",
+        "khoon ki ulti",
+        "kala potty aana",
+        "pet phoolna",
+        "acidity hona",
+        "bhookh na lagna"
+    ],
+    "Nephrology": [
+        "peshab kam aana",
+        "pair mein sujan",
+        "kamar mein dard",
+        "peshab mein jalan",
+        "khoon aana peshab mein",
+        "thakaavat",
+        "sujan poore sharir mein"
+    ],
+    "Endocrinology": [
+        "sugar zyada hona",
+        "chakkar aana sugar se",
+        "baar baar peshab aana",
+        "zyada pyas lagana",
+        "seene mein jalan",
+        "haath-pair mein sunn hona",
+        "weight kam hona",
+        "thyroid ki samasya"
+    ],
+    "Orthopedics": [
+        "haddi toot jaana",
+        "jod mein dard",
+        "pair mein sujan",
+        "chalna mein takleef",
+        "pair ka color badalna",
+        "kamzori haath ya pair mein",
+        "peeth mein dard",
+        "ghutna dard"
+    ],
+    "General Surgery": [
+        "pet mein tez dard",
+        "nali band hona",
+        "appendix ka dard",
+        "pagal dard pait mein",
+        "nali mein sujan",
+        "piliya hona",
+        "pait phoolna"
+    ],
+    "Obstetrics and Gynecology": [
+        "dard uttha rehna",
+        "bahut zyada bleeding hona",
+        "ulti aur dard saath mein",
+        "baby ka hilna band hona",
+        "chakkar aana pregnancy mein",
+        "BP zyada rehna",
+        "bukhar prasav ke baad"
+    ],
+    "Pediatrics": [
+        "bachhe ko tez bukhar",
+        "bachha saans nahin le raha",
+        "bachha kuch nahin kha raha",
+        "bachhe ko fits aana",
+        "bachhe ki aankhein peeli hona",
+        "bachha bahut kamzor hai",
+        "bachhe ko ulti dast"
+    ],
+    "Infectious Disease": [
+        "bohot tez bukhar",
+        "skin pe daane nikalna",
+        "haath pair mein dard",
+        "aankhein peeli hona",
+        "sar mein tez dard",
+        "tohmatein hona",
+        "saans lene mein taklif"
+    ],
+    "Hematology": [
+        "khoon ki kami",
+        "platelets kam hona",
+        "khoon nahin rukna",
+        "haath pair mein daane",
+        "thakaan bahut zyada",
+        "khoon chadhana padega",
+        "anemia ki wajah se kamzori"
+    ],
+    "Oncology": [
+        "cancer mein dard",
+        "khana nahin kha pa raha",
+        "weight bohot girna",
+        "saans phoolna",
+        "bohot thakan rehna",
+        "haath pair sunn hona"
+    ],
+    "Psychiatry": [
+        "neend nahin aana",
+        "khaane ki iccha nahin",
+        "khud ko nuqsan pahunchana",
+        "galat baat sunaayi dena",
+        "gussa aana baar baar",
+        "bhaagna chahte hain"
+    ],
+    "Emergency Medicine": [
+        "accident ho gaya",
+        "saanp ne kata",
+        "chemical pee liya",
+        "saans band ho raha hai",
+        "pura sharir burn ho gaya",
+        "bijli ka jhatka laga"
+    ]
+}
