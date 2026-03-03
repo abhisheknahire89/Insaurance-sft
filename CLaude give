@@ -1,0 +1,876 @@
+# IMPLEMENTATION PROMPT: Aivana Insurance Pre-Authorization Module
+
+## CONTEXT
+
+You are building an Insurance Pre-Authorization module for Aivana, a clinical documentation system for Indian hospitals. The system uses voice-based clinical documentation powered by a NEXUS clinical reasoning engine.
+
+### What Already Exists (DO NOT MODIFY unless specified):
+- `components/InsuranceModule.tsx` - Basic standalone pre-auth form (will be replaced)
+- `components/VedaSessionView.tsx` - Voice scribe session that captures doctor-patient conversations
+- `services/geminiService.ts` - AI services including transcription and clinical note generation
+- `engine/workflow.ts` - NEXUS clinical reasoning workflow that produces DDx and severity scores
+- `types.ts` - TypeScript interfaces for the application
+
+### What You Are Building:
+A hybrid document capture system that:
+1. Captures test result interpretations via voice during consultation
+2. Prompts for document upload as evidence
+3. Generates TPA-ready pre-authorization with proper liability disclaimers
+4. Clearly flags missing documents
+
+---
+
+## ARCHITECTURE OVERVIEW
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     CONSULTATION FLOW                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  Doctor-Patient Conversation (VedaSessionView)                       │
+│       │                                                              │
+│       ▼                                                              │
+│  NEXUS Engine processes → DDx + Severity Scores + Key Findings       │
+│       │                                                              │
+│       ▼                                                              │
+│  System detects "admission decision" keywords                        │
+│       │                                                              │
+│       ▼                                                              │
+│  ┌─────────────────────────────────────────────────────────────┐    │
+│  │         INSURANCE CONFIRMATION MODAL (3 Steps)               │    │
+│  │                                                              │    │
+│  │  Step 1: Review & Confirm Diagnosis                          │    │
+│  │    - Select primary diagnosis from NEXUS DDx                 │    │
+│  │    - Review/override severity scores                         │    │
+│  │    - View auto-extracted clinical findings                   │    │
+│  │    - Add voice-captured test interpretations                 │    │
+│  │                                                              │    │
+│  │  Step 2: Upload Supporting Documents                         │    │
+│  │    - Show required documents based on diagnosis              │    │
+│  │    - Upload PDF/images                                       │    │
+│  │    - Match uploads to voice-captured interpretations         │    │
+│  │    - Flag missing required documents                         │    │
+│  │                                                              │    │
+│  │  Step 3: Confirm & Generate                                  │    │
+│  │    - Summary of all data                                     │    │
+│  │    - Medical necessity preview                               │    │
+│  │    - Liability disclaimer + doctor confirmation              │    │
+│  │    - Generate pre-auth document                              │    │
+│  └─────────────────────────────────────────────────────────────┘    │
+│       │                                                              │
+│       ▼                                                              │
+│  Pre-Auth Document Generated                                         │
+│    - Full document if all evidence attached                          │
+│    - "PENDING DOCUMENTS" flag if evidence missing                    │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## FILE STRUCTURE TO CREATE
+
+```
+components/
+├── InsuranceModule/
+│   ├── index.tsx                    # Main export
+│   ├── InsuranceConfirmationModal.tsx  # The 3-step modal
+│   ├── DiagnosisReviewStep.tsx      # Step 1 component
+│   ├── DocumentUploadStep.tsx       # Step 2 component  
+│   ├── ConfirmationStep.tsx         # Step 3 component
+│   ├── VoiceCapturedFindings.tsx    # Voice-captured test results display
+│   ├── DocumentChecklist.tsx        # Required docs checklist
+│   ├── MedicalNecessityPreview.tsx  # Auto-generated preview
+│   └── types.ts                     # Insurance module specific types
+
+services/
+├── insuranceService.ts              # Pre-auth generation logic
+
+utils/
+├── admissionDetector.ts             # Detects admission keywords in transcript
+├── documentRequirements.ts          # Maps diagnosis to required documents
+```
+
+---
+
+## TYPE DEFINITIONS
+
+Create `components/InsuranceModule/types.ts`:
+
+```typescript
+// Voice-captured clinical finding (from conversation)
+export interface VoiceCapturedFinding {
+  id: string;
+  type: 'lab_result' | 'imaging' | 'vital' | 'examination' | 'symptom';
+  timestamp: string;
+  rawTranscript: string;           // What doctor actually said
+  structuredInterpretation: {
+    testName: string;              // e.g., "Chest X-Ray", "CBC"
+    result: string;                // e.g., "Right lower lobe consolidation"
+    interpretation: 'normal' | 'abnormal_high' | 'abnormal_low' | 'critical' | 'positive' | 'negative';
+    clinicalSignificance: string;  // e.g., "Indicates pneumonia"
+  };
+  evidenceStatus: 'pending' | 'uploaded' | 'not_required';
+  linkedDocumentId?: string;       // ID of uploaded document if linked
+}
+
+// Uploaded document
+export interface UploadedDocument {
+  id: string;
+  fileName: string;
+  fileSize: string;
+  fileType: 'pdf' | 'image';
+  uploadedAt: string;
+  base64Data?: string;             // For display/submission
+  linkedFindingId?: string;        // ID of voice-captured finding if linked
+  documentCategory: DocumentCategory;
+}
+
+// Document categories required for pre-auth
+export type DocumentCategory = 
+  | 'chest_xray'
+  | 'cbc'
+  | 'abg'
+  | 'ecg'
+  | 'ct_scan'
+  | 'mri'
+  | 'ultrasound'
+  | 'blood_culture'
+  | 'urine_routine'
+  | 'lft'
+  | 'kft'
+  | 'covid_test'
+  | 'other';
+
+// Document requirement based on diagnosis
+export interface DocumentRequirement {
+  category: DocumentCategory;
+  displayName: string;
+  isRequired: boolean;
+  description: string;
+}
+
+// NEXUS output structure (from existing engine)
+export interface NexusInsuranceInput {
+  patient: {
+    name: string;
+    age: number;
+    gender: 'Male' | 'Female' | 'Other';
+    uhid: string;
+    policyNumber?: string;
+    tpaName?: string;
+  };
+  consultation: {
+    date: string;
+    doctor: string;
+    doctorLicense: string;
+    department: string;
+  };
+  ddx: Array<{
+    diagnosis: string;
+    probability: number;
+    icd10: string;
+    reasoning: string;
+  }>;
+  severity: {
+    phenoIntensity: number;      // 0-1
+    urgencyQuotient: number;     // 0-1
+    deteriorationVelocity: number; // 0-1
+    overallRisk: 'Low' | 'Moderate' | 'High' | 'Critical';
+    mustNotMiss: boolean;
+  };
+  vitals: {
+    bp: string;
+    pulse: string;
+    temp: string;
+    spo2: string;
+    rr: string;
+  };
+  voiceCapturedFindings: VoiceCapturedFinding[];
+}
+
+// Pre-auth submission state
+export interface PreAuthSubmission {
+  id: string;
+  generatedAt: string;
+  status: 'complete' | 'pending_documents' | 'draft';
+  
+  // Doctor selections
+  selectedDiagnosis: {
+    diagnosis: string;
+    icd10: string;
+    probability: number;
+    reasoning: string;
+  };
+  severityOverride?: {
+    originalScore: number;
+    overriddenScore: number;
+    justification: string;
+  };
+  additionalClinicalNotes: string;
+  
+  // Evidence
+  voiceCapturedFindings: VoiceCapturedFinding[];
+  uploadedDocuments: UploadedDocument[];
+  pendingDocuments: DocumentRequirement[];
+  
+  // Confirmation
+  doctorConfirmation: {
+    confirmed: boolean;
+    confirmedAt: string;
+    doctorName: string;
+    doctorLicense: string;
+  };
+  
+  // Generated output
+  medicalNecessityStatement: string;
+  preAuthDocumentUrl?: string;
+}
+```
+
+---
+
+## COMPONENT SPECIFICATIONS
+
+### 1. InsuranceConfirmationModal.tsx
+
+**Purpose:** Main modal container with 3-step wizard flow
+
+**Props:**
+```typescript
+interface InsuranceConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  nexusData: NexusInsuranceInput;
+  onSubmit: (submission: PreAuthSubmission) => void;
+}
+```
+
+**State:**
+```typescript
+const [step, setStep] = useState<1 | 2 | 3>(1);
+const [selectedDxIndex, setSelectedDxIndex] = useState(0);
+const [severityOverride, setSeverityOverride] = useState<SeverityOverride | null>(null);
+const [clinicalNotes, setClinicalNotes] = useState('');
+const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
+const [isGenerating, setIsGenerating] = useState(false);
+```
+
+**Behavior:**
+- Step navigation with validation
+- Cannot proceed from Step 2 if required documents missing (show warning, allow override)
+- Step 3 requires checkbox confirmation before "Generate" button enables
+
+---
+
+### 2. DiagnosisReviewStep.tsx (Step 1)
+
+**Purpose:** Doctor reviews and confirms NEXUS output
+
+**Sections:**
+
+**A. Primary Diagnosis Selection**
+- Radio button list of DDx from NEXUS
+- Show: diagnosis name, ICD-10 code, probability %, reasoning
+- Pre-select highest probability diagnosis
+- Visual indicator for selected item
+
+**B. Severity Scores Display**
+- 3 cards showing: PhenoIntensity, UrgencyQuotient, DeteriorationVelocity
+- Color coding: Green (<0.4), Yellow (0.4-0.7), Red (>0.7)
+- "Override" checkbox with justification textarea (appears if checked)
+
+**C. Voice-Captured Clinical Findings**
+- List from `nexusData.voiceCapturedFindings`
+- Each item shows:
+  - Test name and result
+  - Interpretation badge (normal/abnormal/critical)
+  - Evidence status icon (✓ uploaded, ⚠ pending, ○ not required)
+- Doctor can mark findings as "not required for pre-auth"
+
+**D. Additional Notes**
+- Textarea for free text
+- Placeholder: "Add context for TPA reviewer..."
+
+---
+
+### 3. DocumentUploadStep.tsx (Step 2)
+
+**Purpose:** Upload supporting evidence, link to voice-captured findings
+
+**Sections:**
+
+**A. Required Documents Checklist**
+- Generated based on selected diagnosis (use `utils/documentRequirements.ts`)
+- Show status: ✓ Uploaded, ⚠ Required - Missing, ○ Optional
+- Visual matching: If voice-captured finding mentions "X-ray", highlight X-ray in checklist
+
+**B. Voice-Captured Findings Without Evidence**
+- Filter findings where `evidenceStatus === 'pending'`
+- Each shows: "You mentioned [test] - Upload report to attach as evidence"
+- "Skip - Not required" button to change status to 'not_required'
+
+**C. Upload Area**
+- Drag-and-drop zone
+- Accept: PDF, JPG, PNG (max 10MB each)
+- On upload, prompt: "Which test is this for?" (dropdown of pending findings + "Other")
+
+**D. Uploaded Documents List**
+- Show file name, size, type icon
+- "Linked to: [Finding name]" if linked
+- Delete button
+
+**E. Warning Banner (if required docs missing)**
+```
+⚠️ Required documents missing: Chest X-Ray, CBC Report
+Pre-auth will be flagged as "PENDING DOCUMENTS" and may be queried by TPA.
+[ ] I understand and want to proceed anyway
+```
+
+---
+
+### 4. ConfirmationStep.tsx (Step 3)
+
+**Purpose:** Final review and doctor confirmation
+
+**Sections:**
+
+**A. Summary Card**
+- Patient info
+- Selected diagnosis + ICD-10
+- Confidence score
+- Overall severity
+- Documents attached count
+- Documents pending count (highlighted if > 0)
+
+**B. Medical Necessity Preview**
+- Auto-generated statement (use `services/insuranceService.ts`)
+- Read-only display
+- "Edit" button opens textarea to modify
+
+**C. Document Status Summary**
+```
+Evidence Status:
+✓ 3 documents attached (Chest X-Ray, CBC, ABG)
+⚠ 1 document pending (Blood Culture)
+```
+
+**D. Liability Disclaimer (NON-EDITABLE)**
+```
+IMPORTANT DISCLAIMER
+
+This pre-authorization request is generated using Aivana Clinical 
+Documentation System based on clinical findings reported by the 
+treating physician. 
+
+Aivana DOES NOT:
+• Independently verify test results or clinical observations
+• Guarantee approval of pre-authorization by TPA/Insurer
+• Take responsibility for accuracy of clinical information
+
+The treating physician confirms that:
+• All clinical information entered is accurate and complete
+• Supporting documents attached are genuine and unaltered
+• The proposed admission is medically necessary
+
+[ ] I, Dr. [Name] ([License#]), confirm the above and take 
+    responsibility for this pre-authorization request.
+```
+
+**E. Generate Button**
+- Disabled until checkbox is checked
+- Shows spinner during generation
+- On success: Show success modal with reference ID
+
+---
+
+### 5. VoiceCapturedFindings.tsx
+
+**Purpose:** Display and manage voice-captured test interpretations
+
+**Props:**
+```typescript
+interface VoiceCapturedFindingsProps {
+  findings: VoiceCapturedFinding[];
+  onUpdateFinding: (id: string, updates: Partial<VoiceCapturedFinding>) => void;
+  showEvidenceStatus: boolean;
+}
+```
+
+**Display for each finding:**
+```
+┌─────────────────────────────────────────────────────────────┐
+│ 🔬 Chest X-Ray                                    ⚠ Pending │
+│                                                              │
+│ "Right lower lobe consolidation noted"                      │
+│                                                              │
+│ Interpretation: ABNORMAL                                     │
+│ Clinical significance: Indicates pneumonia                   │
+│                                                              │
+│ [ Mark as not required ]                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## SERVICE IMPLEMENTATION
+
+### services/insuranceService.ts
+
+```typescript
+import { 
+  NexusInsuranceInput, 
+  PreAuthSubmission, 
+  VoiceCapturedFinding,
+  UploadedDocument 
+} from '../components/InsuranceModule/types';
+
+/**
+ * Generates medical necessity statement from clinical data
+ */
+export const generateMedicalNecessityStatement = (
+  input: NexusInsuranceInput,
+  selectedDx: NexusInsuranceInput['ddx'][0],
+  voiceFindings: VoiceCapturedFinding[]
+): string => {
+  const { patient, vitals, severity } = input;
+  
+  // Extract abnormal findings
+  const abnormalFindings = voiceFindings
+    .filter(f => f.structuredInterpretation.interpretation !== 'normal')
+    .map(f => `${f.structuredInterpretation.testName}: ${f.structuredInterpretation.result}`)
+    .join('; ');
+  
+  // Build severity justification
+  const severityJustification = [];
+  if (severity.phenoIntensity > 0.7) {
+    severityJustification.push('severe symptom presentation');
+  }
+  if (severity.urgencyQuotient > 0.7) {
+    severityJustification.push('time-critical intervention required');
+  }
+  if (severity.deteriorationVelocity > 0.7) {
+    severityJustification.push('high risk of rapid deterioration');
+  }
+  if (parseInt(vitals.spo2) < 94) {
+    severityJustification.push(`hypoxia (SpO2 ${vitals.spo2}%)`);
+  }
+  
+  // Build OPD contraindication reasons
+  const opdContraindications = [];
+  if (parseInt(vitals.spo2) < 94) {
+    opdContraindications.push('oxygen requirement cannot be met at home');
+  }
+  if (severity.phenoIntensity > 0.6) {
+    opdContraindications.push('severity precludes safe outpatient management');
+  }
+  opdContraindications.push('need for IV medications and continuous monitoring');
+  
+  return `
+MEDICAL NECESSITY STATEMENT
+
+Patient: ${patient.age} year old ${patient.gender}
+Diagnosis: ${selectedDx.diagnosis} (ICD-10: ${selectedDx.icd10})
+Diagnostic Confidence: ${(selectedDx.probability * 100).toFixed(0)}%
+
+CLINICAL PRESENTATION:
+${selectedDx.reasoning}
+
+KEY FINDINGS:
+${abnormalFindings || 'As documented in attached reports'}
+
+VITAL SIGNS AT PRESENTATION:
+BP: ${vitals.bp} mmHg | Pulse: ${vitals.pulse}/min | Temp: ${vitals.temp}°F
+SpO2: ${vitals.spo2}% | RR: ${vitals.rr}/min
+
+SEVERITY ASSESSMENT:
+Overall Risk: ${severity.overallRisk}
+Clinical indicators: ${severityJustification.join(', ') || 'Moderate severity requiring inpatient care'}
+
+MEDICAL NECESSITY JUSTIFICATION:
+Hospitalization is medically necessary due to:
+${severityJustification.map(s => `• ${s.charAt(0).toUpperCase() + s.slice(1)}`).join('\n')}
+
+OPD MANAGEMENT NOT APPROPRIATE BECAUSE:
+${opdContraindications.map(c => `• ${c.charAt(0).toUpperCase() + c.slice(1)}`).join('\n')}
+
+PROPOSED MANAGEMENT:
+• Admission to: General Ward / ICU (as clinically indicated)
+• Expected length of stay: 5-7 days
+• Treatment plan: IV antibiotics, supportive care, monitoring
+  `.trim();
+};
+
+/**
+ * Generates the full pre-auth submission object
+ */
+export const createPreAuthSubmission = (
+  input: NexusInsuranceInput,
+  selectedDxIndex: number,
+  severityOverride: { original: number; overridden: number; justification: string } | null,
+  clinicalNotes: string,
+  uploadedDocuments: UploadedDocument[],
+  voiceFindings: VoiceCapturedFinding[]
+): PreAuthSubmission => {
+  const selectedDx = input.ddx[selectedDxIndex];
+  
+  // Determine pending documents
+  const pendingFindings = voiceFindings.filter(
+    f => f.evidenceStatus === 'pending'
+  );
+  
+  // Determine status
+  const hasPendingRequired = pendingFindings.some(f => 
+    f.type === 'lab_result' || f.type === 'imaging'
+  );
+  
+  return {
+    id: `PA-${Date.now()}`,
+    generatedAt: new Date().toISOString(),
+    status: hasPendingRequired ? 'pending_documents' : 'complete',
+    
+    selectedDiagnosis: {
+      diagnosis: selectedDx.diagnosis,
+      icd10: selectedDx.icd10,
+      probability: selectedDx.probability,
+      reasoning: selectedDx.reasoning,
+    },
+    
+    severityOverride: severityOverride ? {
+      originalScore: severityOverride.original,
+      overriddenScore: severityOverride.overridden,
+      justification: severityOverride.justification,
+    } : undefined,
+    
+    additionalClinicalNotes: clinicalNotes,
+    voiceCapturedFindings: voiceFindings,
+    uploadedDocuments: uploadedDocuments,
+    pendingDocuments: [], // Populated by documentRequirements util
+    
+    doctorConfirmation: {
+      confirmed: true,
+      confirmedAt: new Date().toISOString(),
+      doctorName: input.consultation.doctor,
+      doctorLicense: input.consultation.doctorLicense,
+    },
+    
+    medicalNecessityStatement: generateMedicalNecessityStatement(
+      input, 
+      selectedDx, 
+      voiceFindings
+    ),
+  };
+};
+
+/**
+ * Formats pre-auth for TPA submission (plain text)
+ */
+export const formatPreAuthForTPA = (submission: PreAuthSubmission): string => {
+  const pendingDocsWarning = submission.status === 'pending_documents'
+    ? `
+⚠️ PENDING DOCUMENTS WARNING ⚠️
+This pre-authorization has supporting documents pending upload.
+Please request the following from the hospital:
+${submission.voiceCapturedFindings
+  .filter(f => f.evidenceStatus === 'pending')
+  .map(f => `• ${f.structuredInterpretation.testName}`)
+  .join('\n')}
+────────────────────────────────────────
+`
+    : '';
+    
+  return `
+PRE-AUTHORIZATION REQUEST
+Reference: ${submission.id}
+Generated: ${new Date(submission.generatedAt).toLocaleString('en-IN')}
+Status: ${submission.status === 'complete' ? '✓ COMPLETE' : '⚠ PENDING DOCUMENTS'}
+
+${pendingDocsWarning}
+${submission.medicalNecessityStatement}
+
+────────────────────────────────────────
+SUPPORTING DOCUMENTS
+────────────────────────────────────────
+Attached: ${submission.uploadedDocuments.length} document(s)
+${submission.uploadedDocuments.map(d => `• ${d.fileName} (${d.documentCategory})`).join('\n') || '• None'}
+
+Pending: ${submission.voiceCapturedFindings.filter(f => f.evidenceStatus === 'pending').length} document(s)
+${submission.voiceCapturedFindings
+  .filter(f => f.evidenceStatus === 'pending')
+  .map(f => `• ${f.structuredInterpretation.testName} - PENDING`)
+  .join('\n') || '• None'}
+
+────────────────────────────────────────
+DISCLAIMER
+────────────────────────────────────────
+This pre-authorization request was generated using Aivana Clinical 
+Documentation System based on clinical findings reported by the 
+treating physician. Aivana does not independently verify test results 
+or clinical observations. 
+
+The treating physician (${submission.doctorConfirmation.doctorName}, 
+License: ${submission.doctorConfirmation.doctorLicense}) has confirmed 
+the accuracy of the information contained herein.
+
+Confirmed at: ${new Date(submission.doctorConfirmation.confirmedAt).toLocaleString('en-IN')}
+  `.trim();
+};
+```
+
+---
+
+### utils/documentRequirements.ts
+
+```typescript
+import { DocumentRequirement, DocumentCategory } from '../components/InsuranceModule/types';
+
+// Maps ICD-10 codes (or diagnosis categories) to required documents
+const diagnosisDocumentMap: Record<string, DocumentCategory[]> = {
+  // Respiratory
+  'J18': ['chest_xray', 'cbc', 'abg'],           // Pneumonia
+  'J12': ['chest_xray', 'cbc', 'covid_test'],    // Viral pneumonia
+  'J44': ['chest_xray', 'cbc', 'abg', 'ecg'],    // COPD
+  
+  // Cardiac
+  'I21': ['ecg', 'cbc', 'lft', 'kft'],           // MI
+  'I50': ['ecg', 'chest_xray', 'cbc'],           // Heart failure
+  
+  // Infectious
+  'A41': ['blood_culture', 'cbc', 'lft', 'kft'], // Sepsis
+  
+  // Default for unknown
+  'default': ['cbc'],
+};
+
+const documentDetails: Record<DocumentCategory, { displayName: string; description: string }> = {
+  'chest_xray': { displayName: 'Chest X-Ray', description: 'PA view chest radiograph' },
+  'cbc': { displayName: 'CBC Report', description: 'Complete blood count with differential' },
+  'abg': { displayName: 'ABG Report', description: 'Arterial blood gas analysis' },
+  'ecg': { displayName: 'ECG', description: '12-lead electrocardiogram' },
+  'ct_scan': { displayName: 'CT Scan', description: 'Computed tomography report' },
+  'mri': { displayName: 'MRI', description: 'Magnetic resonance imaging report' },
+  'ultrasound': { displayName: 'Ultrasound', description: 'Ultrasonography report' },
+  'blood_culture': { displayName: 'Blood Culture', description: 'Blood culture and sensitivity' },
+  'urine_routine': { displayName: 'Urine Routine', description: 'Urine analysis report' },
+  'lft': { displayName: 'LFT', description: 'Liver function tests' },
+  'kft': { displayName: 'KFT', description: 'Kidney function tests' },
+  'covid_test': { displayName: 'COVID-19 Test', description: 'RT-PCR or Rapid Antigen Test' },
+  'other': { displayName: 'Other Document', description: 'Additional supporting document' },
+};
+
+/**
+ * Gets required documents based on ICD-10 code
+ */
+export const getRequiredDocuments = (icd10Code: string): DocumentRequirement[] => {
+  // Get the category (first 3 characters of ICD-10)
+  const category = icd10Code.substring(0, 3);
+  
+  const requiredCategories = diagnosisDocumentMap[category] || diagnosisDocumentMap['default'];
+  
+  return requiredCategories.map((cat, index) => ({
+    category: cat,
+    displayName: documentDetails[cat].displayName,
+    isRequired: index < 2, // First 2 are required, rest optional
+    description: documentDetails[cat].description,
+  }));
+};
+
+/**
+ * Matches a filename to a document category
+ */
+export const guessDocumentCategory = (filename: string): DocumentCategory => {
+  const lower = filename.toLowerCase();
+  
+  if (lower.includes('xray') || lower.includes('x-ray') || lower.includes('cxr')) return 'chest_xray';
+  if (lower.includes('cbc') || lower.includes('blood count')) return 'cbc';
+  if (lower.includes('abg') || lower.includes('blood gas')) return 'abg';
+  if (lower.includes('ecg') || lower.includes('ekg')) return 'ecg';
+  if (lower.includes('ct') || lower.includes('scan')) return 'ct_scan';
+  if (lower.includes('mri')) return 'mri';
+  if (lower.includes('usg') || lower.includes('ultrasound')) return 'ultrasound';
+  if (lower.includes('culture')) return 'blood_culture';
+  if (lower.includes('urine')) return 'urine_routine';
+  if (lower.includes('lft') || lower.includes('liver')) return 'lft';
+  if (lower.includes('kft') || lower.includes('kidney') || lower.includes('renal')) return 'kft';
+  if (lower.includes('covid') || lower.includes('rtpcr')) return 'covid_test';
+  
+  return 'other';
+};
+```
+
+---
+
+### utils/admissionDetector.ts
+
+```typescript
+/**
+ * Detects if the conversation transcript indicates an admission decision
+ */
+export const detectAdmissionIntent = (transcript: string): {
+  detected: boolean;
+  confidence: 'high' | 'medium' | 'low';
+  triggerPhrase?: string;
+} => {
+  const lowerTranscript = transcript.toLowerCase();
+  
+  // High confidence triggers
+  const highConfidencePhrases = [
+    'admit the patient',
+    'need to admit',
+    'admission required',
+    'will need admission',
+    'admitting to',
+    'admitting for',
+    'needs hospitalization',
+    'requires hospitalization',
+    'admit kar do',       // Hindi
+    'admit karna hoga',   // Hindi
+    'bharthi karo',       // Hindi
+  ];
+  
+  for (const phrase of highConfidencePhrases) {
+    if (lowerTranscript.includes(phrase)) {
+      return { detected: true, confidence: 'high', triggerPhrase: phrase };
+    }
+  }
+  
+  // Medium confidence triggers
+  const mediumConfidencePhrases = [
+    'need to keep you',
+    'stay in hospital',
+    'observation required',
+    'cannot go home',
+    'needs monitoring',
+    'icu admission',
+    'ward admission',
+  ];
+  
+  for (const phrase of mediumConfidencePhrases) {
+    if (lowerTranscript.includes(phrase)) {
+      return { detected: true, confidence: 'medium', triggerPhrase: phrase };
+    }
+  }
+  
+  return { detected: false, confidence: 'low' };
+};
+
+/**
+ * Extracts test result mentions from transcript for voice-captured findings
+ */
+export const extractTestMentions = (transcript: string): Array<{
+  testName: string;
+  rawMention: string;
+  possibleResult?: string;
+}> => {
+  const tests = [
+    { pattern: /x-?ray|chest\s+x-?ray|cxr/gi, name: 'Chest X-Ray' },
+    { pattern: /cbc|complete\s+blood\s+count|blood\s+count/gi, name: 'CBC' },
+    { pattern: /abg|arterial\s+blood\s+gas/gi, name: 'ABG' },
+    { pattern: /ecg|ekg|electrocardiogram/gi, name: 'ECG' },
+    { pattern: /hemoglobin|hb\s+is|haemoglobin/gi, name: 'Hemoglobin' },
+    { pattern: /creatinine/gi, name: 'Creatinine' },
+    { pattern: /ct\s+scan|ct-scan/gi, name: 'CT Scan' },
+    { pattern: /ultrasound|usg|sonography/gi, name: 'Ultrasound' },
+    { pattern: /covid|rtpcr|rapid\s+antigen/gi, name: 'COVID-19 Test' },
+  ];
+  
+  const results: Array<{ testName: string; rawMention: string; possibleResult?: string }> = [];
+  
+  for (const test of tests) {
+    const matches = transcript.match(test.pattern);
+    if (matches) {
+      // Try to extract surrounding context (30 chars before and after)
+      const index = transcript.toLowerCase().search(test.pattern);
+      const start = Math.max(0, index - 30);
+      const end = Math.min(transcript.length, index + 50);
+      const context = transcript.substring(start, end);
+      
+      results.push({
+        testName: test.name,
+        rawMention: context,
+        possibleResult: undefined, // Would need NLP to extract actual result
+      });
+    }
+  }
+  
+  return results;
+};
+```
+
+---
+
+## INTEGRATION POINTS
+
+### 1. Trigger Modal from VedaSessionView
+
+In `components/VedaSessionView.tsx`, add:
+
+```typescript
+import { detectAdmissionIntent, extractTestMentions } from '../utils/admissionDetector';
+import { InsuranceConfirmationModal } from './InsuranceModule';
+
+// Inside component:
+const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+const [insuranceNexusData, setInsuranceNexusData] = useState<NexusInsuranceInput | null>(null);
+
+// After transcript updates, check for admission intent:
+useEffect(() => {
+  const fullTranscript = transcriptHistory.map(t => t.text).join(' ');
+  const admission = detectAdmissionIntent(fullTranscript);
+  
+  if (admission.detected && admission.confidence === 'high' && !showInsuranceModal) {
+    // Prepare data for insurance modal
+    const testMentions = extractTestMentions(fullTranscript);
+    
+    // Build NexusInsuranceInput from current session data
+    // This would pull from your existing NEXUS insights
+    
+    // Show modal
+    setShowInsuranceModal(true);
+  }
+}, [transcriptHistory]);
+```
+
+### 2. Pull from NEXUS Engine
+
+The modal needs to receive data from your existing NEXUS engine output. Map the existing `CoPilotSuggestion` type to `NexusInsuranceInput`.
+
+### 3. Store Audit Trail
+
+Every confirmation should be logged:
+```typescript
+console.log(`[AUDIT] Pre-Auth ${submission.id} generated at ${submission.generatedAt}`);
+console.log(`[AUDIT] Doctor: ${submission.doctorConfirmation.doctorName}`);
+console.log(`[AUDIT] Status: ${submission.status}`);
+console.log(`[AUDIT] Pending docs: ${submission.pendingDocuments.length}`);
+```
+
+---
+
+## IMPORTANT NOTES
+
+1. **DO NOT** claim to verify test results - only capture and display
+2. **ALWAYS** show disclaimer before confirmation
+3. **ALWAYS** flag documents as "pending" if not uploaded
+4. **ALWAYS** include doctor license number in confirmation
+5. Voice-captured findings are the doctor's interpretation, not system verification
+6. Uploaded documents are evidence, but system does not validate their content
+
+---
+
+## TESTING CHECKLIST
+
+- [ ] Modal opens when admission keywords detected
+- [ ] DDx list displays correctly with selection
+- [ ] Severity scores show with correct color coding
+- [ ] Override checkbox enables justification field
+- [ ] Voice-captured findings display correctly
+- [ ] File upload works for PDF and images
+- [ ] Uploaded files can be linked to findings
+- [ ] Required documents checklist updates based on diagnosis
+- [ ] Warning shows when required docs missing
+- [ ] Confirmation checkbox must be checked to enable Generate
+- [ ] Disclaimer is always visible and non-editable
+- [ ] Generated document includes all data
+- [ ] "Pending documents" flag shows when applicable
+- [ ] Audit trail logs correctly

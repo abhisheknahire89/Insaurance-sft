@@ -1,0 +1,736 @@
+# ADDITIONAL IMPLEMENTATION: IRDAI Standard Pre - Authorization Form
+
+## CRITICAL UPDATE
+
+The current implementation generates a narrative medical necessity statement.However, Indian TPAs require the ** IRDAI Standard "Request for Cashless Hospitalisation / Pre-authorization Form – Part C (Revised)" ** format.
+
+** UPDATE THE FOLLOWING FILES:**
+
+    ---
+
+## 1. ADD NEW TYPE DEFINITIONS
+
+Add to `types.ts`:
+
+```typescript
+// IRDAI Standard Pre-Authorization Form Structure
+export interface IRDAIPreAuthForm {
+  // Section 1: TPA / Insurer / Hospital Details
+  section1_TpaInsurer: {
+    insuranceCompanyName: string;
+    tpaName: string;
+    tpaId: string;
+    hospitalName: string;
+    hospitalAddress: string;
+    hospitalCity: string;
+    hospitalState: string;
+    hospitalPincode: string;
+    hospitalPhoneNumber: string;
+    hospitalEmail: string;
+    hospitalRohiniId: string;        // ROHINI ID (mandatory for network hospitals)
+    nabhAccredited: boolean;
+    nablAccredited: boolean;
+    nodalOfficerName: string;
+    nodalOfficerPhone: string;
+    nodalOfficerEmail: string;
+  };
+
+  // Section 2: Policy / Insured Details
+  section2_PolicyDetails: {
+    policyNumber: string;
+    policyType: 'Individual' | 'Floater' | 'Corporate' | 'Group';
+    policyStartDate: string;
+    policyEndDate: string;
+    sumInsured: number;
+    proposerName: string;
+    insuredName: string;
+    relationshipWithProposer: string;
+    tpaIdCardNumber: string;
+    employeeId?: string;              // For corporate policies
+    corporateName?: string;
+    hasOtherHealthPolicy: boolean;
+    otherPolicyDetails?: string;
+  };
+
+  // Section 3: Patient Personal Details
+  section3_PatientDetails: {
+    patientName: string;
+    dateOfBirth: string;
+    age: number;
+    gender: 'Male' | 'Female' | 'Other';
+    maritalStatus: 'Single' | 'Married' | 'Widowed' | 'Divorced';
+    occupation: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+    mobileNumber: string;
+    email: string;
+    aadhaarNumber?: string;
+    panNumber?: string;
+    abhaId?: string;                  // Ayushman Bharat Health Account
+    familyPhysicianName?: string;
+    familyPhysicianContact?: string;
+  };
+
+  // Section 4: Clinical Details (Treating Doctor fills this)
+  section4_ClinicalDetails: {
+    chiefComplaints: string;
+    durationOfPresentAilment: string;
+    natureOfIllness: 'Acute' | 'Chronic' | 'Acute on Chronic';
+    relevantClinicalFindings: string;
+    provisionalDiagnosis: string;
+    icd10Code: string;
+    icd10Description: string;
+    
+    proposedLineOfTreatment: {
+      medical: boolean;
+      surgical: boolean;
+      intensiveCare: boolean;
+      investigation: boolean;
+      nonAllopathic: boolean;
+    };
+    
+    // If surgical
+    surgeryDetails?: {
+      nameOfSurgery: string;
+      surgeryIcdCode?: string;
+      routeOfSurgery: 'Open' | 'Laparoscopic' | 'Endoscopic' | 'Robotic' | 'Other';
+    };
+    
+    // If injury/accident
+    injuryDetails?: {
+      isInjury: boolean;
+      dateOfInjury?: string;
+      causeOfInjury?: string;
+      isMLC: boolean;                 // Medico-Legal Case
+      reportedToPolice?: boolean;
+      firNumber?: string;
+    };
+    
+    // If maternity
+    maternityDetails?: {
+      isMaternity: boolean;
+      gravida?: number;
+      para?: number;
+      lmp?: string;
+      edd?: string;
+      deliveryType?: 'Normal' | 'Cesarean' | 'Assisted';
+    };
+  };
+
+  // Section 5: Admission & Hospitalization Details
+  section5_AdmissionDetails: {
+    dateOfAdmission: string;
+    timeOfAdmission: string;
+    admissionType: 'Emergency' | 'Planned';
+    roomCategory: 'General Ward' | 'Semi-Private' | 'Private' | 'Deluxe' | 'ICU' | 'ICCU' | 'NICU' | 'HDU';
+    expectedLengthOfStay: number;     // in days
+    expectedDaysInICU: number;
+    expectedDaysInRoom: number;
+    
+    pastMedicalHistory: {
+      diabetes: { present: boolean; duration?: string };
+      hypertension: { present: boolean; duration?: string };
+      heartDisease: { present: boolean; duration?: string };
+      asthma: { present: boolean; duration?: string };
+      epilepsy: { present: boolean; duration?: string };
+      cancer: { present: boolean; duration?: string };
+      kidney: { present: boolean; duration?: string };
+      liver: { present: boolean; duration?: string };
+      alcoholism: { present: boolean; duration?: string };
+      smoking: { present: boolean; duration?: string };
+      anyOther: { present: boolean; details?: string };
+    };
+    
+    previousHospitalization?: {
+      wasHospitalizedBefore: boolean;
+      details?: string;
+      dateOfLastHospitalization?: string;
+    };
+  };
+
+  // Section 6: Estimated Cost Break-up
+  section6_CostEstimate: {
+    roomRentPerDay: number;
+    expectedRoomDays: number;
+    totalRoomCharges: number;
+    
+    nursingChargesPerDay: number;
+    totalNursingCharges: number;
+    
+    icuChargesPerDay: number;
+    expectedIcuDays: number;
+    totalIcuCharges: number;
+    
+    otCharges: number;
+    
+    professionalFees: {
+      surgeonFee: number;
+      anesthetistFee: number;
+      consultantFee: number;
+      otherDoctorFees: number;
+    };
+    
+    investigationsEstimate: number;
+    medicinesEstimate: number;
+    consumablesEstimate: number;
+    
+    implants?: {
+      implantName: string;
+      implantCost: number;
+    }[];
+    totalImplantsCost: number;
+    
+    ambulanceCharges: number;
+    miscCharges: number;
+    
+    packageName?: string;             // If package rate applicable
+    packageAmount?: number;
+    
+    totalEstimatedCost: number;
+    amountClaimedFromInsurer: number;
+    
+    isEmergency: boolean;
+    emergencyContactAtHospital?: string;
+  };
+
+  // Section 7: Declarations
+  section7_Declarations: {
+    patientDeclaration: {
+      agreedToTerms: boolean;
+      consentForMedicalDataSharing: boolean;
+      agreesToPayNonPayables: boolean;
+      signatureDate: string;
+      signatureTime: string;
+    };
+    
+    doctorDeclaration: {
+      doctorName: string;
+      doctorQualification: string;
+      doctorRegistrationNumber: string;  // State Medical Council registration
+      hospitalName: string;
+      declarationText: string;
+      signatureDate: string;
+    };
+    
+    hospitalDeclaration: {
+      authorizedSignatoryName: string;
+      designation: string;
+      hospitalSealApplied: boolean;
+      signatureDate: string;
+    };
+  };
+
+  // Metadata
+  metadata: {
+    formVersion: string;
+    generatedAt: string;
+    generatedBy: string;              // System identifier
+    preAuthRequestId: string;
+    submissionChannel: 'Online' | 'Email' | 'Physical';
+  };
+}
+
+// TPA-specific form variations
+export type TPAProvider = 
+  | 'MDIndia'
+  | 'HealthIndia'
+  | 'Raksha'
+  | 'Paramount'
+  | 'MediAssist'
+  | 'Vidal'
+  | 'FHPL'
+  | 'Other';
+
+export interface TPAFormConfig {
+  tpaName: TPAProvider;
+  formDownloadUrl?: string;
+  portalUrl?: string;
+  specificFields?: string[];         // TPA-specific additional fields
+}
+```
+
+---
+
+## 2. UPDATE InsuranceConfirmationModal STEPS
+
+    ** Step 1 remains same ** (Diagnosis Review)
+
+** Step 2 UPDATE ** - Add Patient & Policy Details:
+
+```typescript
+// Add new step between Diagnosis Review and Document Upload
+
+// Step 2: Patient & Policy Details
+interface PolicyDetailsStepProps {
+  formData: Partial<IRDAIPreAuthForm>;
+  onUpdate: (updates: Partial<IRDAIPreAuthForm>) => void;
+}
+
+const PolicyDetailsStep: React.FC<PolicyDetailsStepProps> = ({ formData, onUpdate }) => {
+  return (
+    <div className="space-y-6">
+      {/* Policy Information */}
+      <div className="bg-gray-700/50 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Policy Information</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Policy Number *</label>
+            <input
+              type="text"
+              value={formData.section2_PolicyDetails?.policyNumber || ''}
+              onChange={(e) => onUpdate({
+                section2_PolicyDetails: {
+                  ...formData.section2_PolicyDetails,
+                  policyNumber: e.target.value
+                }
+              })}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
+              placeholder="e.g., POL123456789"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">TPA Name *</label>
+            <select
+              value={formData.section1_TpaInsurer?.tpaName || ''}
+              onChange={(e) => onUpdate({
+                section1_TpaInsurer: {
+                  ...formData.section1_TpaInsurer,
+                  tpaName: e.target.value
+                }
+              })}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
+            >
+              <option value="">Select TPA</option>
+              <option value="MDIndia">MD India</option>
+              <option value="HealthIndia">Health India TPA</option>
+              <option value="MediAssist">Medi Assist</option>
+              <option value="Raksha">Raksha TPA</option>
+              <option value="Paramount">Paramount TPA</option>
+              <option value="FHPL">FHPL</option>
+              <option value="Vidal">Vidal Health</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Insurance Company *</label>
+            <input
+              type="text"
+              value={formData.section1_TpaInsurer?.insuranceCompanyName || ''}
+              onChange={(e) => onUpdate({
+                section1_TpaInsurer: {
+                  ...formData.section1_TpaInsurer,
+                  insuranceCompanyName: e.target.value
+                }
+              })}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
+              placeholder="e.g., Star Health, ICICI Lombard"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Sum Insured (₹)</label>
+            <input
+              type="number"
+              value={formData.section2_PolicyDetails?.sumInsured || ''}
+              onChange={(e) => onUpdate({
+                section2_PolicyDetails: {
+                  ...formData.section2_PolicyDetails,
+                  sumInsured: parseInt(e.target.value)
+                }
+              })}
+              className="w-full bg-gray-700 border border-gray-600 rounded-lg p-2 text-white"
+              placeholder="e.g., 500000"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Past Medical History */}
+      <div className="bg-gray-700/50 rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-white mb-4">Past Medical History</h3>
+        <p className="text-sm text-gray-400 mb-3">Select any pre-existing conditions:</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {[
+            { key: 'diabetes', label: 'Diabetes' },
+            { key: 'hypertension', label: 'Hypertension' },
+            { key: 'heartDisease', label: 'Heart Disease' },
+            { key: 'asthma', label: 'Asthma/COPD' },
+            { key: 'kidney', label: 'Kidney Disease' },
+            { key: 'liver', label: 'Liver Disease' },
+          ].map(condition => (
+            <label key={condition.key} className="flex items-center gap-2 p-2 bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-750">
+              <input
+                type="checkbox"
+                checked={formData.section5_AdmissionDetails?.pastMedicalHistory?.[condition.key]?.present || false}
+                onChange={(e) => {
+                  // Update logic
+                }}
+                className="rounded bg-gray-600 border-gray-500 text-purple-600"
+              />
+              <span className="text-sm text-gray-300">{condition.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+    ** Add NEW Step 3: Cost Estimation **
+
+        ```typescript
+// Step 3: Cost Estimation (NEW)
+const CostEstimationStep: React.FC<CostEstimationStepProps> = ({ formData, onUpdate, diagnosis }) => {
+  // Auto-calculate totals
+  const calculateTotal = () => {
+    const costs = formData.section6_CostEstimate;
+    if (!costs) return 0;
+    
+    return (
+      (costs.totalRoomCharges || 0) +
+      (costs.totalNursingCharges || 0) +
+      (costs.totalIcuCharges || 0) +
+      (costs.otCharges || 0) +
+      (costs.professionalFees?.surgeonFee || 0) +
+      (costs.professionalFees?.anesthetistFee || 0) +
+      (costs.professionalFees?.consultantFee || 0) +
+      (costs.investigationsEstimate || 0) +
+      (costs.medicinesEstimate || 0) +
+      (costs.consumablesEstimate || 0) +
+      (costs.totalImplantsCost || 0) +
+      (costs.miscCharges || 0)
+    );
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+        <p className="text-sm text-blue-300">
+          💡 Cost estimation is required for pre-authorization. TPAs use this to approve the claim amount.
+        </p>
+      </div>
+
+      {/* Room Charges */}
+      <div className="bg-gray-700/50 rounded-lg p-4">
+        <h3 className="font-semibold text-white mb-3">Room & Nursing Charges</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Room Type</label>
+            <select className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm">
+              <option>General Ward</option>
+              <option>Semi-Private</option>
+              <option>Private</option>
+              <option>Deluxe</option>
+              <option>ICU</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Rate/Day (₹)</label>
+            <input
+              type="number"
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm"
+              placeholder="2500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Expected Days</label>
+            <input
+              type="number"
+              className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm"
+              placeholder="5"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Professional Fees */}
+      <div className="bg-gray-700/50 rounded-lg p-4">
+        <h3 className="font-semibold text-white mb-3">Professional Fees</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Surgeon Fee (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="25000" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Anesthetist Fee (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="10000" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Consultant Fee (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="5000" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">OT Charges (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="15000" />
+          </div>
+        </div>
+      </div>
+
+      {/* Other Costs */}
+      <div className="bg-gray-700/50 rounded-lg p-4">
+        <h3 className="font-semibold text-white mb-3">Medicines & Consumables</h3>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Medicines (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="15000" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Consumables (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="8000" />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1">Investigations (₹)</label>
+            <input type="number" className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-white text-sm" placeholder="5000" />
+          </div>
+        </div>
+      </div>
+
+      {/* Total */}
+      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-semibold text-white">Total Estimated Cost</span>
+          <span className="text-2xl font-bold text-green-400">₹{calculateTotal().toLocaleString('en-IN')}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## 3. UPDATE services / insuranceService.ts
+
+Add function to generate IRDAI - compliant form output:
+
+```typescript
+/**
+ * Generates IRDAI-compliant Pre-Authorization Form output
+ */
+export const generateIRDAIPreAuthForm = (
+  formData: IRDAIPreAuthForm
+): string => {
+  return `
+════════════════════════════════════════════════════════════════════════════════
+                    REQUEST FOR CASHLESS HOSPITALISATION
+PRE - AUTHORIZATION FORM – PART C(REVISED)
+════════════════════════════════════════════════════════════════════════════════
+Pre - Auth Request ID: ${ formData.metadata.preAuthRequestId }
+Date & Time: ${ new Date(formData.metadata.generatedAt).toLocaleString('en-IN') }
+Status: ${ formData.section7_Declarations.patientDeclaration.agreedToTerms ? 'SUBMITTED' : 'DRAFT' }
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 1: TPA / INSURER / HOSPITAL DETAILS
+────────────────────────────────────────────────────────────────────────────────
+Insurance Company: ${ formData.section1_TpaInsurer.insuranceCompanyName }
+TPA Name: ${ formData.section1_TpaInsurer.tpaName }
+TPA ID: ${ formData.section1_TpaInsurer.tpaId }
+
+Hospital Name: ${ formData.section1_TpaInsurer.hospitalName }
+Hospital Address: ${ formData.section1_TpaInsurer.hospitalAddress }
+                       ${ formData.section1_TpaInsurer.hospitalCity }, ${ formData.section1_TpaInsurer.hospitalState } - ${ formData.section1_TpaInsurer.hospitalPincode }
+Hospital ROHINI ID: ${ formData.section1_TpaInsurer.hospitalRohiniId }
+NABH Accredited: ${ formData.section1_TpaInsurer.nabhAccredited ? 'Yes' : 'No' }
+NABL Accredited: ${ formData.section1_TpaInsurer.nablAccredited ? 'Yes' : 'No' }
+
+Nodal Officer: ${ formData.section1_TpaInsurer.nodalOfficerName }
+Contact: ${ formData.section1_TpaInsurer.nodalOfficerPhone }
+Email: ${ formData.section1_TpaInsurer.nodalOfficerEmail }
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 2: POLICY / INSURED DETAILS
+────────────────────────────────────────────────────────────────────────────────
+Policy Number: ${ formData.section2_PolicyDetails.policyNumber }
+Policy Type: ${ formData.section2_PolicyDetails.policyType }
+Policy Period: ${ formData.section2_PolicyDetails.policyStartDate } to ${ formData.section2_PolicyDetails.policyEndDate }
+Sum Insured: ₹${ formData.section2_PolicyDetails.sumInsured?.toLocaleString('en-IN') }
+
+Proposer Name: ${ formData.section2_PolicyDetails.proposerName }
+Insured Name: ${ formData.section2_PolicyDetails.insuredName }
+Relationship: ${ formData.section2_PolicyDetails.relationshipWithProposer }
+TPA ID Card No.      : ${ formData.section2_PolicyDetails.tpaIdCardNumber }
+${ formData.section2_PolicyDetails.employeeId ? `Employee ID          : ${formData.section2_PolicyDetails.employeeId}` : '' }
+${ formData.section2_PolicyDetails.corporateName ? `Corporate Name       : ${formData.section2_PolicyDetails.corporateName}` : '' }
+
+Other Health Policy: ${ formData.section2_PolicyDetails.hasOtherHealthPolicy ? 'Yes - ' + formData.section2_PolicyDetails.otherPolicyDetails : 'No' }
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 3: PATIENT PERSONAL DETAILS
+────────────────────────────────────────────────────────────────────────────────
+Patient Name: ${ formData.section3_PatientDetails.patientName }
+Date of Birth: ${ formData.section3_PatientDetails.dateOfBirth }
+Age: ${ formData.section3_PatientDetails.age } years
+Gender: ${ formData.section3_PatientDetails.gender }
+Marital Status: ${ formData.section3_PatientDetails.maritalStatus }
+Occupation: ${ formData.section3_PatientDetails.occupation }
+
+Address: ${ formData.section3_PatientDetails.address }
+                       ${ formData.section3_PatientDetails.city }, ${ formData.section3_PatientDetails.state } - ${ formData.section3_PatientDetails.pincode }
+Mobile: ${ formData.section3_PatientDetails.mobileNumber }
+Email: ${ formData.section3_PatientDetails.email }
+
+${ formData.section3_PatientDetails.aadhaarNumber ? `Aadhaar No.          : ${formData.section3_PatientDetails.aadhaarNumber}` : '' }
+${ formData.section3_PatientDetails.abhaId ? `ABHA ID              : ${formData.section3_PatientDetails.abhaId}` : '' }
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 4: CLINICAL DETAILS(Filled by Treating Doctor)
+────────────────────────────────────────────────────────────────────────────────
+Chief Complaints: ${ formData.section4_ClinicalDetails.chiefComplaints }
+Duration: ${ formData.section4_ClinicalDetails.durationOfPresentAilment }
+Nature of Illness: ${ formData.section4_ClinicalDetails.natureOfIllness }
+
+Relevant Clinical Findings:
+${ formData.section4_ClinicalDetails.relevantClinicalFindings }
+
+PROVISIONAL DIAGNOSIS: ${ formData.section4_ClinicalDetails.provisionalDiagnosis }
+ICD - 10 CODE: ${ formData.section4_ClinicalDetails.icd10Code } - ${ formData.section4_ClinicalDetails.icd10Description }
+
+Proposed Line of Treatment:
+[${ formData.section4_ClinicalDetails.proposedLineOfTreatment.medical ? 'X' : ' ' }] Medical Management
+[${ formData.section4_ClinicalDetails.proposedLineOfTreatment.surgical ? 'X' : ' ' }] Surgical Management
+[${ formData.section4_ClinicalDetails.proposedLineOfTreatment.intensiveCare ? 'X' : ' ' }] Intensive Care
+[${ formData.section4_ClinicalDetails.proposedLineOfTreatment.investigation ? 'X' : ' ' }] Investigation Only
+
+${
+    formData.section4_ClinicalDetails.surgeryDetails ? `
+Surgery Details:
+  Name of Surgery    : ${formData.section4_ClinicalDetails.surgeryDetails.nameOfSurgery}
+  Route of Surgery   : ${formData.section4_ClinicalDetails.surgeryDetails.routeOfSurgery}
+` : ''
+}
+
+${
+    formData.section4_ClinicalDetails.injuryDetails?.isInjury ? `
+Injury Details:
+  Date of Injury     : ${formData.section4_ClinicalDetails.injuryDetails.dateOfInjury}
+  Cause of Injury    : ${formData.section4_ClinicalDetails.injuryDetails.causeOfInjury}
+  Is MLC             : ${formData.section4_ClinicalDetails.injuryDetails.isMLC ? 'Yes' : 'No'}
+` : ''
+}
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 5: ADMISSION & HOSPITALIZATION DETAILS
+────────────────────────────────────────────────────────────────────────────────
+Date of Admission: ${ formData.section5_AdmissionDetails.dateOfAdmission }
+Time of Admission: ${ formData.section5_AdmissionDetails.timeOfAdmission }
+Type of Admission: ${ formData.section5_AdmissionDetails.admissionType }
+Room Category: ${ formData.section5_AdmissionDetails.roomCategory }
+
+Expected Length of Stay: ${ formData.section5_AdmissionDetails.expectedLengthOfStay } days
+    - Days in Room / Ward: ${ formData.section5_AdmissionDetails.expectedDaysInRoom } days
+        - Days in ICU      : ${ formData.section5_AdmissionDetails.expectedDaysInICU } days
+
+PAST MEDICAL HISTORY:
+Diabetes: ${ formData.section5_AdmissionDetails.pastMedicalHistory.diabetes.present ? `Yes (${formData.section5_AdmissionDetails.pastMedicalHistory.diabetes.duration})` : 'No' }
+Hypertension: ${ formData.section5_AdmissionDetails.pastMedicalHistory.hypertension.present ? `Yes (${formData.section5_AdmissionDetails.pastMedicalHistory.hypertension.duration})` : 'No' }
+  Heart Disease: ${ formData.section5_AdmissionDetails.pastMedicalHistory.heartDisease.present ? `Yes (${formData.section5_AdmissionDetails.pastMedicalHistory.heartDisease.duration})` : 'No' }
+Asthma: ${ formData.section5_AdmissionDetails.pastMedicalHistory.asthma.present ? `Yes (${formData.section5_AdmissionDetails.pastMedicalHistory.asthma.duration})` : 'No' }
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 6: ESTIMATED COST BREAK - UP
+────────────────────────────────────────────────────────────────────────────────
+Room Charges: ₹${ formData.section6_CostEstimate.roomRentPerDay }/day × ${formData.section6_CostEstimate.expectedRoomDays} days = ₹${formData.section6_CostEstimate.totalRoomCharges?.toLocaleString('en-IN')}
+Nursing Charges: ₹${ formData.section6_CostEstimate.totalNursingCharges?.toLocaleString('en-IN') }
+ICU Charges: ₹${ formData.section6_CostEstimate.icuChargesPerDay }/day × ${formData.section6_CostEstimate.expectedIcuDays} days = ₹${formData.section6_CostEstimate.totalIcuCharges?.toLocaleString('en-IN')}
+OT Charges: ₹${ formData.section6_CostEstimate.otCharges?.toLocaleString('en-IN') }
+
+Professional Fees:
+- Surgeon          : ₹${ formData.section6_CostEstimate.professionalFees.surgeonFee?.toLocaleString('en-IN') }
+- Anesthetist      : ₹${ formData.section6_CostEstimate.professionalFees.anesthetistFee?.toLocaleString('en-IN') }
+- Consultant       : ₹${ formData.section6_CostEstimate.professionalFees.consultantFee?.toLocaleString('en-IN') }
+
+Investigations: ₹${ formData.section6_CostEstimate.investigationsEstimate?.toLocaleString('en-IN') }
+Medicines: ₹${ formData.section6_CostEstimate.medicinesEstimate?.toLocaleString('en-IN') }
+Consumables: ₹${ formData.section6_CostEstimate.consumablesEstimate?.toLocaleString('en-IN') }
+${ formData.section6_CostEstimate.totalImplantsCost ? `Implants             : ₹${formData.section6_CostEstimate.totalImplantsCost.toLocaleString('en-IN')}` : '' }
+Misc Charges: ₹${ formData.section6_CostEstimate.miscCharges?.toLocaleString('en-IN') }
+
+════════════════════════════════════════════════════════════════════════════════
+TOTAL ESTIMATED COST: ₹${ formData.section6_CostEstimate.totalEstimatedCost?.toLocaleString('en-IN') }
+AMOUNT CLAIMED: ₹${ formData.section6_CostEstimate.amountClaimedFromInsurer?.toLocaleString('en-IN') }
+════════════════════════════════════════════════════════════════════════════════
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 7: DECLARATIONS
+────────────────────────────────────────────────────────────────────────────────
+
+PATIENT / INSURED DECLARATION:
+I hereby declare that the information furnished above is true and correct.I 
+authorize the insurance company / TPA and the hospital to share my medical
+records / information for the purpose of processing this claim.I agree to pay 
+any non - payable items as per policy terms.
+
+[${ formData.section7_Declarations.patientDeclaration.agreedToTerms ? 'X' : ' ' }] I agree to the above declaration
+Date: ${ formData.section7_Declarations.patientDeclaration.signatureDate }
+
+────────────────────────────────────────────────────────────────────────────────
+
+TREATING DOCTOR'S DECLARATION:
+I hereby declare that the information provided above is accurate and the 
+proposed treatment / investigation is necessary for the patient based on my 
+clinical judgment.
+
+Doctor Name: ${ formData.section7_Declarations.doctorDeclaration.doctorName }
+Qualification: ${ formData.section7_Declarations.doctorDeclaration.doctorQualification }
+Registration No.     : ${ formData.section7_Declarations.doctorDeclaration.doctorRegistrationNumber }
+Date: ${ formData.section7_Declarations.doctorDeclaration.signatureDate }
+
+────────────────────────────────────────────────────────────────────────────────
+
+HOSPITAL DECLARATION:
+We hereby declare that the above information is true and correct.The hospital 
+is empaneled with the TPA / Insurance company and agrees to abide by the terms 
+of the agreement.
+
+Authorized Signatory: ${ formData.section7_Declarations.hospitalDeclaration.authorizedSignatoryName }
+Designation: ${ formData.section7_Declarations.hospitalDeclaration.designation }
+Hospital Seal: ${ formData.section7_Declarations.hospitalDeclaration.hospitalSealApplied ? 'Applied' : 'Pending' }
+Date: ${ formData.section7_Declarations.hospitalDeclaration.signatureDate }
+
+════════════════════════════════════════════════════════════════════════════════
+                              END OF PRE - AUTHORIZATION FORM
+════════════════════════════════════════════════════════════════════════════════
+
+DISCLAIMER: This pre - authorization form was generated using Aivana Clinical 
+Documentation System.Aivana does not independently verify the clinical or 
+financial information provided.The treating physician and hospital are 
+responsible for the accuracy of all information submitted.
+
+Generated by: Aivana Insurance Intelligence Module v1.0
+Reference: ${ formData.metadata.preAuthRequestId }
+`.trim();
+};
+```
+
+---
+
+## 4. UPDATE MODAL STEP COUNT
+
+Change from 3 steps to ** 5 steps **:
+
+```
+Step 1: Review Diagnosis (existing)
+Step 2: Patient & Policy Details (NEW)
+Step 3: Cost Estimation (NEW)
+Step 4: Upload Documents (existing, was Step 2)
+Step 5: Confirm & Generate (existing, was Step 3)
+```
+
+Update progress indicator accordingly.
+
+---
+
+## 5. TESTING CHECKLIST(Updated)
+
+    - [] All 7 IRDAI sections present in output
+        - [] Policy number and TPA details captured
+            - [] Past medical history checkboxes work
+                - [] Cost estimation calculates totals correctly
+                    - [] Room charges multiply correctly(rate × days)
+                        - [] All declarations present with date / time
+                        - [] Doctor registration number included
+                            - [] Hospital ROHINI ID field available
+                                - [] Output format matches TPA expectations
+                                    - [] PDF export generates readable document
