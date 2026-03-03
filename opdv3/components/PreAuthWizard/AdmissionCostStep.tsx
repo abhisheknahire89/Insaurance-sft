@@ -3,6 +3,7 @@ import { AdmissionDetails, CostEstimate, ClinicalDetails, RoomCategory, PastMedi
 import { getRateForCategory, getLOSForDiagnosis } from '../../config/rateCard';
 import { calculateTotals, formatCostDisplay } from '../../utils/costCalculator';
 import { todayISO, nowTimeString } from '../../utils/formatters';
+import { getConditionByCode, getConditionByName } from '../../config/icd10Database';
 
 interface AdmissionCostStepProps {
     admission: Partial<AdmissionDetails>;
@@ -43,6 +44,7 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
     admission, cost, clinical, sumInsured, onAdmissionChange, onCostChange, onNext, onBack
 }) => {
     const pmh = admission.pastMedicalHistory ?? DEFAULT_PMH;
+    const [matchedPackage, setMatchedPackage] = useState<any>(null);
 
     const updateField = (partial: Partial<AdmissionDetails>) => onAdmissionChange({ ...admission, ...partial });
 
@@ -52,46 +54,90 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
     };
 
     useEffect(() => {
-        // Smart LOS suggestion from diagnosis
+        // Smart LOS & PMJAY package suggestion from diagnosis
         const dx = clinical?.diagnoses?.[clinical.selectedDiagnosisIndex ?? 0];
-        if (dx && !admission.expectedDaysInRoom) {
-            const los = getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
-            updateField({
-                expectedDaysInRoom: los.wardDays,
-                expectedDaysInICU: los.icuDays,
-                expectedLengthOfStay: los.wardDays + los.icuDays,
-                roomCategory: admission.roomCategory ?? (los.icuDays > 0 ? 'ICU' : 'General Ward'),
-                dateOfAdmission: admission.dateOfAdmission || todayISO(),
-                timeOfAdmission: admission.timeOfAdmission || nowTimeString(),
-                admissionType: admission.admissionType ?? 'Emergency',
-            });
-            const rateInfo = getRateForCategory(los.icuDays > 0 ? 'ICU' : 'General Ward');
-            updateCost({
-                roomRentPerDay: rateInfo.roomRentPerDay,
-                nursingChargesPerDay: rateInfo.nursingChargesPerDay,
-                icuChargesPerDay: rateInfo.icuChargesPerDay,
-                expectedRoomDays: los.wardDays,
-                expectedIcuDays: los.icuDays,
-                investigationsEstimate: 8000,
-                medicinesEstimate: 15000,
-                consumablesEstimate: 6000,
-            });
+
+        if (dx) {
+            // Check for PMJAY Package
+            const condition = dx.icd10Code ? getConditionByCode(dx.icd10Code) : getConditionByName(dx.diagnosis);
+            if (condition?.pmjay_package) {
+                setMatchedPackage(condition.pmjay_package);
+            }
+
+            // Defaults if not already set
+            if (!admission.expectedDaysInRoom) {
+                const los = condition ? { wardDays: condition.los.typical, icuDays: condition.los.icu_days } : getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
+
+                updateField({
+                    expectedDaysInRoom: los.wardDays,
+                    expectedDaysInICU: los.icuDays,
+                    expectedLengthOfStay: los.wardDays + los.icuDays,
+                    roomCategory: admission.roomCategory ?? (los.icuDays > 0 ? 'ICU' : 'General Ward'),
+                    dateOfAdmission: admission.dateOfAdmission || todayISO(),
+                    timeOfAdmission: admission.timeOfAdmission || nowTimeString(),
+                    admissionType: admission.admissionType ?? 'Emergency',
+                });
+
+                const rateInfo = getRateForCategory(los.icuDays > 0 ? 'ICU' : 'General Ward');
+
+                // Pre-fill estimate (PMJAY package override option is handled by user)
+                updateCost({
+                    roomRentPerDay: rateInfo.roomRentPerDay,
+                    nursingChargesPerDay: rateInfo.nursingChargesPerDay,
+                    icuChargesPerDay: rateInfo.icuChargesPerDay,
+                    expectedRoomDays: los.wardDays,
+                    expectedIcuDays: los.icuDays,
+                    investigationsEstimate: 8000,
+                    medicinesEstimate: 15000,
+                    consumablesEstimate: 6000,
+                });
+            }
         }
     }, []);
 
     const handleRoomCategory = (cat: RoomCategory) => {
         const rate = getRateForCategory(cat);
         updateField({ roomCategory: cat });
+        if (!cost.isPackageRate) {
+            updateCost({
+                roomRentPerDay: rate.roomRentPerDay,
+                nursingChargesPerDay: rate.nursingChargesPerDay,
+                icuChargesPerDay: rate.icuChargesPerDay,
+                expectedRoomDays: cost.expectedRoomDays ?? rate.defaultStayDays,
+            });
+        }
+    };
+
+    const applyPackage = (pkg: any) => {
         updateCost({
-            roomRentPerDay: rate.roomRentPerDay,
-            nursingChargesPerDay: rate.nursingChargesPerDay,
-            icuChargesPerDay: rate.icuChargesPerDay,
-            expectedRoomDays: cost.expectedRoomDays ?? rate.defaultStayDays,
+            isPackageRate: true,
+            packageName: pkg.package_name,
+            packageCode: pkg.hbp_code,
+            packageAmount: pkg.package_rate_inr,
+            // Zero out standard heads when packaged
+            roomRentPerDay: 0, nursingChargesPerDay: 0, icuChargesPerDay: 0,
+            otCharges: 0, surgeonFee: 0, anesthetistFee: 0, consultantFee: 0,
+            investigationsEstimate: 0, medicinesEstimate: 0, consumablesEstimate: 0,
+        });
+    };
+
+    const clearPackage = () => {
+        const rateInfo = getRateForCategory(admission.roomCategory ?? 'General Ward');
+        updateCost({
+            isPackageRate: false,
+            packageName: undefined,
+            packageCode: undefined,
+            packageAmount: undefined,
+            roomRentPerDay: rateInfo.roomRentPerDay,
+            nursingChargesPerDay: rateInfo.nursingChargesPerDay,
+            icuChargesPerDay: rateInfo.icuChargesPerDay,
+            investigationsEstimate: 8000,
+            medicinesEstimate: 15000,
+            consumablesEstimate: 6000,
         });
     };
 
     const totals = calculateTotals(cost, sumInsured);
-
     const isValid = !!(admission.admissionType && admission.dateOfAdmission && admission.roomCategory && totals.totalEstimatedCost > 0);
 
     return (
@@ -153,6 +199,76 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                 </div>
             </div>
 
+            {/* PMJAY Package & TPA Rates Feature */}
+            {matchedPackage && (
+                <div className="bg-gradient-to-r from-emerald-900/40 to-teal-900/30 border border-emerald-500/30 rounded-xl p-4 space-y-3 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                        <svg className="w-24 h-24 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="flex justify-between items-start">
+                            <div>
+                                <h3 className="font-bold text-emerald-400 text-sm flex items-center gap-2">
+                                    <span className="bg-emerald-500/20 px-2 py-0.5 rounded text-xs border border-emerald-500/30">HBP 2.0</span>
+                                    PMJAY Package Available
+                                </h3>
+                                <p className="text-gray-300 text-xs mt-1">Diagnosis matches <span className="text-white font-medium">{matchedPackage.condition_name}</span></p>
+                            </div>
+                        </div>
+
+                        <div className="mt-3 bg-black/40 rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-2">
+                                <div>
+                                    <div className="text-white text-sm font-medium">{matchedPackage.package_name}</div>
+                                    <div className="text-emerald-300/70 text-xs font-mono">{matchedPackage.hbp_code}</div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-emerald-400 font-bold text-lg">{formatCostDisplay(matchedPackage.package_rate_inr)}</div>
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">Govt Rate</div>
+                                </div>
+                            </div>
+
+                            {/* TPA Ranges */}
+                            {matchedPackage.private_tpa_rates && (
+                                <div className="mt-3 pt-3 border-t border-white/5">
+                                    <div className="text-xs text-gray-400 mb-2">Typical Private TPA Packages</div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {Object.entries(matchedPackage.private_tpa_rates as Record<string, { min: number, max: number }>).map(([tpa, limits]) => (
+                                            <div key={tpa} className="bg-white/5 rounded px-2 py-1.5 border border-white/5">
+                                                <div className="text-[10px] text-gray-400 capitalize">{tpa.replace('_', ' ')}</div>
+                                                <div className="text-xs text-blue-300 font-medium">₹{(limits.min / 1000).toFixed(0)}k - {(limits.max / 1000).toFixed(0)}k</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="mt-3 flex gap-2">
+                                <button
+                                    onClick={() => applyPackage(matchedPackage.package_rate_inr, matchedPackage.package_name, matchedPackage.hbp_code)}
+                                    className={`flex-1 py-1.5 text-xs font-medium rounded transition-colors ${cost.isPackageRate && cost.packageCode === matchedPackage.hbp_code ? 'bg-emerald-600 text-white' : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'}`}
+                                >
+                                    {cost.isPackageRate && cost.packageCode === matchedPackage.hbp_code ? '✓ Selected Govt Package' : 'Apply Govt Package'}
+                                </button>
+                                {matchedPackage.private_tpa_rates?.medi_assist && (
+                                    <button
+                                        onClick={() => applyPackage(matchedPackage.private_tpa_rates.medi_assist.min, matchedPackage.package_name + ' (Private)', '')}
+                                        className={`flex-1 py-1.5 text-xs font-medium rounded transition-colors ${cost.isPackageRate && cost.packageAmount === matchedPackage.private_tpa_rates.medi_assist.min ? 'bg-blue-600 text-white' : 'bg-blue-500/20 text-blue-300 hover:bg-blue-500/30'}`}
+                                    >
+                                        Apply TPA Base Rate
+                                    </button>
+                                )}
+                                {cost.isPackageRate && (
+                                    <button onClick={clearPackage} className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs rounded transition-colors">
+                                        Clear
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Past Medical History */}
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-3">
                 <h3 className="font-semibold text-blue-300 text-sm">📋 Past Medical History</h3>
@@ -195,41 +311,74 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
                 <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-blue-300 text-sm">💰 Estimated Cost Break-up</h3>
-                    <span className="text-xs text-gray-500">Defaults from rate card — adjust as needed</span>
+                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                        {cost.isPackageRate ? (
+                            <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Package Rate Applied</span>
+                        ) : 'Defaults from rate card — adjust as needed'}
+                    </div>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="text-xs text-gray-500 border-b border-white/10">
-                                <th className="text-left py-1.5 pr-3">Cost Head</th>
-                                <th className="text-right pr-3">Rate</th>
-                                <th className="text-right pr-3">Qty / Days</th>
-                                <th className="text-right">Total (₹)</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            <tr><td className="py-2 text-gray-300">Room Rent</td>
-                                <td className="text-right pr-3"><input type="number" value={cost.roomRentPerDay ?? 0} onChange={e => updateCost({ roomRentPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
-                                <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInRoom ?? 0} days</td>
-                                <td className="text-right font-medium">{formatCostDisplay(totals.totalRoomCharges)}</td></tr>
-                            <tr><td className="py-2 text-gray-300">Nursing Charges</td>
-                                <td className="text-right pr-3"><input type="number" value={cost.nursingChargesPerDay ?? 0} onChange={e => updateCost({ nursingChargesPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
-                                <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInRoom ?? 0} days</td>
-                                <td className="text-right font-medium">{formatCostDisplay(totals.totalNursingCharges)}</td></tr>
-                            <tr><td className="py-2 text-gray-300">ICU Charges</td>
-                                <td className="text-right pr-3"><input type="number" value={cost.icuChargesPerDay ?? 0} onChange={e => updateCost({ icuChargesPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
-                                <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInICU ?? 0} days</td>
-                                <td className="text-right font-medium">{formatCostDisplay(totals.totalIcuCharges)}</td></tr>
-                            {[['OT Charges', 'otCharges'], ['Surgeon Fee', 'surgeonFee'], ['Anesthetist Fee', 'anesthetistFee'], ['Consultant Fee', 'consultantFee'], ['Investigations', 'investigationsEstimate'], ['Medicines', 'medicinesEstimate'], ['Consumables', 'consumablesEstimate'], ['Ambulance', 'ambulanceCharges'], ['Miscellaneous', 'miscCharges']].map(([label, key]) => (
-                                <tr key={key}><td className="py-2 text-gray-300">{label}</td>
-                                    <td colSpan={2} className="text-right pr-3 text-gray-500 text-xs">manual</td>
-                                    <td className="text-right"><input type="number" value={(cost as any)[key] ?? 0} onChange={e => updateCost({ [key]: +e.target.value } as any)}
-                                        className="w-28 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
+
+                {cost.isPackageRate ? (
+                    <div className="bg-black/20 rounded-lg p-4 border border-emerald-500/10">
+                        <div className="flex justify-between items-center mb-4">
+                            <div>
+                                <div className="text-sm font-medium text-emerald-300">{cost.packageName || 'Procedure Package'}</div>
+                                {cost.packageCode && <div className="text-xs text-gray-400 font-mono mt-0.5">{cost.packageCode}</div>}
+                            </div>
+                            <div className="text-right">
+                                <label className="block text-xs text-gray-500 mb-1">Package Amount</label>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-400">₹</span>
+                                    <input
+                                        type="number"
+                                        value={cost.packageAmount ?? 0}
+                                        onChange={e => updateCost({ packageAmount: +e.target.value })}
+                                        className="bg-gray-900 border border-emerald-500/30 text-emerald-400 rounded px-3 py-1.5 text-right w-32 focus:outline-none focus:border-emerald-400"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-xs text-emerald-500/80 mt-2 flex items-start gap-1.5">
+                            <span className="mt-0.5">ℹ️</span>
+                            <span>When a package is applied, individual line items below are zeroed out automatically to prevent double billing. Adjust 'Package Amount' directly.</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="text-xs text-gray-500 border-b border-white/10">
+                                    <th className="text-left py-1.5 pr-3">Cost Head</th>
+                                    <th className="text-right pr-3">Rate</th>
+                                    <th className="text-right pr-3">Qty / Days</th>
+                                    <th className="text-right">Total (₹)</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                <tr><td className="py-2 text-gray-300">Room Rent</td>
+                                    <td className="text-right pr-3"><input type="number" value={cost.roomRentPerDay ?? 0} onChange={e => updateCost({ roomRentPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
+                                    <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInRoom ?? 0} days</td>
+                                    <td className="text-right font-medium">{formatCostDisplay(totals.totalRoomCharges)}</td></tr>
+                                <tr><td className="py-2 text-gray-300">Nursing Charges</td>
+                                    <td className="text-right pr-3"><input type="number" value={cost.nursingChargesPerDay ?? 0} onChange={e => updateCost({ nursingChargesPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
+                                    <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInRoom ?? 0} days</td>
+                                    <td className="text-right font-medium">{formatCostDisplay(totals.totalNursingCharges)}</td></tr>
+                                <tr><td className="py-2 text-gray-300">ICU Charges</td>
+                                    <td className="text-right pr-3"><input type="number" value={cost.icuChargesPerDay ?? 0} onChange={e => updateCost({ icuChargesPerDay: +e.target.value })} className="w-24 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
+                                    <td className="text-right pr-3 text-gray-400">{admission.expectedDaysInICU ?? 0} days</td>
+                                    <td className="text-right font-medium">{formatCostDisplay(totals.totalIcuCharges)}</td></tr>
+                                {[['OT Charges', 'otCharges'], ['Surgeon Fee', 'surgeonFee'], ['Anesthetist Fee', 'anesthetistFee'], ['Consultant Fee', 'consultantFee'], ['Investigations', 'investigationsEstimate'], ['Medicines', 'medicinesEstimate'], ['Consumables', 'consumablesEstimate'], ['Ambulance', 'ambulanceCharges'], ['Miscellaneous', 'miscCharges']].map(([label, key]) => (
+                                    <tr key={key}><td className="py-2 text-gray-300">{label}</td>
+                                        <td colSpan={2} className="text-right pr-3 text-gray-500 text-xs">manual</td>
+                                        <td className="text-right"><input type="number" value={(cost as any)[key] ?? 0} onChange={e => updateCost({ [key]: +e.target.value } as any)}
+                                            className="w-28 bg-gray-900 border border-white/10 rounded px-2 py-1 text-xs text-right text-white focus:outline-none" /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Totals */}
                 <div className={`rounded-xl p-4 ${totals.exceedsSumInsured ? 'bg-red-900/20 border border-red-500/30' : 'bg-gray-900 border border-white/10'}`}>

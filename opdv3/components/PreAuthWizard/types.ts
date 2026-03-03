@@ -254,6 +254,11 @@ export interface ClinicalDetails {
     };
     voiceCapturedFindings: WizardVoiceFinding[];
     additionalClinicalNotes: string;
+    matchedPackageData?: {
+        hbp_code: string;
+        package_name: string;
+        package_rate_inr: number;
+    };
 }
 
 // ============================================
@@ -324,6 +329,7 @@ export interface CostEstimate {
     ambulanceCharges: number;
     miscCharges: number;
     packageName?: string;
+    packageCode?: string;
     packageAmount?: number;
     isPackageRate: boolean;
     totalEstimatedCost: number;
