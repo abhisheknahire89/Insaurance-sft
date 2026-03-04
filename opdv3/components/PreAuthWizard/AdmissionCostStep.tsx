@@ -4,6 +4,7 @@ import { getRateForCategory, getLOSForDiagnosis } from '../../config/rateCard';
 import { calculateTotals, formatCostDisplay } from '../../utils/costCalculator';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 import { getConditionByCode, getConditionByName } from '../../config/icd10Database';
+import { calculateCost, findConditionByICD } from '../../services/costEstimationService';
 
 interface AdmissionCostStepProps {
     admission: Partial<AdmissionDetails>;
@@ -54,42 +55,71 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
     };
 
     useEffect(() => {
-        // Smart LOS & PMJAY package suggestion from diagnosis
         const dx = clinical?.diagnoses?.[clinical.selectedDiagnosisIndex ?? 0];
 
         if (dx) {
-            // Check for PMJAY Package
+            // Check ICD clinical database for PMJAY package
             const condition = dx.icd10Code ? getConditionByCode(dx.icd10Code) : getConditionByName(dx.diagnosis);
             if (condition?.pmjay_package) {
                 setMatchedPackage(condition.pmjay_package);
             }
 
-            // Defaults if not already set
+            // Also check cost database for PMJAY package (covers more conditions)
+            const costCondition = findConditionByICD(dx.icd10Code || '');
+            if (!matchedPackage && costCondition?.pmjay?.eligible) {
+                setMatchedPackage({
+                    hbp_code: costCondition.pmjay.hbp_code,
+                    package_name: costCondition.condition,
+                    package_rate_inr: costCondition.pmjay.rate,
+                });
+            }
+
+            // Pre-fill LOS and costs if not already set
             if (!admission.expectedDaysInRoom) {
-                const los = condition ? { wardDays: condition.los.typical, icuDays: condition.los.icu_days } : getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
+                // Get LOS from cost DB first (100 conditions), fallback to clinical DB / rateCard
+                const costLos = costCondition
+                    ? { wardDays: costCondition.los.avg - costCondition.los.icu, icuDays: costCondition.los.icu }
+                    : null;
+                const clinicalLos = condition
+                    ? { wardDays: condition.los.typical, icuDays: condition.los.icu_days }
+                    : null;
+                const los = costLos || clinicalLos || getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
+
+                const defaultRoom = los.icuDays > 0 ? 'ICU' : 'General Ward';
 
                 updateField({
                     expectedDaysInRoom: los.wardDays,
                     expectedDaysInICU: los.icuDays,
                     expectedLengthOfStay: los.wardDays + los.icuDays,
-                    roomCategory: admission.roomCategory ?? (los.icuDays > 0 ? 'ICU' : 'General Ward'),
+                    roomCategory: admission.roomCategory ?? (defaultRoom as RoomCategory),
                     dateOfAdmission: admission.dateOfAdmission || todayISO(),
                     timeOfAdmission: admission.timeOfAdmission || nowTimeString(),
                     admissionType: admission.admissionType ?? 'Emergency',
                 });
 
-                const rateInfo = getRateForCategory(los.icuDays > 0 ? 'ICU' : 'General Ward');
+                // Calculate costs from the 100-condition ICD cost database
+                const est = calculateCost(
+                    dx.icd10Code || '',
+                    defaultRoom,
+                    false, // default to private; PMJAY applied via button
+                    los.wardDays + los.icuDays,
+                    los.icuDays,
+                );
 
-                // Pre-fill estimate (PMJAY package override option is handled by user)
                 updateCost({
-                    roomRentPerDay: rateInfo.roomRentPerDay,
-                    nursingChargesPerDay: rateInfo.nursingChargesPerDay,
-                    icuChargesPerDay: rateInfo.icuChargesPerDay,
+                    roomRentPerDay: est.breakdown.room_rent / Math.max(1, los.wardDays),
+                    nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, los.wardDays),
+                    icuChargesPerDay: est.breakdown.icu_charges / Math.max(1, los.icuDays || 1),
                     expectedRoomDays: los.wardDays,
                     expectedIcuDays: los.icuDays,
-                    investigationsEstimate: 8000,
-                    medicinesEstimate: 15000,
-                    consumablesEstimate: 6000,
+                    otCharges: est.breakdown.ot_charges,
+                    surgeonFee: est.breakdown.surgeon_fee,
+                    anesthetistFee: est.breakdown.anesthetist_fee,
+                    consultantFee: est.breakdown.consultant_fee,
+                    investigationsEstimate: est.breakdown.investigations,
+                    medicinesEstimate: est.breakdown.medicines,
+                    consumablesEstimate: est.breakdown.consumables,
+                    miscCharges: est.breakdown.miscellaneous,
                 });
             }
         }
