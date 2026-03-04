@@ -1,6 +1,57 @@
-import { PreAuthRecord, MedicalNecessityStatement } from '../components/PreAuthWizard/types';
+import { PreAuthRecord, MedicalNecessityStatement, CostEstimate } from '../components/PreAuthWizard/types';
 import { scoreNecessityStrength } from '../utils/strengthScorer';
 import { getConditionByCode, getConditionByName } from '../config/icd10Database';
+import { calculateCost } from './costEstimationService';
+import { calculateTotals } from '../utils/costCalculator';
+
+/**
+ * If the cost estimate is all zeros, auto-calculate from ICD cost database.
+ * This is the FIX for the "LOS=0, Cost=₹0" bug.
+ */
+function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate> {
+    const cost = record.costEstimate;
+    // If costs are already populated, return as-is
+    if (cost && (cost.totalEstimatedCost ?? 0) > 0) {
+        return cost;
+    }
+
+    const selectedDx = record.clinical?.diagnoses?.[record.clinical.selectedDiagnosisIndex ?? 0];
+    const icdCode = selectedDx?.icd10Code;
+    if (!icdCode) return cost ?? {};
+
+    const roomCategory = record.admission?.roomCategory ?? 'General Ward';
+    const isPMJAY = record.insurance?.policyType?.toLowerCase().includes('pmjay') ||
+        record.insurance?.policyType?.toLowerCase().includes('ayushman') || false;
+
+    console.log(`[CostFix] Auto-calculating costs from ICD database for ${icdCode}, room=${roomCategory}, PMJAY=${isPMJAY}`);
+
+    const est = calculateCost(icdCode, roomCategory, isPMJAY);
+
+    console.log(`[CostFix] Result: LOS=${est.los.total_days}, Total=₹${est.total_estimated}`, est.breakdown);
+
+    const enriched = calculateTotals({
+        roomRentPerDay: est.breakdown.room_rent / Math.max(1, est.los.ward_days),
+        expectedRoomDays: est.los.ward_days,
+        nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, est.los.ward_days),
+        icuChargesPerDay: est.los.icu_days > 0 ? est.breakdown.icu_charges / est.los.icu_days : 0,
+        expectedIcuDays: est.los.icu_days,
+        otCharges: est.breakdown.ot_charges,
+        surgeonFee: est.breakdown.surgeon_fee,
+        anesthetistFee: est.breakdown.anesthetist_fee,
+        consultantFee: est.breakdown.consultant_fee,
+        investigationsEstimate: est.breakdown.investigations,
+        medicinesEstimate: est.breakdown.medicines,
+        consumablesEstimate: est.breakdown.consumables,
+        miscCharges: est.breakdown.miscellaneous,
+        ...(est.source === 'PMJAY' && est.pmjay_details ? {
+            isPackageRate: true,
+            packageName: est.pmjay_details.package_name,
+            packageAmount: est.pmjay_details.package_rate,
+        } : {}),
+    }, record.insurance?.sumInsured ?? 0);
+
+    return enriched;
+}
 
 /**
  * Auto-generates a medical necessity statement from collected data.
@@ -9,7 +60,8 @@ export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): Medica
     const patient = record.patient;
     const clinical = record.clinical;
     const admission = record.admission;
-    const cost = record.costEstimate;
+    // ✅ FIX: Auto-enrich cost from ICD database if totalEstimatedCost is 0
+    const cost = enrichCostFromICD(record);
 
     const selectedDx = clinical?.diagnoses?.[clinical.selectedDiagnosisIndex ?? 0];
     const vitals = clinical?.vitals;
@@ -141,10 +193,26 @@ export const generateIRDAITextFromRecord = (record: Partial<PreAuthRecord>): str
     const ins = record.insurance;
     const c = record.clinical;
     const a = record.admission;
-    const cost = record.costEstimate;
+    // ✅ FIX: Auto-enrich cost from ICD database if totalEstimatedCost is 0
+    const cost = enrichCostFromICD(record);
     const necessity = record.medicalNecessity;
     const decl = record.declarations;
     const selectedDx = c?.diagnoses?.[c.selectedDiagnosisIndex ?? 0];
+
+    // ✅ FIX: Auto-enrich admission LOS from ICD database if expectedLengthOfStay is 0
+    let admissionLOS = a?.expectedLengthOfStay ?? 0;
+    let admissionWard = a?.expectedDaysInRoom ?? 0;
+    let admissionICU = a?.expectedDaysInICU ?? 0;
+    if (admissionLOS === 0 && selectedDx?.icd10Code) {
+        const { findConditionByICD } = require('./costEstimationService');
+        const icdCond = findConditionByICD(selectedDx.icd10Code);
+        if (icdCond) {
+            admissionLOS = icdCond.los.avg;
+            admissionWard = icdCond.los.avg - icdCond.los.icu;
+            admissionICU = icdCond.los.icu;
+            console.log(`[LOSFix] Auto-set LOS from ICD DB: total=${admissionLOS}, ward=${admissionWard}, icu=${admissionICU}`);
+        }
+    }
 
     const pmh = a?.pastMedicalHistory;
     const pmhList = pmh ? [
@@ -223,7 +291,7 @@ Date of Admission  : ${a?.dateOfAdmission ?? 'N/A'}
 Time of Admission  : ${a?.timeOfAdmission ?? 'N/A'}
 Admission Type     : ${a?.admissionType ?? 'N/A'}
 Room Category      : ${a?.roomCategory ?? 'N/A'}
-Expected Stay      : ${a?.expectedLengthOfStay ?? 'N/A'} days (Ward: ${a?.expectedDaysInRoom ?? 0}, ICU: ${a?.expectedDaysInICU ?? 0})
+Expected Stay      : ${admissionLOS || 'N/A'} days (Ward: ${admissionWard}, ICU: ${admissionICU})
 
 Past Medical History: ${pmhList || 'Nil'}
 

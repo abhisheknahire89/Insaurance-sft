@@ -12,6 +12,7 @@ import { VoiceDictationMode } from './VoiceDictationMode';
 import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
+import { calculateCost, findConditionByICD } from '../../services/costEstimationService';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 
 interface PreAuthWizardProps {
@@ -106,10 +107,51 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         const icuDays = data.admission.expectedDaysInICU ?? 0;
 
         // Build a smart cost estimate from the Gemini-extracted admission info
-        const baseCost = calculateTotals({
+        let baseCost = calculateTotals({
             expectedRoomDays: roomDays,
             expectedIcuDays: icuDays,
         }, data.insurance.sumInsured ?? 0);
+
+        // ✅ FIX: If voice extracted ICD code, auto-calculate costs from ICD database
+        const voiceDx = data.clinical?.diagnoses?.[0];
+        const voiceICD = voiceDx?.icd10Code;
+        if (voiceICD) {
+            const roomCat = data.admission.roomCategory ?? 'General Ward';
+            const isPMJAY = data.insurance.policyType?.toLowerCase().includes('pmjay') ||
+                data.insurance.policyType?.toLowerCase().includes('ayushman') || false;
+
+            console.log(`[VoiceCostFix] Calculating costs from ICD DB: ${voiceICD}, room=${roomCat}, PMJAY=${isPMJAY}`);
+            const est = calculateCost(voiceICD, roomCat, isPMJAY, los || undefined, icuDays || undefined);
+
+            // Also fix LOS from ICD database if voice didn't capture it
+            const icdCond = findConditionByICD(voiceICD);
+            const finalLOS = los || (icdCond?.los.avg ?? 5);
+            const finalICU = icuDays || (icdCond?.los.icu ?? 0);
+            const finalWard = finalLOS - finalICU;
+
+            baseCost = calculateTotals({
+                roomRentPerDay: est.breakdown.room_rent / Math.max(1, est.los.ward_days),
+                expectedRoomDays: finalWard,
+                nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, est.los.ward_days),
+                icuChargesPerDay: finalICU > 0 ? est.breakdown.icu_charges / finalICU : 0,
+                expectedIcuDays: finalICU,
+                otCharges: est.breakdown.ot_charges,
+                surgeonFee: est.breakdown.surgeon_fee,
+                anesthetistFee: est.breakdown.anesthetist_fee,
+                consultantFee: est.breakdown.consultant_fee,
+                investigationsEstimate: est.breakdown.investigations,
+                medicinesEstimate: est.breakdown.medicines,
+                consumablesEstimate: est.breakdown.consumables,
+                miscCharges: est.breakdown.miscellaneous,
+                ...(est.source === 'PMJAY' && est.pmjay_details ? {
+                    isPackageRate: true,
+                    packageName: est.pmjay_details.package_name,
+                    packageAmount: est.pmjay_details.package_rate,
+                } : {}),
+            }, data.insurance.sumInsured ?? 0);
+
+            console.log(`[VoiceCostFix] Result: LOS=${finalLOS}, Total=₹${baseCost.totalEstimatedCost}`);
+        }
 
         const merged: Partial<PreAuthRecord> = {
             ...record,
