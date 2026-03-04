@@ -170,7 +170,16 @@ ${clinical?.treatmentTakenSoFar ? `PRIOR TREATMENT:\n${clinical.treatmentTakenSo
 PROPOSED MANAGEMENT:
 ${treatmentLines.length > 0 ? treatmentLines.map(l => `• ${l}`).join('\n') : '• Medical management'}
 • Admission: ${admission?.admissionType ?? 'N/A'} - ${admission?.roomCategory ?? 'General Ward'}
-• Expected Length of Stay: ${admission?.expectedLengthOfStay ?? 'N/A'} days (${admission?.expectedDaysInRoom ?? 0} ward + ${admission?.expectedDaysInICU ?? 0} ICU days)
+• Expected Length of Stay: ${(() => {
+            let los = admission?.expectedLengthOfStay ?? 0;
+            let ward = admission?.expectedDaysInRoom ?? 0;
+            let icu = admission?.expectedDaysInICU ?? 0;
+            if (los === 0 && selectedDx?.icd10Code) {
+                const icdCond = findConditionByICD(selectedDx.icd10Code);
+                if (icdCond) { los = icdCond.los.avg; ward = icdCond.los.avg - icdCond.los.icu; icu = icdCond.los.icu; }
+            }
+            return `${los} days (${ward} ward + ${icu} ICU days)`;
+        })()}
 • Total Estimated Cost: ₹${(cost?.totalEstimatedCost ?? 0).toLocaleString('en-IN')}
 ${icdEnrichment}`;
 
