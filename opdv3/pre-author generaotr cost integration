@@ -3,7 +3,7 @@
 // File: src/modules/insurance/utils/preAuthGenerator.ts
 // ============================================================================
 
-import { calculateCost, findConditionByICD } from './costCalculator';
+import { calculateCost, findConditionByICD } from './services/costEstimationService';
 
 // -----------------------------------------------------------------------------
 // TYPES

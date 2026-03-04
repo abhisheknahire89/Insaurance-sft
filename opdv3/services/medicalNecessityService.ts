@@ -1,7 +1,7 @@
 import { PreAuthRecord, MedicalNecessityStatement, CostEstimate } from '../components/PreAuthWizard/types';
 import { scoreNecessityStrength } from '../utils/strengthScorer';
 import { getConditionByCode, getConditionByName } from '../config/icd10Database';
-import { calculateCost } from './costEstimationService';
+import { calculateCost, findConditionByICD } from './costEstimationService';
 import { calculateTotals } from '../utils/costCalculator';
 
 /**
@@ -204,7 +204,6 @@ export const generateIRDAITextFromRecord = (record: Partial<PreAuthRecord>): str
     let admissionWard = a?.expectedDaysInRoom ?? 0;
     let admissionICU = a?.expectedDaysInICU ?? 0;
     if (admissionLOS === 0 && selectedDx?.icd10Code) {
-        const { findConditionByICD } = require('./costEstimationService');
         const icdCond = findConditionByICD(selectedDx.icd10Code);
         if (icdCond) {
             admissionLOS = icdCond.los.avg;
