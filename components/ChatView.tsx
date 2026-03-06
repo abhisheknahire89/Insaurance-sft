@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Message, NexusInsuranceInput, CoPilotSuggestion } from '../types';
-import { extractTestResultsFromTranscript } from '../services/geminiService';
+import { extractTestResultsFromTranscript } from '../services/aiService';
 import { InsurancePreAuthModal } from './InsurancePreAuthModal';
 
 interface ChatViewProps {

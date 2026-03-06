@@ -4,7 +4,7 @@ import { DoctorProfile, TranscriptEntry } from '../types';
 import { Icon } from './Icon';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { processAudioSegment, generateClinicalNote } from '../services/geminiService';
+import { processAudioSegment, generateClinicalNote } from '../services/aiService';
 import { renderMarkdownToHTML } from '../utils/markdownRenderer';
 import { Mic, Activity, CheckCircle2, Circle, Clock, Download, FileText, ChevronRight, X, Wifi, BedDouble } from 'lucide-react';
 import { createIPDCase } from '../services/ipdService';

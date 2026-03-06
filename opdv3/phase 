@@ -12,7 +12,7 @@ The software converts doctor's clinical notes into insurance-ready "medical nece
 
 ### What Already Exists (DO NOT MODIFY unless specified):
 - `components/VedaSessionView.tsx` - Voice scribe session that captures doctor-patient conversations
-- `services/geminiService.ts` - AI services including transcription and clinical note generation
+- `services/aiService.ts` - AI services including transcription and clinical note generation
 - `engine/workflow.ts` - NEXUS clinical reasoning workflow that produces DDx and severity scores
 - `types.ts` - TypeScript interfaces for the application
 
@@ -941,7 +941,7 @@ export interface WizardState {
 2. User captures/uploads front of card
 3. System prompts: "Now capture the back of the card" (optional)
 4. Loading spinner with "Extracting details from card..."
-5. OCR service processes images via `services/ocrService.ts` (uses Gemini vision API)
+5. OCR service processes images via `services/ocrService.ts` (uses AI vision API)
 6. Results displayed in editable form
 
 **OCR Result Review Screen:**

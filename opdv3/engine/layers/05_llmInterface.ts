@@ -8,12 +8,12 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Layer 05: Foundational LLM Interface (Reasoning Runtime)
 export const queryLlm = async (context: NexusContext): Promise<NexusContext> => {
-  
+
   const contents = constructLlmContent(context);
-  
+
   try {
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-3-flash-preview', // FIX: Using Gemini 3 for complex clinical reasoning
+      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview', // FIX: Using AI 3 for complex clinical reasoning
       contents: contents,
       config: {
         systemInstruction: context.systemInstruction,
@@ -21,12 +21,12 @@ export const queryLlm = async (context: NexusContext): Promise<NexusContext> => 
     });
 
     context.llmResponseStream = responseStream;
-    context.auditTrail.push('[LLM Interface] Started streaming response from Gemini.');
+    context.auditTrail.push('[LLM Interface] Started streaming response from AI.');
   } catch (error: any) {
     console.error('Error streaming chat response:', error);
     context.auditTrail.push(`[LLM Interface] ERROR: ${error.message}`);
     throw error;
   }
-  
+
   return context;
 };

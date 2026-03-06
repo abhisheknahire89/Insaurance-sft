@@ -5,27 +5,27 @@ import { ChatInput } from './ChatInput';
 import { ChatMessage } from './ChatMessage';
 import { Icon } from './Icon';
 import { PRE_CODED_GPTS } from '../constants';
-import { streamChatResponse, getPromptInsights } from '../services/geminiService';
+import { streamChatResponse, getPromptInsights } from '../services/aiService';
 import { synthesizeSpeech } from '../services/googleTtsService';
 import { PromptInsightsPanel } from './PromptInsightsPanel';
 import { GeneralTriageForm } from './PregnancyRiskAssessmentForm'; // Re-using file, but content is GeneralTriage
 
 interface ChatViewProps {
-  chat: Chat | null;
-  onNewChat: (gpt?: PreCodedGpt) => void;
-  updateChat: (chatId: string, messages: Message[]) => void;
-  userRole: UserRole;
-  language: string;
-  isDoctorVerified: boolean;
-  setShowVerificationModal: (show: boolean) => void;
-  setPendingVerificationMessage: (message: string | null) => void;
-  pendingVerificationMessage: string | null;
-  doctorProfile: DoctorProfile;
-  pendingFirstMessage: string | null;
-  setPendingFirstMessage: (message: string | null) => void;
-  isInsightsPanelOpen: boolean;
-  setIsInsightsPanelOpen: (isOpen: boolean) => void;
-  knowledgeBaseProtocols: ClinicalProtocol[];
+    chat: Chat | null;
+    onNewChat: (gpt?: PreCodedGpt) => void;
+    updateChat: (chatId: string, messages: Message[]) => void;
+    userRole: UserRole;
+    language: string;
+    isDoctorVerified: boolean;
+    setShowVerificationModal: (show: boolean) => void;
+    setPendingVerificationMessage: (message: string | null) => void;
+    pendingVerificationMessage: string | null;
+    doctorProfile: DoctorProfile;
+    pendingFirstMessage: string | null;
+    setPendingFirstMessage: (message: string | null) => void;
+    isInsightsPanelOpen: boolean;
+    setIsInsightsPanelOpen: (isOpen: boolean) => void;
+    knowledgeBaseProtocols: ClinicalProtocol[];
 }
 
 const languageToCodeMap: Record<string, string> = {
@@ -51,7 +51,7 @@ const LabResultForm: React.FC<{ onSubmit: (params: LabParameterInput[]) => void 
             setCurrentParam({ name: '', value: '', units: '', referenceRange: '' });
         }
     };
-    
+
     const handleRemoveParam = (index: number) => {
         setParams(params.filter((_, i) => i !== index));
     };
@@ -81,7 +81,7 @@ const LabResultForm: React.FC<{ onSubmit: (params: LabParameterInput[]) => void 
                     <h2 className="text-2xl font-bold text-white">General Lab Analyzer</h2>
                 </div>
                 <p className="text-gray-400 mb-6 text-sm">Enter lab parameters (e.g., Sodium, Creatinine, WBC) for a clinical interpretation.</p>
-                
+
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Parameter Input Fields */}
                     <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end p-3 bg-aivana-dark rounded-lg">
@@ -98,7 +98,7 @@ const LabResultForm: React.FC<{ onSubmit: (params: LabParameterInput[]) => void 
                             <input type="text" name="units" id="units" value={currentParam.units} onChange={handleInputChange} className="w-full bg-aivana-grey p-2 rounded-md border border-aivana-light-grey/80 focus:ring-aivana-accent focus:border-aivana-accent" placeholder="e.g., mEq/L" />
                         </div>
                         <button type="button" onClick={handleAddParam} disabled={!canAdd} className="w-full bg-aivana-accent/80 hover:bg-aivana-accent text-white font-semibold py-2 px-3 rounded-md transition-colors flex items-center justify-center gap-2 disabled:bg-aivana-light-grey/50 disabled:cursor-not-allowed">
-                            <Icon name="newChat" className="w-5 h-5"/> Add
+                            <Icon name="newChat" className="w-5 h-5" /> Add
                         </button>
                     </div>
 
@@ -110,14 +110,14 @@ const LabResultForm: React.FC<{ onSubmit: (params: LabParameterInput[]) => void 
                                     <span className="font-semibold text-white">{param.name}:</span>
                                     <span className="text-gray-300">{param.value} {param.units}</span>
                                     <span className="text-gray-400 text-xs">(Ref: {param.referenceRange || 'N/A'})</span>
-                                    <button onClick={() => handleRemoveParam(index)} className="p-1 text-red-400 hover:text-red-300"><Icon name="close" className="w-4 h-4"/></button>
+                                    <button onClick={() => handleRemoveParam(index)} className="p-1 text-red-400 hover:text-red-300"><Icon name="close" className="w-4 h-4" /></button>
                                 </div>
                             ))}
                         </div>
                     )}
-                    
+
                     <button type="submit" className="w-full !mt-6 bg-aivana-accent hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
-                        <Icon name="diagnosis" className="w-5 h-5"/>
+                        <Icon name="diagnosis" className="w-5 h-5" />
                         Analyze Results
                     </button>
                 </form>
@@ -128,215 +128,215 @@ const LabResultForm: React.FC<{ onSubmit: (params: LabParameterInput[]) => void 
 
 
 export const ChatView: React.FC<ChatViewProps> = ({
-  chat,
-  onNewChat,
-  updateChat,
-  userRole,
-  language,
-  isDoctorVerified,
-  setShowVerificationModal,
-  setPendingVerificationMessage,
-  pendingVerificationMessage,
-  doctorProfile,
-  pendingFirstMessage,
-  setPendingFirstMessage,
-  isInsightsPanelOpen,
-  setIsInsightsPanelOpen,
-  knowledgeBaseProtocols: knowledgeBaseProtocols,
+    chat,
+    onNewChat,
+    updateChat,
+    userRole,
+    language,
+    isDoctorVerified,
+    setShowVerificationModal,
+    setPendingVerificationMessage,
+    pendingVerificationMessage,
+    doctorProfile,
+    pendingFirstMessage,
+    setPendingFirstMessage,
+    isInsightsPanelOpen,
+    setIsInsightsPanelOpen,
+    knowledgeBaseProtocols: knowledgeBaseProtocols,
 }) => {
-  const [isSending, setIsSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  
-  // State for Prompt Insights
-  const [insights, setInsights] = useState<PromptInsight | null>(null);
-  const [isFetchingInsights, setIsFetchingInsights] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+
+    // State for Prompt Insights
+    const [insights, setInsights] = useState<PromptInsight | null>(null);
+    const [isFetchingInsights, setIsFetchingInsights] = useState(false);
 
 
-  const activeGpt = chat?.gptId ? PRE_CODED_GPTS.find(g => g.id === chat.gptId) : undefined;
-  const shouldShowRiskAssessmentForm = chat && activeGpt?.customComponentId === 'PregnancyRiskAssessment' && chat.messages.filter(m => m.sender === 'USER').length === 0;
-  const shouldShowLabResultForm = chat && activeGpt?.customComponentId === 'LabResultAnalysis' && chat.messages.filter(m => m.sender === 'USER').length === 0;
+    const activeGpt = chat?.gptId ? PRE_CODED_GPTS.find(g => g.id === chat.gptId) : undefined;
+    const shouldShowRiskAssessmentForm = chat && activeGpt?.customComponentId === 'PregnancyRiskAssessment' && chat.messages.filter(m => m.sender === 'USER').length === 0;
+    const shouldShowLabResultForm = chat && activeGpt?.customComponentId === 'LabResultAnalysis' && chat.messages.filter(m => m.sender === 'USER').length === 0;
 
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-  };
-  
-  const fetchInsightsForPrompt = useCallback(async (prompt: string) => {
-    if (!prompt) return;
-    setIsFetchingInsights(true);
-    setInsights(null);
-    try {
-        const fetchedInsights = await getPromptInsights(prompt, doctorProfile, language);
-        setInsights(fetchedInsights);
-        if (fetchedInsights) {
-          setIsInsightsPanelOpen(true); // Open panel automatically when insights are ready
-        }
-    } catch (error) {
-        console.error("Failed to fetch prompt insights:", error);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    };
+
+    const fetchInsightsForPrompt = useCallback(async (prompt: string) => {
+        if (!prompt) return;
+        setIsFetchingInsights(true);
         setInsights(null);
-    } finally {
-        setIsFetchingInsights(false);
-    }
-  }, [doctorProfile, language, setIsInsightsPanelOpen]);
+        try {
+            const fetchedInsights = await getPromptInsights(prompt, doctorProfile, language);
+            setInsights(fetchedInsights);
+            if (fetchedInsights) {
+                setIsInsightsPanelOpen(true); // Open panel automatically when insights are ready
+            }
+        } catch (error) {
+            console.error("Failed to fetch prompt insights:", error);
+            setInsights(null);
+        } finally {
+            setIsFetchingInsights(false);
+        }
+    }, [doctorProfile, language, setIsInsightsPanelOpen]);
 
 
-  useEffect(() => {
-    setTimeout(scrollToBottom, 100);
-  }, [chat?.messages]);
-  
-  const handleToggleTts = useCallback(async (message: Message) => {
-    if (!audioRef.current) return;
+    useEffect(() => {
+        setTimeout(scrollToBottom, 100);
+    }, [chat?.messages]);
 
-    if (playingMessageId === message.id) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        setPlayingMessageId(null);
-    } else {
-        audioRef.current.pause();
-        setPlayingMessageId(message.id); 
+    const handleToggleTts = useCallback(async (message: Message) => {
+        if (!audioRef.current) return;
 
-        const langCode = languageToCodeMap[language] || 'en-IN';
-        const audioSrc = await synthesizeSpeech(message.text, langCode);
-
-        if (audioSrc && audioRef.current) {
-            audioRef.current.src = audioSrc;
-            audioRef.current.play().catch(e => {
-                console.error("Audio playback failed:", e);
-                setPlayingMessageId(null);
-            });
-            
-            audioRef.current.onended = () => {
-                setPlayingMessageId(null);
-            };
-            audioRef.current.onerror = () => {
-                console.error("Audio element error");
-                setPlayingMessageId(null);
-            };
+        if (playingMessageId === message.id) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            setPlayingMessageId(null);
         } else {
-            console.error("Failed to get audio source from TTS API.");
-            setPlayingMessageId(null); 
+            audioRef.current.pause();
+            setPlayingMessageId(message.id);
+
+            const langCode = languageToCodeMap[language] || 'en-IN';
+            const audioSrc = await synthesizeSpeech(message.text, langCode);
+
+            if (audioSrc && audioRef.current) {
+                audioRef.current.src = audioSrc;
+                audioRef.current.play().catch(e => {
+                    console.error("Audio playback failed:", e);
+                    setPlayingMessageId(null);
+                });
+
+                audioRef.current.onended = () => {
+                    setPlayingMessageId(null);
+                };
+                audioRef.current.onerror = () => {
+                    console.error("Audio element error");
+                    setPlayingMessageId(null);
+                };
+            } else {
+                console.error("Failed to get audio source from TTS API.");
+                setPlayingMessageId(null);
+            }
         }
-    }
-  }, [playingMessageId, language]);
-  
-  const handleUpdateMessage = (messageId: string, updates: Partial<Message>) => {
-      if (!chat) return;
-      const updatedMessages = chat.messages.map(m => m.id === messageId ? {...m, ...updates} : m);
-      updateChat(chat.id, updatedMessages);
-  };
+    }, [playingMessageId, language]);
 
-
-  const handleSendMessage = useCallback(async (message: string) => {
-    if (!chat) return;
-    
-    setIsSending(true);
-    fetchInsightsForPrompt(message);
-
-    const userMessage: Message = {
-      id: `msg-${Date.now()}`,
-      sender: 'USER',
-      text: message,
+    const handleUpdateMessage = (messageId: string, updates: Partial<Message>) => {
+        if (!chat) return;
+        const updatedMessages = chat.messages.map(m => m.id === messageId ? { ...m, ...updates } : m);
+        updateChat(chat.id, updatedMessages);
     };
 
-    const aiMessagePlaceholder: Message = {
-        id: `msg-${Date.now() + 1}`,
-        sender: 'AI',
-        text: '...',
-    };
-    
-    const currentMessages = chat.messages ? [...chat.messages, userMessage] : [userMessage];
-    updateChat(chat.id, [...currentMessages, aiMessagePlaceholder]);
 
-    const stream = streamChatResponse({
-        message,
-        history: currentMessages,
-        userRole,
-        language,
-        activeGpt,
-        isDoctorVerified,
-        doctorProfile,
-        knowledgeBaseProtocols: knowledgeBaseProtocols,
-    });
+    const handleSendMessage = useCallback(async (message: string) => {
+        if (!chat) return;
 
-    let finalMessage: Message = { ...aiMessagePlaceholder, text: '...' };
-    let fullStreamedText = '';
+        setIsSending(true);
+        fetchInsightsForPrompt(message);
 
-    try {
-        for await (const chunk of stream) {
-            if (chunk.error) {
-                if (chunk.error.includes("license verification")) {
-                    setPendingVerificationMessage(message);
-                    setShowVerificationModal(true);
-                    finalMessage.text = "Verification required to proceed. Please verify your license to continue.";
-                } else {
-                    finalMessage.text = chunk.error;
+        const userMessage: Message = {
+            id: `msg-${Date.now()}`,
+            sender: 'USER',
+            text: message,
+        };
+
+        const aiMessagePlaceholder: Message = {
+            id: `msg-${Date.now() + 1}`,
+            sender: 'AI',
+            text: '...',
+        };
+
+        const currentMessages = chat.messages ? [...chat.messages, userMessage] : [userMessage];
+        updateChat(chat.id, [...currentMessages, aiMessagePlaceholder]);
+
+        const stream = streamChatResponse({
+            message,
+            history: currentMessages,
+            userRole,
+            language,
+            activeGpt,
+            isDoctorVerified,
+            doctorProfile,
+            knowledgeBaseProtocols: knowledgeBaseProtocols,
+        });
+
+        let finalMessage: Message = { ...aiMessagePlaceholder, text: '...' };
+        let fullStreamedText = '';
+
+        try {
+            for await (const chunk of stream) {
+                if (chunk.error) {
+                    if (chunk.error.includes("license verification")) {
+                        setPendingVerificationMessage(message);
+                        setShowVerificationModal(true);
+                        finalMessage.text = "Verification required to proceed. Please verify your license to continue.";
+                    } else {
+                        finalMessage.text = chunk.error;
+                    }
+                    updateChat(chat.id, [...currentMessages, finalMessage]);
+                    setIsSending(false);
+                    return;
                 }
-                updateChat(chat.id, [...currentMessages, finalMessage]);
-                setIsSending(false);
-                return; 
-            }
 
-            if (chunk.textChunk) {
-                fullStreamedText += chunk.textChunk;
-                
-                // Check if we should hide this text (JSON buffering logic)
-                const target = '```json';
-                const trimmed = fullStreamedText.trimStart();
-                let shouldHide = false;
+                if (chunk.textChunk) {
+                    fullStreamedText += chunk.textChunk;
 
-                if (trimmed.startsWith(target)) {
-                     // It definitely starts with JSON block. Hide it.
-                     shouldHide = true;
-                } else if (target.startsWith(trimmed) && trimmed.length < target.length) {
-                     // It matches the prefix so far (e.g. "``"), so wait to see if it becomes JSON.
-                     shouldHide = true;
+                    // Check if we should hide this text (JSON buffering logic)
+                    const target = '```json';
+                    const trimmed = fullStreamedText.trimStart();
+                    let shouldHide = false;
+
+                    if (trimmed.startsWith(target)) {
+                        // It definitely starts with JSON block. Hide it.
+                        shouldHide = true;
+                    } else if (target.startsWith(trimmed) && trimmed.length < target.length) {
+                        // It matches the prefix so far (e.g. "``"), so wait to see if it becomes JSON.
+                        shouldHide = true;
+                    }
+
+                    // If it's potentially JSON, keep the UI text as '...' to show typing indicator
+                    // Otherwise, update the UI with the streamed text
+                    if (shouldHide) {
+                        finalMessage.text = '...';
+                    } else {
+                        finalMessage.text = fullStreamedText;
+                    }
                 }
-                
-                // If it's potentially JSON, keep the UI text as '...' to show typing indicator
-                // Otherwise, update the UI with the streamed text
-                if (shouldHide) {
-                    finalMessage.text = '...';
-                } else {
-                    finalMessage.text = fullStreamedText;
-                }
-            }
 
-            if (chunk.source_protocol_id) finalMessage.source_protocol_id = chunk.source_protocol_id;
-            if (chunk.source_protocol_last_reviewed) finalMessage.source_protocol_last_reviewed = chunk.source_protocol_last_reviewed;
-            if (chunk.action_type) finalMessage.action_type = chunk.action_type;
-            if (chunk.citations) finalMessage.citations = chunk.citations;
-            if (chunk.structuredData) {
-                finalMessage.structuredData = chunk.structuredData;
-                // Once structured data arrives, we replace the text (which might be '...' or JSON) with the summary.
-                finalMessage.text = chunk.structuredData.summary; 
+                if (chunk.source_protocol_id) finalMessage.source_protocol_id = chunk.source_protocol_id;
+                if (chunk.source_protocol_last_reviewed) finalMessage.source_protocol_last_reviewed = chunk.source_protocol_last_reviewed;
+                if (chunk.action_type) finalMessage.action_type = chunk.action_type;
+                if (chunk.citations) finalMessage.citations = chunk.citations;
+                if (chunk.structuredData) {
+                    finalMessage.structuredData = chunk.structuredData;
+                    // Once structured data arrives, we replace the text (which might be '...' or JSON) with the summary.
+                    finalMessage.text = chunk.structuredData.summary;
+                }
+
+                updateChat(chat.id, [...currentMessages, { ...finalMessage }]);
             }
-            
-            updateChat(chat.id, [...currentMessages, { ...finalMessage }]);
+        } catch (error) {
+            console.error("Error handling stream:", error);
+            finalMessage.text = "An unexpected error occurred while processing your request.";
+            updateChat(chat.id, [...currentMessages, finalMessage]);
+        } finally {
+            setIsSending(false);
         }
-    } catch (error) {
-        console.error("Error handling stream:", error);
-        finalMessage.text = "An unexpected error occurred while processing your request.";
-        updateChat(chat.id, [...currentMessages, finalMessage]);
-    } finally {
-        setIsSending(false);
-    }
-  }, [chat, language, updateChat, userRole, activeGpt, isDoctorVerified, doctorProfile, setPendingVerificationMessage, setShowVerificationModal, fetchInsightsForPrompt, knowledgeBaseProtocols]);
-  
-  const handleRiskAssessmentSubmit = (formData: {
-    age: string;
-    sex: string;
-    systolicBP: string;
-    diastolicBP: string;
-    hr: string;
-    temp: string;
-    spo2: string;
-    respiratoryRate: string;
-    chiefComplaint: string;
-    history: string[];
-  }) => {
-      const prompt = `
+    }, [chat, language, updateChat, userRole, activeGpt, isDoctorVerified, doctorProfile, setPendingVerificationMessage, setShowVerificationModal, fetchInsightsForPrompt, knowledgeBaseProtocols]);
+
+    const handleRiskAssessmentSubmit = (formData: {
+        age: string;
+        sex: string;
+        systolicBP: string;
+        diastolicBP: string;
+        hr: string;
+        temp: string;
+        spo2: string;
+        respiratoryRate: string;
+        chiefComplaint: string;
+        history: string[];
+    }) => {
+        const prompt = `
           Perform a clinical risk assessment and triage for this patient.
           - Patient: ${formData.age} year old ${formData.sex}
           - Chief Complaint: ${formData.chiefComplaint}
@@ -347,41 +347,41 @@ export const ChatView: React.FC<ChatViewProps> = ({
           Provide a differential diagnosis, risk stratification (Low/Medium/High), and suggested management plan/disposition.
           Your response must be in structured JSON format.
       `;
-      handleSendMessage(prompt);
-  };
-  
-  const handleLabResultSubmit = (labParams: LabParameterInput[]) => {
-      const paramStrings = labParams.map(p => 
-          `- Parameter: ${p.name}, Value: ${p.value} ${p.units}, Reference Range: ${p.referenceRange || 'N/A'}`
-      );
-      
-      const prompt = `
+        handleSendMessage(prompt);
+    };
+
+    const handleLabResultSubmit = (labParams: LabParameterInput[]) => {
+        const paramStrings = labParams.map(p =>
+            `- Parameter: ${p.name}, Value: ${p.value} ${p.units}, Reference Range: ${p.referenceRange || 'N/A'}`
+        );
+
+        const prompt = `
           Analyze the following lab results for a general medical patient.
           ${paramStrings.join('\n')}
           
           Provide a detailed interpretation for each parameter, an overall clinical summary, and flag any critical or abnormal values with recommended next steps. Your response must be in structured JSON format.
       `;
-      handleSendMessage(prompt);
-  };
+        handleSendMessage(prompt);
+    };
 
 
-  useEffect(() => {
-    if (isDoctorVerified && pendingVerificationMessage && chat) {
-      const message = pendingVerificationMessage;
-      setPendingVerificationMessage(null);
-      handleSendMessage(message);
-    }
-  }, [isDoctorVerified, pendingVerificationMessage, chat, handleSendMessage, setPendingVerificationMessage]);
-  
-  useEffect(() => {
-      if (chat && pendingFirstMessage && chat.messages.length === 0) {
-          const messageToSend = pendingFirstMessage;
-          setPendingFirstMessage(null); 
-          handleSendMessage(messageToSend);
-      }
-  }, [chat, pendingFirstMessage, handleSendMessage, setPendingFirstMessage]);
+    useEffect(() => {
+        if (isDoctorVerified && pendingVerificationMessage && chat) {
+            const message = pendingVerificationMessage;
+            setPendingVerificationMessage(null);
+            handleSendMessage(message);
+        }
+    }, [isDoctorVerified, pendingVerificationMessage, chat, handleSendMessage, setPendingVerificationMessage]);
 
-  
+    useEffect(() => {
+        if (chat && pendingFirstMessage && chat.messages.length === 0) {
+            const messageToSend = pendingFirstMessage;
+            setPendingFirstMessage(null);
+            handleSendMessage(messageToSend);
+        }
+    }, [chat, pendingFirstMessage, handleSendMessage, setPendingFirstMessage]);
+
+
     const handleSendMessageOnWelcome = (message: string) => {
         if (!message.trim()) return;
         onNewChat();
@@ -392,8 +392,8 @@ export const ChatView: React.FC<ChatViewProps> = ({
         if (!chat?.messages) return null;
         // Find last message from AI that isn't a placeholder and has text
         return [...chat.messages]
-          .reverse()
-          .find(m => m.sender === 'AI' && m.text && m.text !== '...');
+            .reverse()
+            .find(m => m.sender === 'AI' && m.text && m.text !== '...');
     }, [chat?.messages]);
 
     const latestDdxData = useMemo(() => {
@@ -414,90 +414,90 @@ export const ChatView: React.FC<ChatViewProps> = ({
         }
     }, [lastAiMessage, handleToggleTts]);
 
-  if (!chat) {
+    if (!chat) {
+        return (
+            <div className="flex-1 flex flex-col h-full relative bg-aivana-dark">
+                <WelcomeScreen onNewChat={onNewChat} />
+                <div className="p-4 w-full max-w-4xl mx-auto z-10">
+                    <ChatInput
+                        onSendMessage={handleSendMessageOnWelcome}
+                        isSending={isSending}
+                        language={language}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (shouldShowRiskAssessmentForm) {
+        return <GeneralTriageForm onSubmit={handleRiskAssessmentSubmit} />;
+    }
+
+    if (shouldShowLabResultForm) {
+        return <LabResultForm onSubmit={handleLabResultSubmit} />;
+    }
+
+
     return (
-      <div className="flex-1 flex flex-col h-full relative bg-aivana-dark">
-          <WelcomeScreen onNewChat={onNewChat} />
-          <div className="p-4 w-full max-w-4xl mx-auto z-10">
-              <ChatInput 
-                onSendMessage={handleSendMessageOnWelcome} 
-                isSending={isSending} 
-                language={language}
-              />
-          </div>
-      </div>
+        <div className="flex-1 flex h-full overflow-hidden">
+            <div className="flex-1 flex flex-col h-full overflow-hidden">
+                <audio ref={audioRef} style={{ display: 'none' }} />
+
+                {/* Desktop Header */}
+                <header className="hidden md:flex items-center justify-between p-4 border-b border-aivana-light-grey">
+                    <h2 className="text-lg font-semibold truncate">
+                        {chat.title}
+                    </h2>
+                    <button
+                        onClick={() => setIsInsightsPanelOpen(!isInsightsPanelOpen)}
+                        className={`p-2 rounded-md transition-colors ${isInsightsPanelOpen ? 'bg-aivana-accent text-white' : 'text-gray-400 hover:bg-aivana-grey hover:text-white'}`}
+                        aria-label="Toggle prompt insights"
+                        title="Toggle prompt insights"
+                    >
+                        <Icon name="lightbulb" />
+                    </button>
+                </header>
+
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-2">
+                    {chat.messages.map((message) => (
+                        <ChatMessage
+                            key={message.id}
+                            message={message}
+                            onToggleTts={handleToggleTts}
+                            playingMessageId={playingMessageId}
+                            onUpdateMessage={handleUpdateMessage}
+                        />
+                    ))}
+                    <div ref={messagesEndRef} />
+                </div>
+                <div className="p-4 w-full max-w-4xl mx-auto">
+                    <ChatInput
+                        onSendMessage={handleSendMessage}
+                        isSending={isSending}
+                        onPlayLastMessage={handlePlayLastMessage}
+                        isTtsPlaying={!!lastAiMessage && playingMessageId === lastAiMessage.id}
+                        canPlayTts={!!lastAiMessage}
+                        language={language}
+                    />
+                </div>
+            </div>
+            {/* Backdrop for mobile when panel is open */}
+            {isInsightsPanelOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-10 md:hidden"
+                    onClick={() => setIsInsightsPanelOpen(false)}
+                ></div>
+            )}
+            <PromptInsightsPanel
+                isOpen={isInsightsPanelOpen}
+                onClose={() => setIsInsightsPanelOpen(false)}
+                insights={insights}
+                isLoading={isFetchingInsights}
+                currentDdx={latestDdxData?.type === 'ddx' ? latestDdxData.data : null}
+                currentQuestions={latestDdxData?.type === 'ddx' ? latestDdxData.questions : null}
+            />
+        </div>
     );
-  }
-  
-  if (shouldShowRiskAssessmentForm) {
-      return <GeneralTriageForm onSubmit={handleRiskAssessmentSubmit} />;
-  }
-  
-  if (shouldShowLabResultForm) {
-      return <LabResultForm onSubmit={handleLabResultSubmit} />;
-  }
-
-
-  return (
-    <div className="flex-1 flex h-full overflow-hidden">
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <audio ref={audioRef} style={{ display: 'none' }} />
-
-        {/* Desktop Header */}
-        <header className="hidden md:flex items-center justify-between p-4 border-b border-aivana-light-grey">
-            <h2 className="text-lg font-semibold truncate">
-                {chat.title}
-            </h2>
-            <button
-              onClick={() => setIsInsightsPanelOpen(!isInsightsPanelOpen)}
-              className={`p-2 rounded-md transition-colors ${isInsightsPanelOpen ? 'bg-aivana-accent text-white' : 'text-gray-400 hover:bg-aivana-grey hover:text-white'}`}
-              aria-label="Toggle prompt insights"
-              title="Toggle prompt insights"
-            >
-              <Icon name="lightbulb" />
-            </button>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-2">
-          {chat.messages.map((message) => (
-              <ChatMessage
-                  key={message.id}
-                  message={message}
-                  onToggleTts={handleToggleTts}
-                  playingMessageId={playingMessageId}
-                  onUpdateMessage={handleUpdateMessage}
-              />
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="p-4 w-full max-w-4xl mx-auto">
-          <ChatInput 
-              onSendMessage={handleSendMessage} 
-              isSending={isSending} 
-              onPlayLastMessage={handlePlayLastMessage}
-              isTtsPlaying={!!lastAiMessage && playingMessageId === lastAiMessage.id}
-              canPlayTts={!!lastAiMessage}
-              language={language}
-          />
-        </div>
-      </div>
-       {/* Backdrop for mobile when panel is open */}
-      {isInsightsPanelOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 z-10 md:hidden"
-            onClick={() => setIsInsightsPanelOpen(false)}
-          ></div>
-      )}
-      <PromptInsightsPanel
-        isOpen={isInsightsPanelOpen}
-        onClose={() => setIsInsightsPanelOpen(false)}
-        insights={insights}
-        isLoading={isFetchingInsights}
-        currentDdx={latestDdxData?.type === 'ddx' ? latestDdxData.data : null}
-        currentQuestions={latestDdxData?.type === 'ddx' ? latestDdxData.questions : null}
-      />
-    </div>
-  );
 };
 
 
@@ -545,8 +545,8 @@ const WelcomeScreen: React.FC<{ onNewChat: (gpt?: PreCodedGpt) => void }> = ({ o
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
                 {cards.map((card) => {
-                     const gpt = findGpt(card.id);
-                     return (
+                    const gpt = findGpt(card.id);
+                    return (
                         <button
                             key={card.id}
                             onClick={() => onNewChat(gpt)}

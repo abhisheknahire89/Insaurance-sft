@@ -121,7 +121,7 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         const roomDays = data.admission.expectedDaysInRoom ?? los;
         const icuDays = data.admission.expectedDaysInICU ?? 0;
 
-        // Build a smart cost estimate from the Gemini-extracted admission info
+        // Build a smart cost estimate from the AI-extracted admission info
         let baseCost = calculateTotals({
             expectedRoomDays: roomDays,
             expectedIcuDays: icuDays,

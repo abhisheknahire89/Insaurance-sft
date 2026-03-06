@@ -4,7 +4,7 @@
 
 **Product:** Aivana Health Intelligence - Insurance Pre-Authorization Module  
 **Goal:** Auto-generate TPA-ready pre-authorization documents from clinical consultations  
-**Tech Stack:** React SPA + Gemini API + NEXUS Clinical Algorithm  
+**Tech Stack:** React SPA + AI API + NEXUS Clinical Algorithm  
 
 ---
 
@@ -487,7 +487,7 @@ src/
 │       │   ├── costCalculator.ts
 │       │   └── pdfExporter.ts
 │       └── prompts/
-│           └── medicalNecessityPrompt.ts  # Gemini prompt template
+│           └── medicalNecessityPrompt.ts  # AI prompt template
 ```
 
 ---

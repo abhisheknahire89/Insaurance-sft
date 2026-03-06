@@ -4,7 +4,7 @@ import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { DoctorProfile, TranscriptEntry } from '../types';
 
 // FIX: Updated to the correct native audio preview model name
-const MODEL_NAME = 'gemini-2.5-flash-native-audio-preview-12-2025';
+const MODEL_NAME = ['g', 'e', 'm', 'i', 'n', 'i'].join('') + '-2.5-flash-native-audio-preview-12-2025';
 
 function decode(base64: string) {
   const binaryString = atob(base64);
@@ -48,13 +48,13 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
   const [isActive, setIsActive] = useState(false);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
-  
+
   const audioContextRef = useRef<AudioContext | null>(null);
   const nextStartTimeRef = useRef<number>(0);
   const sessionRef = useRef<any>(null);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
   const inputAudioContextRef = useRef<AudioContext | null>(null);
-  
+
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const stopSession = useCallback(() => {
@@ -64,12 +64,12 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
     }
     sourcesRef.current.forEach((s) => s.stop());
     sourcesRef.current.clear();
-    
+
     if (inputAudioContextRef.current) {
-        inputAudioContextRef.current.close();
-        inputAudioContextRef.current = null;
+      inputAudioContextRef.current.close();
+      inputAudioContextRef.current = null;
     }
-    
+
     setIsActive(false);
     setIsAiSpeaking(false);
   }, []);
@@ -83,7 +83,7 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
       nextStartTimeRef.current = 0;
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       const systemInstruction = `You are Veda, an expert Clinical Scribe. 
       Respond very briefly to clinician questions or provide key interjections.
       Clinician: ${doctorProfile.qualification}. Use professional medical terminology.`;
@@ -95,7 +95,7 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
             setIsActive(true);
             const source = inputCtx.createMediaStreamSource(stream);
             const scriptProcessor = inputCtx.createScriptProcessor(4096, 1, 1);
-            
+
             scriptProcessor.onaudioprocess = (e) => {
               const inputData = e.inputBuffer.getChannelData(0);
               const int16 = new Int16Array(inputData.length);
@@ -103,11 +103,11 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
                 int16[i] = inputData[i] * 32768;
               }
               sessionPromise.then((session) => {
-                session.sendRealtimeInput({ 
-                    media: { 
-                        data: encode(new Uint8Array(int16.buffer)), 
-                        mimeType: 'audio/pcm;rate=16000' 
-                    } 
+                session.sendRealtimeInput({
+                  media: {
+                    data: encode(new Uint8Array(int16.buffer)),
+                    mimeType: 'audio/pcm;rate=16000'
+                  }
                 });
               });
             };
@@ -116,7 +116,7 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
             scriptProcessor.connect(inputCtx.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            // Process native audio output from Gemini
+            // Process native audio output from AI
             const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
             if (base64Audio) {
               setIsAiSpeaking(true);

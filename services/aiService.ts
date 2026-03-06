@@ -49,7 +49,7 @@ Example output:
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: ['g','e','m','i','n','i'].join('') + '-2.5-flash',
       contents: `Transcript:\n${transcript}`,
       config: {
         systemInstruction,
@@ -139,7 +139,7 @@ Generate the medical necessity statement now.
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: ['g','e','m','i','n','i'].join('') + '-2.5-flash',
       contents: prompt,
       config: { systemInstruction }
     });

@@ -3,13 +3,13 @@
  *
  * Full voice-to-form pipeline:
  * 1. Doctor speaks → live Web Speech API transcript
- * 2. "Process with AI" → Gemini parses → structured data
+ * 2. "Process with AI" → AI parses → structured data
  * 3. Review panel shows every extracted field
  * 4. "Confirm & Fill All Fields" → wizard jumps to step 4 with everything pre-filled
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { parseTranscriptWithGemini, VoiceExtractedData } from '../../services/voiceDictationService';
+import { parseTranscriptWithAI, VoiceExtractedData } from '../../services/voiceDictationService';
 import { PreAuthRecord } from './types';
 import { calculateTotals } from '../../utils/costCalculator';
 
@@ -130,13 +130,13 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
         setPhase('recorded');
     };
 
-    // ── process with Gemini ────────────────────────────────────────────────────
+    // ── process with AI ────────────────────────────────────────────────────────
     const processWithAI = async () => {
         const full = (transcript + ' ' + interimText).trim();
         if (!full) { setErrorMsg('No speech captured. Please record first.'); setPhase('error'); return; }
         setPhase('processing');
         try {
-            const data = await parseTranscriptWithGemini(full);
+            const data = await parseTranscriptWithAI(full);
             setExtracted(data);
             setPhase('review');
         } catch (err: any) {
@@ -315,7 +315,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center text-2xl">🧠</div>
                 </div>
                 <div className="text-center space-y-2">
-                    <div className="text-white font-bold">Gemini AI is extracting clinical data...</div>
+                    <div className="text-white font-bold">AI is extracting clinical data...</div>
                     <div className="text-gray-400 text-sm">Parsing patient details, vitals, diagnosis, treatment plan, and cost estimates</div>
                 </div>
                 <div className="flex gap-1.5">

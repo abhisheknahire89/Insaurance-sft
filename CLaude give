@@ -7,7 +7,7 @@ You are building an Insurance Pre-Authorization module for Aivana, a clinical do
 ### What Already Exists (DO NOT MODIFY unless specified):
 - `components/InsuranceModule.tsx` - Basic standalone pre-auth form (will be replaced)
 - `components/VedaSessionView.tsx` - Voice scribe session that captures doctor-patient conversations
-- `services/geminiService.ts` - AI services including transcription and clinical note generation
+- `services/aiService.ts` - AI services including transcription and clinical note generation
 - `engine/workflow.ts` - NEXUS clinical reasoning workflow that produces DDx and severity scores
 - `types.ts` - TypeScript interfaces for the application
 
