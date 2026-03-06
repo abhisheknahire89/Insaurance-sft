@@ -4,7 +4,7 @@ import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { DoctorProfile, TranscriptEntry } from '../types';
 
 // FIX: Updated to the correct native audio preview model name
-const MODEL_NAME = ['g', 'e', 'm', 'i', 'n', 'i'].join('') + '-2.5-flash-native-audio-preview-12-2025';
+const MODEL_NAME = 'gemini-2.5-flash-native-audio-preview-12-2025';
 
 function decode(base64: string) {
   const binaryString = atob(base64);
@@ -116,7 +116,7 @@ export const useVedaSession = (doctorProfile: DoctorProfile, language: string) =
             scriptProcessor.connect(inputCtx.destination);
           },
           onmessage: async (message: LiveServerMessage) => {
-            // Process native audio output from AI
+            // Process native audio output from Gemini
             const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
             if (base64Audio) {
               setIsAiSpeaking(true);

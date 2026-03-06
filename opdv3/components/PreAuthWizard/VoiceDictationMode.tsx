@@ -3,13 +3,13 @@
  *
  * Full voice-to-form pipeline:
  * 1. Doctor speaks → live Web Speech API transcript
- * 2. "Process with AI" → AI parses → structured data
+ * 2. "Process with AI" → Gemini parses → structured data
  * 3. Review panel shows every extracted field
  * 4. "Confirm & Fill All Fields" → wizard jumps to step 4 with everything pre-filled
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { parseTranscriptWithAI, VoiceExtractedData } from '../../services/voiceDictationService';
+import { parseTranscriptWithGemini, VoiceExtractedData } from '../../services/voiceDictationService';
 import { PreAuthRecord } from './types';
 import { calculateTotals } from '../../utils/costCalculator';
 
@@ -53,7 +53,6 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
 
     // ── start recording ────────────────────────────────────────────────────────
     const startRecording = useCallback(() => {
-        setErrorMsg('');   // clear any previous error when retrying
         if (!SpeechRecognition) {
             setErrorMsg('Your browser does not support voice input. Please use Chrome and try again.');
             setPhase('error');
@@ -89,10 +88,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
             rec.onerror = (e: any) => {
                 // 'no-speech' and 'aborted' are normal — just restart; don't surface as error
                 if (e.error === 'no-speech' || e.error === 'aborted') return;
-                const reason = e.error === 'network'
-                    ? 'Browser speech service could not be reached (check connection or try again).'
-                    : e.error;
-                setErrorMsg(`Mic error: ${reason} Please try again.`);
+                setErrorMsg(`Mic error: ${e.error}. Please try again.`);
                 setPhase('error');
                 shouldRestartRef.current = false;
             };
@@ -130,22 +126,17 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
         setPhase('recorded');
     };
 
-    // ── process with AI ────────────────────────────────────────────────────────
+    // ── process with Gemini ────────────────────────────────────────────────────
     const processWithAI = async () => {
         const full = (transcript + ' ' + interimText).trim();
         if (!full) { setErrorMsg('No speech captured. Please record first.'); setPhase('error'); return; }
         setPhase('processing');
         try {
-            const data = await parseTranscriptWithAI(full);
+            const data = await parseTranscriptWithGemini(full);
             setExtracted(data);
             setPhase('review');
         } catch (err: any) {
-            const raw = err?.message ?? err?.toString?.() ?? 'Unknown error';
-            const isQuota = /429|RESOURCE_EXHAUSTED|quota exceeded/i.test(raw);
-            const msg = isQuota
-                ? 'Gemini API quota exceeded. Try again in a minute or check your plan and billing at ai.google.dev/gemini-api.'
-                : `AI processing failed: ${raw.length > 200 ? raw.slice(0, 200) + '…' : raw}`;
-            setErrorMsg(`${msg} You can still edit the transcript manually.`);
+            setErrorMsg(`AI processing failed: ${err?.message ?? 'Unknown error'}. You can still edit the transcript manually.`);
             setPhase('error');
         }
     };
@@ -315,7 +306,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center text-2xl">🧠</div>
                 </div>
                 <div className="text-center space-y-2">
-                    <div className="text-white font-bold">AI is extracting clinical data...</div>
+                    <div className="text-white font-bold">Veda AI extracting clinical data...</div>
                     <div className="text-gray-400 text-sm">Parsing patient details, vitals, diagnosis, treatment plan, and cost estimates</div>
                 </div>
                 <div className="flex gap-1.5">

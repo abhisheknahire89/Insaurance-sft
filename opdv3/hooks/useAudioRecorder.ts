@@ -8,31 +8,21 @@ export const useAudioRecorder = () => {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const segmentTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-    const isRecordingActiveRef = useRef(false);
-    const audioContextRef = useRef<AudioContext | null>(null);
-    const segmentInProgressRef = useRef(false);
 
     const startRecording = useCallback(async (
-        options: {
-            onSegment?: (blob: Blob) => void;
-            segmentDuration?: number;
-            vadThreshold?: number;
-            minSegmentDuration?: number;
-            stream?: MediaStream;
-        } = {}
+        options: { onSegment?: (blob: Blob) => void; segmentDuration?: number; vadThreshold?: number; minSegmentDuration?: number } = {}
     ) => {
         setError(null);
-        if (mediaRecorderRef.current || isRecordingActiveRef.current) return;
+        if (mediaRecorderRef.current || isRecording) return;
         const {
             onSegment,
             segmentDuration = 30000,
             vadThreshold = 0.015,
-            minSegmentDuration = 3000,
-            stream: providedStream
+            minSegmentDuration = 3000
         } = options;
 
         try {
-            const stream = providedStream ?? await navigator.mediaDevices.getUserMedia({
+            const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     sampleRate: 16000,
                     channelCount: 1,
@@ -40,10 +30,8 @@ export const useAudioRecorder = () => {
                     noiseSuppression: true
                 }
             });
-            const ownsStream = !providedStream;
 
             const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-            audioContextRef.current = audioContext;
             const source = audioContext.createMediaStreamSource(stream);
             const analyser = audioContext.createAnalyser();
             analyser.fftSize = 256;
@@ -58,7 +46,6 @@ export const useAudioRecorder = () => {
 
             const mediaOptions = { mimeType: 'audio/webm;codecs=opus' };
             const recorder = new MediaRecorder(stream, MediaRecorder.isTypeSupported(mediaOptions.mimeType) ? mediaOptions : undefined);
-            (recorder as any).__ownsStream = ownsStream;
             mediaRecorderRef.current = recorder;
             audioChunksRef.current = [];
 
@@ -68,78 +55,57 @@ export const useAudioRecorder = () => {
                 }
             };
 
-            recorder.onerror = () => {
-                setError('Recording error.');
-                isRecordingActiveRef.current = false;
-            };
-
-            const handleTrackEnded = () => {
-                isRecordingActiveRef.current = false;
-                setError('Microphone track ended.');
-            };
-            (recorder as any).__trackEndedHandler = handleTrackEnded;
-            stream.getTracks().forEach((track) => {
-                track.addEventListener('ended', handleTrackEnded);
-            });
-
             const checkVAD = () => {
-                if (!isRecordingActiveRef.current) return;
+                if (recorder.state !== 'recording') return;
 
-                if (audioContextRef.current?.state === 'suspended') {
-                    audioContextRef.current.resume();
+                analyser.getFloatTimeDomainData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i] * dataArray[i];
                 }
+                const rms = Math.sqrt(sum / bufferLength);
 
-                if (recorder.state === 'recording') {
-                    analyser.getFloatTimeDomainData(dataArray);
-                    let sum = 0;
-                    for (let i = 0; i < bufferLength; i++) {
-                        sum += dataArray[i] * dataArray[i];
-                    }
-                    const rms = Math.sqrt(sum / bufferLength);
-
-                    const now = Date.now();
-                    if (rms > vadThreshold) {
-                        if (!isSpeaking) isSpeaking = true;
-                        lastSpeechTime = now;
-                    } else {
-                        if (isSpeaking && (now - lastSpeechTime > 1500)) {
-                            isSpeaking = false;
-                            const duration = now - segmentStartTime;
-                            if (duration > minSegmentDuration) {
-                                triggerSegment();
-                            }
+                const now = Date.now();
+                if (rms > vadThreshold) {
+                    if (!isSpeaking) isSpeaking = true;
+                    lastSpeechTime = now;
+                } else {
+                    if (isSpeaking && (now - lastSpeechTime > 1500)) {
+                        // Silence detected for 1.5s after speech
+                        isSpeaking = false;
+                        const duration = now - segmentStartTime;
+                        if (duration > minSegmentDuration) {
+                            triggerSegment();
                         }
                     }
-
-                    if (now - segmentStartTime > segmentDuration) {
-                        triggerSegment();
-                    }
                 }
 
-                if (isRecordingActiveRef.current) {
+                if (now - segmentStartTime > segmentDuration) {
+                    triggerSegment();
+                }
+
+                if (isRecording) {
                     requestAnimationFrame(checkVAD);
                 }
             };
 
             const triggerSegment = () => {
-                if (segmentInProgressRef.current) return;
-                if (recorder.state !== 'recording' || audioChunksRef.current.length === 0) return;
-
-                segmentInProgressRef.current = true;
-                recorder.requestData();
-                setTimeout(() => {
-                    if (audioChunksRef.current.length > 0) {
+                if (recorder.state === 'recording' && audioChunksRef.current.length > 0) {
+                    recorder.requestData();
+                    setTimeout(() => {
                         const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
                         if (onSegment) onSegment(blob);
-                        audioChunksRef.current = [];
-                    }
-                    segmentStartTime = Date.now();
-                    segmentInProgressRef.current = false;
-                }, 150);
+                        // Reset for next segment - we keep the same recorder to avoid header overhead
+                        // but Gemini's diarization handles the full stream context better.
+                        // For per-chunk processing, we just need to ensure we don't send massive files.
+                        // Here we keep accumulating to maintain audio headers, but Gemini focuses on the new parts.
+                        // To truly "reset", we'd need to stop/start, but that causes pops.
+                        segmentStartTime = Date.now();
+                    }, 100);
+                }
             };
 
-            recorder.start(1000);
-            isRecordingActiveRef.current = true;
+            recorder.start(1000); // Collect data every 1s
             setIsRecording(true);
             setIsPaused(false);
 
@@ -149,9 +115,8 @@ export const useAudioRecorder = () => {
             console.error('Microphone access error:', err);
             setError('Microphone access denied.');
             setIsRecording(false);
-            isRecordingActiveRef.current = false;
         }
-    }, []);
+    }, [isRecording]);
 
     const stopRecording = useCallback((): Promise<Blob | null> => {
         return new Promise((resolve) => {
@@ -161,25 +126,13 @@ export const useAudioRecorder = () => {
             }
 
             const recorder = mediaRecorderRef.current;
-            isRecordingActiveRef.current = false;
 
             const cleanupAndResolve = () => {
                 const mimeType = recorder.mimeType || 'audio/webm';
                 const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
 
-                const trackEndedHandler = (recorder as any).__trackEndedHandler;
-                const ownsStream = (recorder as any).__ownsStream === true;
                 if (recorder.stream) {
-                    recorder.stream.getTracks().forEach((track) => {
-                        if (trackEndedHandler) track.removeEventListener('ended', trackEndedHandler);
-                        if (ownsStream) track.stop();
-                    });
-                }
-
-                if (audioContextRef.current) {
-                    const ctx = audioContextRef.current;
-                    audioContextRef.current = null;
-                    if (ctx.state !== 'closed') ctx.close();
+                    recorder.stream.getTracks().forEach(track => track.stop());
                 }
 
                 mediaRecorderRef.current = null;

@@ -18,7 +18,6 @@ import { todayISO, nowTimeString } from '../../utils/formatters';
 interface PreAuthWizardProps {
     onClose: () => void;
     existingRecord?: PreAuthRecord;
-    prefilledData?: Partial<PreAuthRecord>;
 }
 
 const buildEmptyRecord = (): Partial<PreAuthRecord> => ({
@@ -69,24 +68,10 @@ const buildEmptyRecord = (): Partial<PreAuthRecord> => ({
     outputs: {},
 });
 
-export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingRecord, prefilledData }) => {
+export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingRecord }) => {
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
     const [showVoiceMode, setShowVoiceMode] = useState(false);
-    const [record, setRecord] = useState<Partial<PreAuthRecord>>(() => {
-        if (existingRecord) return existingRecord;
-        const empty = buildEmptyRecord();
-        if (prefilledData) {
-            return {
-                ...empty,
-                ...prefilledData,
-                patient: { ...empty.patient, ...prefilledData.patient },
-                clinical: { ...empty.clinical, ...prefilledData.clinical },
-                admission: { ...empty.admission, ...prefilledData.admission },
-                costEstimate: prefilledData.costEstimate ?? empty.costEstimate,
-            };
-        }
-        return empty;
-    });
+    const [record, setRecord] = useState<Partial<PreAuthRecord>>(existingRecord ?? buildEmptyRecord());
     const [saving, setSaving] = useState(false);
 
     const updateRecord = useCallback(async (partial: Partial<PreAuthRecord>) => {
@@ -121,7 +106,7 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         const roomDays = data.admission.expectedDaysInRoom ?? los;
         const icuDays = data.admission.expectedDaysInICU ?? 0;
 
-        // Build a smart cost estimate from the AI-extracted admission info
+        // Build a smart cost estimate from the Gemini-extracted admission info
         let baseCost = calculateTotals({
             expectedRoomDays: roomDays,
             expectedIcuDays: icuDays,

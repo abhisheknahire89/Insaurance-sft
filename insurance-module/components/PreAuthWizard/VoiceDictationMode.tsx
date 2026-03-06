@@ -306,7 +306,7 @@ export const VoiceDictationMode: React.FC<VoiceDictationModeProps> = ({
                     <div className="absolute inset-0 flex items-center justify-center text-2xl">🧠</div>
                 </div>
                 <div className="text-center space-y-2">
-                    <div className="text-white font-bold">Gemini AI is extracting clinical data...</div>
+                    <div className="text-white font-bold">Veda AI extracting clinical data...</div>
                     <div className="text-gray-400 text-sm">Parsing patient details, vitals, diagnosis, treatment plan, and cost estimates</div>
                 </div>
                 <div className="flex gap-1.5">

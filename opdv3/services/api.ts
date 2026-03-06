@@ -2,7 +2,7 @@
 // This file simulates a backend proxy.
 // In a real production environment, this would be a server (e.g., a GCP Cloud Run instance)
 // that securely stores and uses the API key. The client would make fetch requests to this server.
-// For this frontend-only prototype, we are keeping the API SDK calls here to demonstrate
+// For this frontend-only prototype, we are keeping the Gemini SDK calls here to demonstrate
 // the correct architecture and prepare for a seamless transition to a real backend.
 
 import { GoogleGenAI, GenerateContentResponse, Modality } from "@google/genai";
@@ -15,37 +15,37 @@ export const postToProxy = async (endpoint: string, body: any): Promise<any> => 
     console.log(`[PROXY] Calling endpoint: ${endpoint}`);
 
     switch (endpoint) {
-        case '/ai/generateContent':
-        case '/ai/generateSummary':
-            return callAIGenerateContent(body);
+        case '/gemini/generateContent':
+        case '/gemini/generateSummary':
+            return callGeminiGenerateContent(body);
 
-        case '/ai/stream':
+        case '/gemini/stream':
             // This is a special case for streaming, we return the stream directly
-            return callAIStream(body);
+            return callGeminiStream(body);
 
         case '/tts/synthesize':
-            return callAITts(body);
+            return callGeminiTts(body);
 
         default:
             throw new Error(`Unknown proxy endpoint: ${endpoint}`);
     }
 };
 
-// --- AI Handlers ---
+// --- Gemini Handlers ---
 
-async function callAIGenerateContent(body: any): Promise<GenerateContentResponse> {
+async function callGeminiGenerateContent(body: any): Promise<GenerateContentResponse> {
     const { model, contents, config } = body;
     try {
         const response = await ai.models.generateContent({ model, contents, config });
         // The real API returns a complex object, we return it whole.
         return response;
     } catch (error) {
-        console.error("AI API error (via proxy simulation):", error);
+        console.error("Gemini API error (via proxy simulation):", error);
         throw error;
     }
 }
 
-async function callAIStream(body: any): Promise<AsyncGenerator<string>> {
+async function callGeminiStream(body: any): Promise<AsyncGenerator<string>> {
     const { model, contents, config } = body;
     try {
         const responseStream = await ai.models.generateContentStream({ model, contents, config });
@@ -61,24 +61,24 @@ async function callAIStream(body: any): Promise<AsyncGenerator<string>> {
         return textStream();
 
     } catch (error) {
-        console.error("AI API streaming error (via proxy simulation):", error);
+        console.error("Gemini API streaming error (via proxy simulation):", error);
         throw error;
     }
 }
 
-// --- AI TTS Handler ---
-// Simulates the structure expected by services/googleTtsService.ts but uses AI model
-async function callAITts(body: any): Promise<{ audioContent: string | null }> {
+// --- Gemini TTS Handler ---
+// Simulates the structure expected by services/googleTtsService.ts but uses Gemini model
+async function callGeminiTts(body: any): Promise<{ audioContent: string | null }> {
     try {
         const { input, voice } = body;
         const text = input.text;
-        // voice.languageCode is available but ai tts uses voiceName.
+        // voice.languageCode is available but gemini tts uses voiceName.
 
         // Use 'Kore' as a standard high-quality voice per documentation examples
         const voiceName = 'Kore';
 
         const response = await ai.models.generateContent({
-            model: ["g","e","m","i","n","i"].join("") + "-2.5-flash-preview-tts",
+            model: "gemini-2.5-flash-preview-tts",
             // Strictly follow the contents: [{ parts: [{ text }] }] structure
             contents: [{ parts: [{ text: text }] }],
             config: {
@@ -105,7 +105,7 @@ async function callAITts(body: any): Promise<{ audioContent: string | null }> {
         return { audioContent: null };
 
     } catch (error) {
-        console.error('Failed to synthesize speech via AI:', error);
+        console.error('Failed to synthesize speech via Gemini:', error);
         return { audioContent: null };
     }
 }

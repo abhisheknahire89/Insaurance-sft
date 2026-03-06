@@ -7,7 +7,7 @@ import {
     UploadedDocument,
     ExtractedTestResult
 } from '../types';
-import { generateMedicalNecessityStatement } from '../services/aiService';
+import { generateMedicalNecessityStatement } from '../services/geminiService';
 import { generateDisclaimer } from '../constants';
 import { InsuranceStepReview } from './InsuranceStepReview';
 import { InsuranceStepDocuments } from './InsuranceStepDocuments';

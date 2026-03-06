@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Initialize AI API
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_AI_API_KEY || '');
+// Initialize Gemini API
+const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || '');
 
 export interface ExtractedPatientData {
     document_type: string;
@@ -84,7 +84,7 @@ function computeExtractedMissingFields(data: any): { extracted: string[], missin
 
 export const extractFromDocument = async (file: File): Promise<ExtractedPatientData> => {
     try {
-        const model = genAI.getGenerativeModel({ model: ["g","e","m","i","n","i"].join("") + "-2.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         // Convert file to base64
         const fileToBase64 = (f: File): Promise<string> => {
@@ -114,7 +114,7 @@ export const extractFromDocument = async (file: File): Promise<ExtractedPatientD
         const result = await model.generateContent([EXTRACTION_PROMPT, ...imageParts]);
         const responseText = result.response.text().trim();
 
-        // Ensure stripping markdown json blocks which the AI sometimes outputs anyway
+        // Ensure stripping markdown json blocks which GEMINI sometimes outputs anyway
         let jsonStr = responseText;
         if (jsonStr.startsWith('\`\`\`json')) {
             jsonStr = jsonStr.replace(/^\`\`\`json/, '').replace(/\`\`\`$/, '').trim();

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { GoogleGenAI, Modality } from "@google/genai";
 
 // FIX: Updated to the correct native audio preview model name
-const MODEL_NAME = ['g', 'e', 'm', 'i', 'n', 'i'].join('') + '-2.5-flash-native-audio-preview-12-2025';
+const MODEL_NAME = 'gemini-2.5-flash-native-audio-preview-12-2025';
 
 declare global {
     interface Window {
@@ -15,7 +15,7 @@ interface UseSpeechRecognitionReturn {
     isListening: boolean;
     transcript: string;
     interimTranscript: string;
-    startListening: (sharedStream?: MediaStream | null) => void;
+    startListening: () => void;
     stopListening: () => void;
     resetTranscript: () => void;
     error: string | null;
@@ -51,7 +51,6 @@ export const useSpeechRecognition = (options: { lang?: string } = {}): UseSpeech
     const [stream, setStream] = useState<MediaStream | null>(null);
 
     const supported = true;
-    const streamOwnedRef = useRef(true);
 
     const audioContextRef = useRef<AudioContext | null>(null);
     const streamRef = useRef<MediaStream | null>(null);

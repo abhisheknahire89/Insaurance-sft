@@ -4,7 +4,7 @@ import { DoctorProfile, TranscriptEntry } from '../types';
 import { Icon } from './Icon';
 import { useAudioRecorder } from '../hooks/useAudioRecorder';
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition';
-import { processAudioSegment, generateClinicalNote } from '../services/aiService';
+import { processAudioSegment, generateClinicalNote } from '../services/geminiService';
 import { renderMarkdownToHTML } from '../utils/markdownRenderer';
 import { Mic, Activity, CheckCircle2, Circle, Clock, Download, FileText, ChevronRight, X, Wifi, BedDouble } from 'lucide-react';
 import { createIPDCase } from '../services/ipdService';
@@ -198,7 +198,6 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
     const pendingSegmentsQueue = useRef<Blob[]>([]);
     const processedSegmentsRef = useRef<number>(0);
     const transcriptEndRef = useRef<HTMLDivElement>(null);
-    const sharedStreamRef = useRef<MediaStream | null>(null);
 
     const { isRecording, startRecording, stopRecording } = useAudioRecorder();
     const { startListening, stopListening, interimTranscript } = useSpeechRecognition({ lang: language });
@@ -284,25 +283,12 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
         };
     }, [language, doctorProfile, transcriptHistory]);
 
-    const stopSharedStream = useCallback(() => {
-        if (sharedStreamRef.current) {
-            sharedStreamRef.current.getTracks().forEach((t) => t.stop());
-            sharedStreamRef.current = null;
-        }
-    }, []);
-
     // Cleanup previous session on mount
     useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('mock') === 'true') {
-            setPhase('review'); // Start in review mode for testing
-        } else {
-            handleStartSession();
-        }
+        handleStartSession();
         return () => {
             stopRecording();
             stopListening();
-            stopSharedStream();
         };
     }, []);
 
@@ -313,18 +299,7 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
         setClinicalNote('');
         processedSegmentsRef.current = 0;
         pendingSegmentsQueue.current = [];
-        stopSharedStream();
-        const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-                sampleRate: 16000,
-                channelCount: 1,
-                echoCancellation: true,
-                noiseSuppression: true
-            }
-        });
-        sharedStreamRef.current = stream;
         await startRecording({
-            stream,
             segmentDuration: 30000,
             vadThreshold: 0.02,
             minSegmentDuration: 2000,
@@ -334,14 +309,13 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
                 processSegment(blob, idx);
             }
         });
-        startListening(stream);
+        startListening();
     };
 
     const handleStopSession = async () => {
         setPhase('processing');
         stopListening();
         const finalBlob = await stopRecording();
-        stopSharedStream();
         if (finalBlob) {
             const idx = pendingSegmentsQueue.current.length;
             pendingSegmentsQueue.current.push(finalBlob);
@@ -575,13 +549,13 @@ export const ScribeSessionView: React.FC<ScribeSessionViewProps> = ({ onEndSessi
                                 </div>
 
                                 <div className="p-4 border border-gray-200 rounded-xl bg-white shadow-sm relative">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Full Clinical Note (SOAP)</label>
-                                    <textarea
-                                        className="w-full text-xs text-gray-700 outline-none resize-none h-48 placeholder-gray-300 border border-gray-50 rounded p-2"
-                                        placeholder="Paste clinical note here for pre-auth extraction..."
-                                        value={clinicalNote}
-                                        onChange={(e) => setClinicalNote(e.target.value)}
-                                    ></textarea>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Medicines</label>
+                                        <button className="text-[10px] font-bold text-opd-primary border border-opd-primary px-2 py-1 rounded hover:bg-opd-primary hover:text-white transition-colors">+ ADD DRUG</button>
+                                    </div>
+                                    <div className="text-xs text-gray-400 italic py-4 text-center bg-gray-50 rounded-lg">
+                                        No medicines prescribed via voice yet.
+                                    </div>
                                 </div>
 
                                 <div className="p-4 border border-gray-200 rounded-xl bg-white shadow-sm">

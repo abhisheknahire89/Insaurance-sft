@@ -5,7 +5,7 @@ import { ChatInput } from './ChatInput';
 import { ChatMessage } from './ChatMessage';
 import { Icon } from './Icon';
 import { PRE_CODED_GPTS } from '../constants';
-import { streamChatResponse, getPromptInsights } from '../services/aiService';
+import { streamChatResponse, getPromptInsights } from '../services/geminiService';
 import { synthesizeSpeech } from '../services/googleTtsService';
 import { PromptInsightsPanel } from './PromptInsightsPanel';
 import { GeneralTriageForm } from './PregnancyRiskAssessmentForm'; // Re-using file, but content is GeneralTriage

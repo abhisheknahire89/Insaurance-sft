@@ -15,46 +15,6 @@ import { runNexusWorkflow } from '../engine/workflow';
 import { prescriptionDictionary } from '../prescription_dictionary';
 import { CLINICAL_PROTOCOLS } from '../knowledgeBase';
 
-export const extractInsurancePreAuthData = async (
-  note: string,
-  patientName: string
-): Promise<any> => {
-  const systemInstruction = `You are a medical data extraction AI. Analyze the clinical note and extract details for insurance pre-authorization.
-  
-  Return a JSON object:
-  {
-    "patient": { "patientName": "Extracted Name or provided name" },
-    "clinical": {
-      "diagnoses": [{ "diagnosis": "Primary Diagnosis", "icd10Code": "ICD10 if found" }],
-      "vitals": { "bp": "string", "pulse": "string", "temp": "string", "spo2": "string", "rr": "string" },
-      "chiefComplaints": "Summary of complaints",
-      "historyOfPresentIllness": "HPI summary",
-      "relevantClinicalFindings": "Findings summary"
-    },
-    "admission": {
-      "reasonForHospitalisation": "Reason summary"
-    }
-  }
-  
-  If a field is not found, use empty string or null.`;
-
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: `Clinical Note:\n${note}\n\nPatient Name Context: ${patientName}`,
-      config: {
-        systemInstruction,
-        responseMimeType: 'application/json',
-      }
-    });
-
-    return JSON.parse(response.text || '{}');
-  } catch (error) {
-    console.error('Error extracting insurance data:', error);
-    return null;
-  }
-};
-
 export const extractTestResultsFromTranscript = async (
   transcript: string,
   language: string
@@ -72,7 +32,7 @@ Return a JSON array. If no test results are mentioned, return an empty array.`;
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-2.5-flash',
+      model: 'gemini-2.5-flash',
       contents: `Transcript:\n${transcript}`,
       config: {
         systemInstruction,
@@ -165,7 +125,7 @@ Generate the medical necessity statement now.
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-2.5-flash',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config: { systemInstruction }
     });
@@ -176,8 +136,7 @@ Generate the medical necessity statement now.
   }
 };
 
-const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env?.API_KEY : '');
-const ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key-to-prevent-crash' });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const SUPPORTED_LANGUAGES = ["English", "Hindi", "Marathi", "Gujarati", "Tamil", "Telugu", "Kannada", "Malayalam", "Bengali", "Punjabi", "Odia", "Assamese", "Urdu"];
 
@@ -222,7 +181,7 @@ export const processAudioSegment = async (
     };
 
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: { parts: [audioPart, { text: "Transcribe and normalize this clinical segment." }] },
       config: {
         systemInstruction,
@@ -273,7 +232,7 @@ export const cleanupTranscript = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Raw Transcript:\n${transcript}`,
       config: { systemInstruction, temperature: 0 },
     });
@@ -307,7 +266,7 @@ export const generateSoapNote = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Cleaned Transcript:\n${cleanedTranscript}`,
       config: { systemInstruction, temperature: 0 },
     });
@@ -352,7 +311,7 @@ export const generatePrescription = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: `Cleaned Transcript:\n${cleanedTranscript}`,
       config: { systemInstruction, temperature: 0 },
     });
@@ -386,14 +345,14 @@ export const generateClinicalNote = async (
   }
 };
 
-// FIX: Implemented generateCaseSummary using ai-3-flash-preview
+// FIX: Implemented generateCaseSummary using gemini-3-flash-preview
 export const generateCaseSummary = async (messages: Message[], language: string, doctorProfile: DoctorProfile): Promise<string> => {
   const systemInstruction = `You are an expert clinical documentalist. Summarize the following doctor-patient conversation into a concise case summary for a medical record. Use ${language}.`;
   const transcript = messages.map(m => `${m.sender}: ${m.text}`).join('\n');
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: transcript,
       config: { systemInstruction }
     });
@@ -410,7 +369,7 @@ export const getPromptInsights = async (prompt: string, doctorProfile: DoctorPro
 
   try {
     const response = await ai.models.generateContent({
-      model: ['g','e','m','i','n','i'].join('') + '-3-flash-preview',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         systemInstruction,
