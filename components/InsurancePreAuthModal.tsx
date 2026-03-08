@@ -5,13 +5,15 @@ import {
     ConsultationInfo,
     PreAuthSubmission,
     UploadedDocument,
-    ExtractedTestResult
+    VoiceCapturedFinding,
+    IRDAIPreAuthForm
 } from '../types';
-import { generateMedicalNecessityStatement } from '../services/geminiService';
-import { generateDisclaimer } from '../constants';
+import { generateMedicalNecessityStatement, createPreAuthSubmission, formatPreAuthForTPA, generateIRDAIPreAuthForm, generateOPDJustification } from '../services/insuranceService';
 import { InsuranceStepReview } from './InsuranceStepReview';
 import { InsuranceStepDocuments } from './InsuranceStepDocuments';
 import { InsuranceStepConfirm } from './InsuranceStepConfirm';
+import { InsuranceStepPolicy } from './InsuranceStepPolicy';
+import { InsuranceStepCost } from './InsuranceStepCost';
 
 interface InsurancePreAuthModalProps {
     isOpen: boolean;
@@ -38,15 +40,175 @@ export const InsurancePreAuthModal: React.FC<InsurancePreAuthModalProps> = ({
         justification: ''
     });
 
-    const [testResults, setTestResults] = useState<ExtractedTestResult[]>([]);
+    const [testResults, setTestResults] = useState<VoiceCapturedFinding[]>([]);
     const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>([]);
     const [medicalNecessity, setMedicalNecessity] = useState('');
     const [doctorConfirmed, setDoctorConfirmed] = useState(false);
     const [generatingStatement, setGeneratingStatement] = useState(false);
+    const [selectedDxIndex, setSelectedDxIndex] = useState(0);
+
+    const [formData, setFormData] = useState<Partial<IRDAIPreAuthForm>>({
+        metadata: {
+            formVersion: '1.0',
+            generatedAt: new Date().toISOString(),
+            generatedBy: 'Aivana System',
+            preAuthRequestId: `PA-${Date.now()}`,
+            submissionChannel: 'Online'
+        },
+        section1_TpaInsurer: {
+            insuranceCompanyName: '',
+            tpaName: patientInfo.tpaName || '',
+            tpaId: '',
+            hospitalName: 'Aivana Partner Hospital',
+            hospitalAddress: '123 Health Ave',
+            hospitalCity: 'Mumbai',
+            hospitalState: 'Maharashtra',
+            hospitalPincode: '400001',
+            hospitalPhoneNumber: '1800-123-4567',
+            hospitalEmail: 'tpa@hospital.com',
+            hospitalRohiniId: 'ROH12345',
+            nabhAccredited: true,
+            nablAccredited: true,
+            nodalOfficerName: 'Dr. Admin',
+            nodalOfficerPhone: '9876543210',
+            nodalOfficerEmail: 'nodal@hospital.com'
+        },
+        section2_PolicyDetails: {
+            policyNumber: patientInfo.policyNumber || '',
+            policyType: 'Individual',
+            policyStartDate: '2024-01-01',
+            policyEndDate: '2024-12-31',
+            sumInsured: 500000,
+            proposerName: patientInfo.name,
+            insuredName: patientInfo.name,
+            relationshipWithProposer: 'Self',
+            tpaIdCardNumber: '',
+            hasOtherHealthPolicy: false
+        },
+        section3_PatientDetails: {
+            patientName: patientInfo.name,
+            dateOfBirth: '1980-01-01',
+            age: patientInfo.age,
+            gender: patientInfo.gender,
+            maritalStatus: 'Single',
+            occupation: 'Software Engineer',
+            address: '456 User Lane',
+            city: 'Mumbai',
+            state: 'Maharashtra',
+            pincode: '400002',
+            mobileNumber: '9999999999',
+            email: 'patient@example.com'
+        },
+        section4_ClinicalDetails: {
+            chiefComplaints: nexusOutput?.ddx[0]?.rationale || '',
+            durationOfPresentAilment: '3 days',
+            natureOfIllness: 'Acute',
+            relevantClinicalFindings: nexusOutput?.keyFindings?.join(', ') || '',
+            provisionalDiagnosis: nexusOutput?.ddx[0]?.diagnosis || '',
+            icd10Code: '',
+            icd10Description: '',
+            proposedLineOfTreatment: {
+                medical: true,
+                surgical: false,
+                intensiveCare: false,
+                investigation: true,
+                nonAllopathic: false
+            }
+        },
+        section5_AdmissionDetails: {
+            dateOfAdmission: new Date().toISOString().split('T')[0],
+            timeOfAdmission: new Date().toTimeString().substring(0, 5),
+            admissionType: 'Emergency',
+            roomCategory: 'General Ward',
+            expectedLengthOfStay: 5,
+            expectedDaysInICU: 0,
+            expectedDaysInRoom: 5,
+            pastMedicalHistory: {
+                diabetes: { present: false },
+                hypertension: { present: false },
+                heartDisease: { present: false },
+                asthma: { present: false },
+                epilepsy: { present: false },
+                cancer: { present: false },
+                kidney: { present: false },
+                liver: { present: false },
+                alcoholism: { present: false },
+                smoking: { present: false },
+                anyOther: { present: false }
+            }
+        },
+        section6_CostEstimate: {
+            roomRentPerDay: 0,
+            expectedRoomDays: 0,
+            totalRoomCharges: 0,
+            nursingChargesPerDay: 0,
+            totalNursingCharges: 0,
+            icuChargesPerDay: 0,
+            expectedIcuDays: 0,
+            totalIcuCharges: 0,
+            otCharges: 0,
+            professionalFees: {
+                surgeonFee: 0,
+                anesthetistFee: 0,
+                consultantFee: 0,
+                otherDoctorFees: 0
+            },
+            investigationsEstimate: 0,
+            medicinesEstimate: 0,
+            consumablesEstimate: 0,
+            totalImplantsCost: 0,
+            ambulanceCharges: 0,
+            miscCharges: 0,
+            totalEstimatedCost: 0,
+            amountClaimedFromInsurer: 0,
+            isEmergency: true
+        },
+        section7_Declarations: {
+            patientDeclaration: {
+                agreedToTerms: true,
+                consentForMedicalDataSharing: true,
+                agreesToPayNonPayables: true,
+                signatureDate: new Date().toISOString().split('T')[0],
+                signatureTime: new Date().toTimeString().substring(0, 5)
+            },
+            doctorDeclaration: {
+                doctorName: consultationInfo.doctorName,
+                doctorQualification: 'MBBS, MD',
+                doctorRegistrationNumber: consultationInfo.doctorLicense,
+                hospitalName: 'Aivana Partner Hospital',
+                declarationText: 'Verified',
+                signatureDate: new Date().toISOString().split('T')[0]
+            },
+            hospitalDeclaration: {
+                authorizedSignatoryName: 'Admin',
+                designation: 'Nodal Officer',
+                hospitalSealApplied: true,
+                signatureDate: new Date().toISOString().split('T')[0]
+            }
+        }
+    });
+
+    const updateFormData = (updates: Partial<IRDAIPreAuthForm>) => {
+        setFormData(prev => ({ ...prev, ...updates }));
+    };
+
+    const handleDiagnosisSelect = (index: number) => {
+        setSelectedDxIndex(index);
+        if (nexusOutput && nexusOutput.ddx[index]) {
+            const dx = nexusOutput.ddx[index];
+            updateFormData({
+                section4_ClinicalDetails: {
+                    ...formData.section4_ClinicalDetails as any,
+                    provisionalDiagnosis: dx.diagnosis,
+                    chiefComplaints: dx.rationale,
+                }
+            });
+        }
+    };
 
     useEffect(() => {
-        if (nexusOutput?.extractedTestResults) {
-            setTestResults(nexusOutput.extractedTestResults);
+        if (nexusOutput?.voiceCapturedFindings) {
+            setTestResults(nexusOutput.voiceCapturedFindings);
         }
     }, [nexusOutput]);
 
@@ -66,16 +228,25 @@ export const InsurancePreAuthModal: React.FC<InsurancePreAuthModalProps> = ({
     };
 
     const handleNextStep = async () => {
-        if (currentStep === 2) {
+        if (currentStep === 4) {
             if (nexusOutput) {
                 setGeneratingStatement(true);
-                const statement = await generateMedicalNecessityStatement(
-                    nexusOutput.ddx[0],
-                    nexusOutput.severity,
-                    nexusOutput.keyFindings,
-                    testResults,
-                    nexusOutput.vitals
-                );
+
+                // 1. Generate the concise OPD justification logic based on Nexus AI severities
+                const justification = generateOPDJustification(nexusOutput);
+
+                // 2. Inject it into the form data for Section 4
+                const updatedFormData = {
+                    ...formData,
+                    section4_ClinicalDetails: {
+                        ...formData.section4_ClinicalDetails as any,
+                        medicalNecessityJustification: justification
+                    }
+                };
+                setFormData(updatedFormData);
+
+                // 3. Generate the rigid 7-section IRDAI text output
+                const statement = generateIRDAIPreAuthForm(updatedFormData as IRDAIPreAuthForm);
                 setMedicalNecessity(statement);
                 setGeneratingStatement(false);
             }
@@ -85,111 +256,30 @@ export const InsurancePreAuthModal: React.FC<InsurancePreAuthModalProps> = ({
 
     const handlePrevStep = () => setCurrentStep(prev => prev - 1);
 
-    const formatPreAuthForTPA = (submission: PreAuthSubmission): string => {
-        return `
-═══════════════════════════════════════════════════════════════
-              PRE-AUTHORIZATION REQUEST
-              Generated via Aivana Clinical Documentation System
-═══════════════════════════════════════════════════════════════
-
-DOCUMENT STATUS: ${submission.documentationStatus === 'complete' ? '✓ COMPLETE' : '⚠ PENDING DOCUMENTS'}
-${submission.pendingDocuments.length > 0 ? `Pending: ${submission.pendingDocuments.join(', ')}` : ''}
-
-───────────────────────────────────────────────────────────────
-SECTION 1: DIAGNOSIS
-───────────────────────────────────────────────────────────────
-Primary Diagnosis: ${submission.primaryDiagnosis.diagnosis}
-ICD-10 Code: ${submission.icd10Code}
-Diagnostic Confidence: ${(submission.primaryDiagnosis.probability * 100).toFixed(0)}%
-Clinical Rationale: ${submission.primaryDiagnosis.rationale}
-
-───────────────────────────────────────────────────────────────
-SECTION 2: CLINICAL SEVERITY ASSESSMENT (NEXUS Scores)
-───────────────────────────────────────────────────────────────
-Symptom Severity (PhenoIntensity): ${submission.severityScores.phenoIntensity.toFixed(2)} / 1.00
-Clinical Urgency (UrgencyQuotient): ${submission.severityScores.urgencyQuotient.toFixed(2)} / 1.00
-Deterioration Risk (DeteriorationVelocity): ${submission.severityScores.deteriorationVelocity.toFixed(2)} / 1.00
-Red Flag Status: ${submission.severityScores.redFlagSeverity.toUpperCase()}
-
-${submission.severityOverride?.overridden ? `
-** SEVERITY OVERRIDE BY PHYSICIAN **
-Override Justification: ${submission.severityOverride.justification}
-` : ''}
-
-───────────────────────────────────────────────────────────────
-SECTION 3: KEY CLINICAL FINDINGS
-───────────────────────────────────────────────────────────────
-${submission.keyFindings.map((f, i) => `${i + 1}. ${f}`).join('\n')}
-
-───────────────────────────────────────────────────────────────
-SECTION 4: TEST RESULTS
-───────────────────────────────────────────────────────────────
-${submission.testResults.map(t =>
-            `• ${t.testName}: ${t.value} ${t.unit}
-   Interpretation: ${t.interpretation.replace('_', ' ').toUpperCase()}
-   Document: ${t.documentAttached ? '✓ Attached' : '✗ Not attached'}`
-        ).join('\n\n')}
-
-───────────────────────────────────────────────────────────────
-SECTION 5: MEDICAL NECESSITY STATEMENT
-───────────────────────────────────────────────────────────────
-${submission.medicalNecessityStatement}
-
-───────────────────────────────────────────────────────────────
-SECTION 6: SUPPORTING DOCUMENTS
-───────────────────────────────────────────────────────────────
-Total Documents Attached: ${submission.uploadedDocuments.length}
-${submission.uploadedDocuments.map((d, i) =>
-            `${i + 1}. ${d.fileName} (${d.fileSize}) - ${d.linkedToTest || 'General'}`
-        ).join('\n')}
-
-───────────────────────────────────────────────────────────────
-SECTION 7: PHYSICIAN CONFIRMATION
-───────────────────────────────────────────────────────────────
-Confirmed By: ${submission.doctorConfirmation.doctorName}
-License Number: ${submission.doctorConfirmation.doctorLicense}
-Confirmation Timestamp: ${submission.doctorConfirmation.confirmedAt}
-
-═══════════════════════════════════════════════════════════════
-DISCLAIMER
-═══════════════════════════════════════════════════════════════
-${submission.disclaimer}
-
-═══════════════════════════════════════════════════════════════
-    `.trim();
-    };
-
     const handleSubmit = () => {
         if (!doctorConfirmed || !nexusOutput) return;
 
         setIsSubmitting(true);
 
         setTimeout(() => {
-            const { status, pendingList } = calculateDocumentationStatus();
-            const disclaimer = generateDisclaimer(status, pendingList);
-
-            const submission: PreAuthSubmission = {
-                primaryDiagnosis: nexusOutput.ddx[0],
-                icd10Code: 'Pending ICD-10 Assignment',
-                severityScores: nexusOutput.severity,
-                severityOverride: severityOverride.overridden ? severityOverride : undefined,
-                keyFindings: nexusOutput.keyFindings,
-                testResults,
+            const submission = createPreAuthSubmission(
+                nexusOutput,
+                selectedDxIndex,
+                severityOverride.overridden ? {
+                    original: nexusOutput.severity.phenoIntensity,
+                    overridden: Number(severityOverride.newSeverity) || 0,
+                    justification: severityOverride.justification
+                } : null,
+                '',
                 uploadedDocuments,
-                clinicalNotes: '',
-                medicalNecessityStatement: medicalNecessity,
-                documentationStatus: status,
-                pendingDocuments: pendingList,
-                doctorConfirmation: {
-                    confirmed: doctorConfirmed,
-                    confirmedAt: new Date().toISOString(),
-                    doctorName: consultationInfo.doctorName,
-                    doctorLicense: consultationInfo.doctorLicense
-                },
-                disclaimer
-            };
+                testResults,
+                consultationInfo.doctorName,
+                consultationInfo.doctorLicense
+            );
 
-            const tpaDocument = formatPreAuthForTPA(submission);
+            submission.medicalNecessityStatement = medicalNecessity; // Override if doctor edited it
+
+            const tpaDocument = medicalNecessity; // Use IRDAI form
             setIsSubmitting(false);
             onSubmit(submission, tpaDocument);
             onClose();
@@ -260,12 +350,14 @@ ${submission.disclaimer}
                 <div className="flex border-b border-gray-800 bg-gray-900/50">
                     {[
                         { num: 1, label: 'Review Admission' },
-                        { num: 2, label: 'Attach Documents' },
-                        { num: 3, label: 'Confirm & Submit' }
+                        { num: 2, label: 'Policy Details' },
+                        { num: 3, label: 'Cost Estimation' },
+                        { num: 4, label: 'Attach Documents' },
+                        { num: 5, label: 'Confirm & Submit' }
                     ].map((step) => (
                         <div
                             key={step.num}
-                            className={`flex-1 py-3 px-4 text-center text-sm font-medium border-b-2 transition-colors
+                            className={`flex-1 py-3 px-2 md:px-4 text-center text-xs md:text-sm font-medium border-b-2 transition-colors
                 ${currentStep === step.num
                                     ? 'border-blue-500 text-blue-400 bg-blue-500/10'
                                     : currentStep > step.num
@@ -282,7 +374,8 @@ ${submission.disclaimer}
                     {currentStep === 1 && (
                         <InsuranceStepReview
                             nexusData={nexusOutput}
-                            primaryDiagnosis={nexusOutput.ddx.length > 0 ? nexusOutput.ddx[0] : null}
+                            selectedDiagnosisIndex={selectedDxIndex}
+                            onDiagnosisSelect={handleDiagnosisSelect}
                             patientName={patientInfo.name}
                             severityOverride={severityOverride}
                             onSeverityOverrideChange={setSeverityOverride}
@@ -290,16 +383,32 @@ ${submission.disclaimer}
                     )}
 
                     {currentStep === 2 && (
+                        <InsuranceStepPolicy
+                            formData={formData}
+                            onUpdate={updateFormData}
+                        />
+                    )}
+
+                    {currentStep === 3 && (
+                        <InsuranceStepCost
+                            formData={formData}
+                            onUpdate={updateFormData}
+                            diagnosis={nexusOutput.ddx[0]?.diagnosis}
+                        />
+                    )}
+
+                    {currentStep === 4 && (
                         <InsuranceStepDocuments
                             testResults={testResults}
                             uploadedDocuments={uploadedDocuments}
                             onFileUpload={handleFileUpload}
                             onLinkDocument={handleLinkDocument}
                             onRemoveDocument={handleRemoveDocument}
+                            provisionalDiagnosis={formData.section4_ClinicalDetails?.provisionalDiagnosis}
                         />
                     )}
 
-                    {currentStep === 3 && (
+                    {currentStep === 5 && (
                         generatingStatement ? (
                             <div className="flex flex-col items-center justify-center h-48 space-y-4">
                                 <div className="w-8 h-8 rounded-full border-4 border-gray-700 border-t-purple-500 animate-spin" />
@@ -328,7 +437,7 @@ ${submission.disclaimer}
                         {currentStep === 1 ? 'Cancel' : '← Back'}
                     </button>
 
-                    {currentStep < 3 ? (
+                    {currentStep < 5 ? (
                         <button
                             onClick={handleNextStep}
                             className="px-6 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition disabled:opacity-50"

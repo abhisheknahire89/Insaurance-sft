@@ -1,5 +1,5 @@
 import React from 'react';
-import { ExtractedTestResult, UploadedDocument, ConsultationInfo } from '../types';
+import { VoiceCapturedFinding, UploadedDocument, ConsultationInfo } from '../types';
 
 interface InsuranceStepConfirmProps {
     documentationStatus: 'complete' | 'pending_documents';

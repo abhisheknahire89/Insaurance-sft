@@ -1,8 +1,8 @@
 import React from 'react';
-import { ExtractedTestResult, UploadedDocument } from '../types';
+import { VoiceCapturedFinding, UploadedDocument } from '../types';
 
 interface TestResultCardProps {
-  result: ExtractedTestResult;
+  result: VoiceCapturedFinding;
   linkedDocument?: UploadedDocument;
   onAttachClick: (testName: string) => void;
   onRemoveClick: (documentId: string, testName: string) => void;

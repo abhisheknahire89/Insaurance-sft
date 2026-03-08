@@ -1,7 +1,4 @@
 {
-    "buildCommand": "cd opdv3 && npm install && npm run build",
-    "outputDirectory": "opdv3/dist",
-    "installCommand": "echo 'skip root install'",
     "rewrites": [
         {
             "source": "/(.*)",
