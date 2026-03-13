@@ -1,76 +1,40 @@
-import { DocumentRequirement, DocumentCategory } from '../types';
-
-// Maps ICD-10 codes (or diagnosis categories) to required documents
-const diagnosisDocumentMap: Record<string, DocumentCategory[]> = {
-    // Respiratory
-    'J18': ['chest_xray', 'cbc', 'abg'],           // Pneumonia
-    'J12': ['chest_xray', 'cbc', 'covid_test'],    // Viral pneumonia
-    'J44': ['chest_xray', 'cbc', 'abg', 'ecg'],    // COPD
-
-    // Cardiac
-    'I21': ['ecg', 'cbc', 'lft', 'kft'],           // MI
-    'I50': ['ecg', 'chest_xray', 'cbc'],           // Heart failure
-
-    // Infectious
-    'A41': ['blood_culture', 'cbc', 'lft', 'kft'], // Sepsis
-    'A90': ['ns1_antigen', 'cbc', 'dengue_igm'],   // Dengue Fever
-
-    // Gastrointestinal
-    'K35': ['usg_abdomen', 'cbc', 'urine_routine'], // Acute appendicitis
-
-    // Default for unknown
-    'default': ['cbc'],
-};
-
-const documentDetails: Record<DocumentCategory, { displayName: string; description: string }> = {
-    'chest_xray': { displayName: 'Chest X-Ray', description: 'PA view chest radiograph' },
-    'cbc': { displayName: 'CBC Report', description: 'Complete blood count with differential' },
-    'abg': { displayName: 'ABG Report', description: 'Arterial blood gas analysis' },
-    'ecg': { displayName: 'ECG', description: '12-lead electrocardiogram' },
-    'ct_scan': { displayName: 'CT Scan', description: 'Computed tomography report' },
-    'mri': { displayName: 'MRI', description: 'Magnetic resonance imaging report' },
-    'ultrasound': { displayName: 'Ultrasound', description: 'Ultrasonography report' },
-    'blood_culture': { displayName: 'Blood Culture', description: 'Blood culture and sensitivity' },
-    'urine_routine': { displayName: 'Urine Routine', description: 'Urine analysis report' },
-    'lft': { displayName: 'LFT', description: 'Liver function tests' },
-    'kft': { displayName: 'KFT', description: 'Kidney function tests' },
-    'covid_test': { displayName: 'COVID-19 Test', description: 'RT-PCR or Rapid Antigen Test' },
-    'ns1_antigen': { displayName: 'Dengue NS1 Antigen', description: 'Rapid test for early Dengue detection' },
-    'dengue_igm': { displayName: 'Dengue IgM', description: 'Antibody test for Dengue' },
-    'usg_abdomen': { displayName: 'USG Abdomen / Pelvis', description: 'Abdominal ultrasonography' },
-    'other': { displayName: 'Other Document', description: 'Additional supporting document' },
-};
+import { WizardDocCategory } from '../components/PreAuthWizard/types';
+import { DocumentRequirement } from '../types';
+import { getDocumentChecklist } from '../data/icd10MasterDatabase';
 
 export const getRequiredDocuments = (diagnosisOrIcd10: string): DocumentRequirement[] => {
-    let category = 'default';
+    // Attempt cashless checklist first
+    const dbChecklist = getDocumentChecklist(diagnosisOrIcd10, 'cashless');
+    
+    const mapToWizardCategory = (name: string): WizardDocCategory => {
+        const n = name.toLowerCase();
+        if (n.includes('x-ray') || n.includes('cxr')) return 'chest_xray';
+        if (n.includes('cbc') || n.includes('blood count')) return 'cbc';
+        if (n.includes('abg')) return 'abg';
+        if (n.includes('ecg')) return 'ecg';
+        if (n.includes('ct scan')) return 'ct_scan';
+        if (n.includes('mri')) return 'mri';
+        if (n.includes('usg') || n.includes('ultrasound')) return 'ultrasound';
+        if (n.includes('culture')) return 'blood_culture';
+        if (n.includes('urine')) return 'urine_routine';
+        if (n.includes('lft')) return 'lft';
+        if (n.includes('kft') || n.includes('creatinine')) return 'kft';
+        if (n.includes('policy') || n.includes('insurance')) return 'policy_copy';
+        return 'other';
+    };
 
-    // Check if it's an ICD-10 code format (e.g., A90, J18.9)
-    if (/^[A-Z][0-9]{2}/.test(diagnosisOrIcd10)) {
-        category = diagnosisOrIcd10.substring(0, 3);
-    } else {
-        // Fallback explicit text matching
-        const lowerDiag = diagnosisOrIcd10.toLowerCase();
-        if (lowerDiag.includes('dengue')) category = 'A90';
-        else if (lowerDiag.includes('appendicitis')) category = 'K35';
-        else if (lowerDiag.includes('pneumonia')) category = 'J18';
-        else if (lowerDiag.includes('sepsis')) category = 'A41';
-        else if (lowerDiag.includes('myocardial') || lowerDiag.includes('mi')) category = 'I21';
-    }
-
-    const requiredCategories = diagnosisDocumentMap[category] || diagnosisDocumentMap['default'];
-
-    return requiredCategories.map((cat, index) => ({
-        category: cat,
-        displayName: documentDetails[cat].displayName,
-        isRequired: index < 2, // First 2 are required, rest optional
-        description: documentDetails[cat].description,
+    return [...dbChecklist.mandatory, ...dbChecklist.recommended].map(r => ({
+        category: mapToWizardCategory(r.name) as any, // Cast for legacy support
+        displayName: r.name,
+        isRequired: r.mandatory,
+        description: r.tpaQueryIfMissing,
     }));
 };
 
 /**
  * Matches a filename to a document category
  */
-export const guessDocumentCategory = (filename: string): DocumentCategory => {
+export const guessDocumentCategory = (filename: string): WizardDocCategory => {
     const lower = filename.toLowerCase();
 
     if (lower.includes('xray') || lower.includes('x-ray') || lower.includes('cxr')) return 'chest_xray';
@@ -88,6 +52,9 @@ export const guessDocumentCategory = (filename: string): DocumentCategory => {
     if (lower.includes('ns1') || lower.includes('antigen')) return 'ns1_antigen';
     if (lower.includes('igm') || lower.includes('mac')) return 'dengue_igm';
     if (lower.includes('usg abdomen') || lower.includes('pelvis')) return 'usg_abdomen';
+    if (lower.includes('policy') || lower.includes('insurance')) return 'policy_copy';
+    if (lower.includes('pan')) return 'pan_card';
+    if (lower.includes('id') || lower.includes('aadhaar')) return 'id_proof';
 
     return 'other';
 };

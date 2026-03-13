@@ -3,8 +3,7 @@ import { AdmissionDetails, CostEstimate, ClinicalDetails, RoomCategory, PastMedi
 import { getRateForCategory, getLOSForDiagnosis } from '../../config/rateCard';
 import { calculateTotals, formatCostDisplay } from '../../utils/costCalculator';
 import { todayISO, nowTimeString } from '../../utils/formatters';
-import { getConditionByCode, getConditionByName } from '../../config/icd10Database';
-import { calculateCost, findConditionByICD } from '../../services/costEstimationService';
+import { getConditionByCode, estimateCost, isPMJAYEligible } from '../../data/icd10MasterDatabase';
 
 interface AdmissionCostStepProps {
     admission: Partial<AdmissionDetails>;
@@ -58,32 +57,25 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
         const dx = clinical?.diagnoses?.[clinical.selectedDiagnosisIndex ?? 0];
 
         if (dx) {
-            // Check ICD clinical database for PMJAY package
-            const condition = dx.icd10Code ? getConditionByCode(dx.icd10Code) : getConditionByName(dx.diagnosis);
-            if (condition?.pmjay_package) {
-                setMatchedPackage(condition.pmjay_package);
-            }
+            // Check ICD master database for PMJAY package
+            const condition = dx.icd10Code ? getConditionByCode(dx.icd10Code) : undefined;
+            const pmjay = dx.icd10Code ? isPMJAYEligible(dx.icd10Code) : { eligible: false };
 
-            // Also check cost database for PMJAY package (covers more conditions)
-            const costCondition = findConditionByICD(dx.icd10Code || '');
-            if (!matchedPackage && costCondition?.pmjay?.eligible) {
+            if (pmjay.eligible) {
                 setMatchedPackage({
-                    hbp_code: costCondition.pmjay.hbp_code,
-                    package_name: costCondition.condition,
-                    package_rate_inr: costCondition.pmjay.rate,
+                    hbp_code: pmjay.hbpCode,
+                    package_name: condition?.commonName || dx.diagnosis,
+                    package_rate_inr: pmjay.packageRate,
                 });
             }
 
             // Pre-fill LOS and costs if not already set
             if (!admission.expectedDaysInRoom) {
-                // Get LOS from cost DB first (100 conditions), fallback to clinical DB / rateCard
-                const costLos = costCondition
-                    ? { wardDays: costCondition.los.avg - costCondition.los.icu, icuDays: costCondition.los.icu }
-                    : null;
+                // Get LOS from master database
                 const clinicalLos = condition
-                    ? { wardDays: condition.los.typical, icuDays: condition.los.icu_days }
+                    ? { wardDays: condition.typicalLOS.average - (condition.icuProbability === 'high' ? 2 : 0), icuDays: (condition.icuProbability === 'high' ? 2 : 0) }
                     : null;
-                const los = costLos || clinicalLos || getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
+                const los = clinicalLos || getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
 
                 const defaultRoom = los.icuDays > 0 ? 'ICU' : 'General Ward';
 
@@ -97,30 +89,37 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                     admissionType: admission.admissionType ?? 'Emergency',
                 });
 
-                // Calculate costs from the 100-condition ICD cost database
-                const est = calculateCost(
-                    dx.icd10Code || '',
-                    defaultRoom,
-                    false, // default to private; PMJAY applied via button
-                    los.wardDays + los.icuDays,
-                    los.icuDays,
-                );
+                // Calculate costs from the ICD-10 master database
+                if (dx.icd10Code) {
+                    const wardTypeMap: Record<string, 'general' | 'private' | 'icu'> = {
+                        'General Ward': 'general',
+                        'Semi-Private': 'general',
+                        'Private': 'private',
+                        'Deluxe': 'private',
+                        'ICU': 'icu',
+                        'ICCU': 'icu',
+                        'NICU': 'icu',
+                        'HDU': 'icu'
+                    };
 
-                updateCost({
-                    roomRentPerDay: est.breakdown.room_rent / Math.max(1, los.wardDays),
-                    nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, los.wardDays),
-                    icuChargesPerDay: est.breakdown.icu_charges / Math.max(1, los.icuDays || 1),
-                    expectedRoomDays: los.wardDays,
-                    expectedIcuDays: los.icuDays,
-                    otCharges: est.breakdown.ot_charges,
-                    surgeonFee: est.breakdown.surgeon_fee,
-                    anesthetistFee: est.breakdown.anesthetist_fee,
-                    consultantFee: est.breakdown.consultant_fee,
-                    investigationsEstimate: est.breakdown.investigations,
-                    medicinesEstimate: est.breakdown.medicines,
-                    consumablesEstimate: est.breakdown.consumables,
-                    miscCharges: est.breakdown.miscellaneous,
-                });
+                    const estimation = estimateCost(
+                        dx.icd10Code, 
+                        wardTypeMap[admission.roomCategory || defaultRoom] || 'general',
+                        los.wardDays + los.icuDays
+                    );
+
+                    if (estimation.average > 0) {
+                        updateCost({
+                             totalRoomCharges: estimation.breakdown.roomCharges,
+                             consultantFee: estimation.breakdown.consultantFees,
+                             investigationsEstimate: estimation.breakdown.investigations,
+                             medicinesEstimate: estimation.breakdown.medicines,
+                             otCharges: estimation.breakdown.procedures,
+                             miscCharges: estimation.breakdown.nursing + estimation.breakdown.miscellaneous,
+                             totalEstimatedCost: estimation.max
+                        });
+                    }
+                }
             }
         }
     }, []);

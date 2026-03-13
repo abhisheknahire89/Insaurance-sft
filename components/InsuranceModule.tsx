@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PreAuthWizard } from './PreAuthWizard';
-import { getRequiredDocuments } from '../data/icd10DocumentMap';
+import { getDocumentChecklist, estimateCost, getConditionByCode } from '../data/icd10MasterDatabase';
 import { extractInsurancePreAuthData } from '../services/geminiService';
 
 // --- TYPES ---
@@ -184,20 +184,25 @@ ${input.hospitalName}
 `.trim();
 };
 
-const generateDocumentChecklist = (icd10Code: string, input: ReimbursementInput) => {
-    const reqs = getRequiredDocuments(icd10Code);
+const generateDocumentChecklistMarkdown = (icd10Code: string, input: ReimbursementInput) => {
+    const { mandatory, recommended, reimbursementExtra } = getDocumentChecklist(icd10Code, 'reimbursement');
+    const allReqNames = [...mandatory, ...recommended, ...reimbursementExtra].map(r => r.name);
+    
     return `
 DOCUMENT CHECKLIST (ICD-10: ${icd10Code})
 ----------------------------------------
-Standard Requirements for this diagnosis:
-${reqs.map((r, i) => `${i + 1}. [${input.documentsAvailable.includes(r) ? 'X' : ' '}] ${r}`).join('\n')}
+Mandatory Requirements:
+${mandatory.map((r, i) => `${i + 1}. [${input.documentsAvailable.includes(r.name) ? 'X' : ' '}] ${r.name}`).join('\n')}
+
+Recommended / Claim Specific:
+${[...recommended, ...reimbursementExtra].map((r, i) => `${i + 1}. [${input.documentsAvailable.includes(r.name) ? 'X' : ' '}] ${r.name}`).join('\n')}
 
 Additional Requirements Based on Patient History:
 [${input.hasPriorTreatmentForCondition && input.priorTreatmentDetails ? 'X' : ' '}] Prior Treatment Records
 [${input.implantsCost > 0 ? 'X' : ' '}] Implant Invoice and Stickers
 
 Other Provided Documents:
-${input.documentsAvailable.filter(d => !reqs.includes(d)).map(d => `- [X] ${d}`).join('\n')}
+${input.documentsAvailable.filter(d => !allReqNames.includes(d)).map(d => `- [X] ${d}`).join('\n')}
 `.trim();
 };
 
@@ -265,6 +270,19 @@ export const EnhancementModule: React.FC<{ preAuthData: any }> = ({ preAuthData 
                 </div>
             )}
 
+            {input.trigger === 'extended_stay' && input.originalDischargeDate && input.newDischargeDate && (
+                <div className="p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                    <p className="text-xs text-blue-300">
+                        💡 Tip: For this diagnosis, an extension of stay typically costs ₹
+                        {(estimateCost(
+                            preAuthData?.clinical?.diagnoses?.[0]?.icd10Code || 'J15', 
+                            'general', 
+                            Math.max(1, (new Date(input.newDischargeDate).getTime() - new Date(input.originalDischargeDate).getTime()) / (1000 * 60 * 60 * 24))
+                        ).average).toLocaleString()} based on current hospital rates.
+                    </p>
+                </div>
+            )}
+
             <div className="pt-2">
                 <label className="block text-sm text-red-400 font-bold">Additional Amount Requested (₹)</label>
                 <input type="number" className="w-1/2 p-2 bg-gray-800 rounded border border-gray-700" value={input.additionalAmountRequested} onChange={e => setInput({ ...input, additionalAmountRequested: Number(e.target.value) })} />
@@ -309,7 +327,7 @@ export const ReimbursementModule: React.FC = () => {
         setDocs({
             discharge: generateInsuranceDischarge(input),
             coverLetter: generateCoverLetter(input),
-            checklist: generateDocumentChecklist(input.finalPrimaryICD10 || 'default', input)
+            checklist: generateDocumentChecklistMarkdown(input.finalPrimaryICD10 || 'default', input)
         });
     };
 

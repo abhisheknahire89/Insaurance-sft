@@ -1,8 +1,230 @@
-import { PreAuthRecord, MedicalNecessityStatement, CostEstimate } from '../components/PreAuthWizard/types';
+import { PreAuthRecord, MedicalNecessityStatement, CostEstimate, ClinicalDetails } from '../components/PreAuthWizard/types';
 import { scoreNecessityStrength } from '../utils/strengthScorer';
-import { getConditionByCode, getConditionByName } from '../config/icd10Database';
-import { calculateCost, findConditionByICD } from './costEstimationService';
+import { 
+    getConditionByCode, 
+    getConditionByName,
+    searchConditions, 
+    estimateCost, 
+    isPMJAYEligible,
+    getSeverityMarkers,
+    getSpecialNotes,
+    validateAndSuggestICD10
+} from '../data/icd10MasterDatabase';
 import { calculateTotals } from '../utils/costCalculator';
+
+// ── BUG 5: SEVERITY RULE ENGINE ──────────────────────────────────────────────
+type SeverityLevel = 'Mild' | 'Moderate' | 'Moderate-Severe' | 'Severe' | 'Critical';
+
+interface SeverityFactors {
+  spo2: number;
+  rr: number;
+  pulse: number;
+  temp: number;
+  bp: string; // "118/72"
+  crp?: number;
+  wbc?: number; // TLC
+  phenoIntensity?: number;
+  deteriorationVelocity?: number;
+  curb65Score?: number;
+  failedOutpatientTreatment?: boolean;
+}
+
+export const classifySeverity = (factors: SeverityFactors): {
+  level: SeverityLevel;
+  score: number;
+  triggeringFactors: string[];
+} => {
+  let score = 0;
+  const triggeringFactors: string[] = [];
+
+  // SpO2 scoring
+  if (factors.spo2 < 88) { score += 3; triggeringFactors.push(`Critical hypoxia (SpO2 ${factors.spo2}%)`); }
+  else if (factors.spo2 < 92) { score += 2; triggeringFactors.push(`Significant hypoxia (SpO2 ${factors.spo2}%)`); }
+  else if (factors.spo2 < 94) { score += 1; triggeringFactors.push(`Borderline hypoxia (SpO2 ${factors.spo2}%)`); }
+
+  // Respiratory rate scoring
+  if (factors.rr > 30) { score += 2; triggeringFactors.push(`Severe tachypnea (RR ${factors.rr}/min)`); }
+  else if (factors.rr > 24) { score += 1; triggeringFactors.push(`Tachypnea (RR ${factors.rr}/min)`); }
+
+  // Heart rate scoring
+  if (factors.pulse > 120) { score += 1; triggeringFactors.push(`Significant tachycardia (HR ${factors.pulse}/min)`); }
+  else if (factors.pulse > 100) { score += 0.5; triggeringFactors.push(`Tachycardia (HR ${factors.pulse}/min)`); }
+
+  // BP scoring (systolic)
+  const systolic = parseInt(factors.bp?.split('/')[0] || '120');
+  if (systolic < 90) { score += 3; triggeringFactors.push(`Hypotension (BP ${factors.bp})`); }
+  else if (systolic < 100) { score += 1; triggeringFactors.push(`Low-normal BP (${factors.bp})`); }
+
+  // Inflammatory markers
+  if (factors.crp && factors.crp > 150) { score += 1; triggeringFactors.push(`Markedly elevated CRP (${factors.crp})`); }
+  else if (factors.crp && factors.crp > 50) { score += 0.5; }
+
+  if (factors.wbc && (factors.wbc > 15000 || factors.wbc < 4000)) { 
+    score += 0.5; 
+    triggeringFactors.push(`Abnormal TLC (${factors.wbc})`); 
+  }
+
+  // NEXUS/Wizard scores
+  if (factors.phenoIntensity && factors.phenoIntensity > 0.8) { score += 1; }
+  if (factors.deteriorationVelocity && factors.deteriorationVelocity > 0.7) { score += 1; }
+
+  // CURB-65
+  if (factors.curb65Score && factors.curb65Score >= 3) { score += 2; triggeringFactors.push(`High CURB-65 score (${factors.curb65Score})`); }
+  else if (factors.curb65Score && factors.curb65Score === 2) { score += 1; triggeringFactors.push(`CURB-65 score of 2 (moderate severity)`); }
+
+  // Failed outpatient treatment
+  if (factors.failedOutpatientTreatment) { score += 1; triggeringFactors.push('Failed prior outpatient antibiotic therapy'); }
+
+  // Classify based on total score
+  let level: SeverityLevel;
+  if (score >= 7) level = 'Critical';
+  else if (score >= 5) level = 'Severe';
+  else if (score >= 3) level = 'Moderate-Severe';
+  else if (score >= 1.5) level = 'Moderate';
+  else level = 'Mild';
+
+  return { level, score, triggeringFactors };
+};
+
+// ── BUG 2: MEDICAL NECESSITY BULLETS ─────────────────────────────────────────
+const generateNecessityBullets = (clinicalData: Partial<ClinicalDetails>): string[] => {
+  const bullets: string[] = [];
+  const vitals = clinicalData.vitals;
+
+  // Source 1: Severity-based bullets
+  if (vitals?.spo2 && parseInt(vitals.spo2) < 94) {
+    bullets.push(
+      `Hypoxia (SpO2 ${vitals.spo2}% on room air) requires continuous supplemental oxygen — cannot be safely provided in outpatient setting`
+    );
+  }
+  if (vitals?.rr && parseInt(vitals.rr) > 24) {
+    bullets.push(
+      `Tachypnea (RR ${vitals.rr}/min) indicating significant respiratory compromise requiring close monitoring`
+    );
+  }
+  if (vitals?.pulse && parseInt(vitals.pulse) > 100) {
+    bullets.push(
+      `Tachycardia (HR ${vitals.pulse}/min) consistent with systemic infection requiring inpatient monitoring`
+    );
+  }
+
+  // Source 2: Failed prior treatment
+  if (clinicalData.treatmentTakenSoFar && clinicalData.treatmentTakenSoFar.toLowerCase() !== 'none' && clinicalData.treatmentTakenSoFar.toLowerCase() !== 'nil') {
+    bullets.push(
+      `Failed outpatient treatment: Patient received ${clinicalData.treatmentTakenSoFar} without clinical improvement — necessitates escalation to IV therapy in monitored setting`
+    );
+  }
+
+  // Source 3: OPD contraindication reasons
+  if (clinicalData.reasonForHospitalisation) {
+    bullets.push(clinicalData.reasonForHospitalisation);
+  }
+
+  // Source 4: Comorbidities that directly impact severity
+  // Logic shifted to BUG 8 function
+
+  // Source 5: Severity scoring systems mentioned in clinical notes
+  const clinicalText = (clinicalData.relevantClinicalFindings || '') + ' ' + (clinicalData.additionalClinicalNotes || '');
+  if (clinicalText.toLowerCase().includes('curb-65') || clinicalText.toLowerCase().includes('curb65')) {
+    const scoreMatch = clinicalText.match(/curb-?65[^\d]*(\d)/i);
+    if (scoreMatch) {
+      const score = parseInt(scoreMatch[1]);
+      if (score >= 2) {
+        bullets.push(
+          `CURB-65 severity score of ${score} indicates moderate-to-severe pneumonia — score ≥2 is standard clinical threshold recommending inpatient management per BTS/IDSA guidelines`
+        );
+      }
+    }
+  }
+
+  // Source 6: IV medication requirement
+  const planText = (clinicalData.proposedTreatmentDetails?.antibiotics || clinicalData.proposedTreatmentDetails?.otherTreatments || '').toLowerCase();
+  if (planText.includes('iv ') || planText.includes('intravenous') || planText.includes('parenteral')) {
+    bullets.push(
+      `Intravenous medication required — IV antibiotic therapy and IV fluid management necessitate inpatient setting with nursing monitoring`
+    );
+  }
+
+  // Fallback: ensure at least one bullet exists
+  if (bullets.length === 0) {
+    bullets.push('Clinical severity precludes safe outpatient management — inpatient monitoring required');
+  }
+
+  return bullets;
+};
+
+// ── BUG 4: STRUCTURED TREATMENT PLAN ─────────────────────────────────────────
+const generateTreatmentPlanText = (details: any, admissionType?: string): string => {
+  if (!details) return 'Medical management as per clinical protocol';
+  const lines: string[] = [];
+
+  if (details.antibiotics) lines.push(`Antibiotic Therapy: ${details.antibiotics}`);
+  if (details.oxygenTherapy) lines.push(`Oxygen Supplementation: ${details.oxygenDetails || 'As required to maintain SpO2 >94%'}`);
+  if (details.ivFluids) lines.push(`IV Fluid Management: ${details.ivFluidDetails || 'IV fluids as per clinical assessment'}`);
+  if (details.nebulization) lines.push(`Nebulization: ${details.nebulizationDetails || 'Bronchodilator nebulization as required'}`);
+  if (details.insulinProtocol) lines.push(`Diabetes Management: ${details.insulinDetails || 'Insulin sliding scale with blood glucose monitoring'}`);
+  if (details.pendingInvestigations) lines.push(`Investigations Ordered: ${details.pendingInvestigations}`);
+  if (details.otherTreatments) lines.push(details.otherTreatments);
+
+  if (lines.length === 0) {
+    lines.push(admissionType || 'Medical management as per clinical protocol');
+  }
+
+  return lines.join('\n');
+};
+
+// ── BUG 7: INVESTIGATIONS TEXT ───────────────────────────────────────────────
+const generateInvestigationsText = (clinical: Partial<ClinicalDetails>): string => {
+  const completed: string[] = [];
+  const pending: string[] = [];
+
+  const invSent = clinical.investigationsSent;
+  if (invSent?.bloodCulture) pending.push('Blood culture — sent, awaiting sensitivity report');
+  if (invSent?.sputumCulture) pending.push('Sputum culture — sent, awaiting report');
+  if (invSent?.urineCulture) pending.push('Urine culture — sent, awaiting report');
+  if (invSent?.abg) pending.push('Arterial Blood Gas (ABG) — pending');
+  if (invSent?.ctScan) pending.push('CT Scan — pending');
+  
+  if (clinical.investigationsPending) pending.push(clinical.investigationsPending);
+  if (clinical.investigationsResultsAvailable) completed.push(clinical.investigationsResultsAvailable);
+
+  let text = '';
+  if (completed.length > 0) text += `Results Available: ${completed.join('; ')}\n`;
+  if (pending.length > 0) {
+    text += `Investigations Pending: ${pending.join('; ')}\n`;
+    text += `(Results will be submitted to TPA upon availability)`;
+  }
+  return text;
+};
+
+// ── BUG 8: COMORBIDITY IMPACT ────────────────────────────────────────────────
+const COMORBIDITY_LOS_IMPACT: Record<string, string> = {
+  'diabetes': 'Comorbid uncontrolled diabetes requires concurrent glycemic management (insulin protocol), impairs immune response, and increases risk of secondary infection — expected to extend LOS by 1-2 days compared to non-diabetic patients with equivalent pneumonia severity.',
+  'hypertension': 'Comorbid hypertension requires BP monitoring during IV fluid therapy and antibiotic administration to prevent hemodynamic instability.',
+  'copd': 'Comorbid COPD increases risk of acute-on-chronic respiratory failure, necessitating closer respiratory monitoring and potentially longer oxygen wean-off period.',
+  'ckd': 'Comorbid chronic kidney disease requires antibiotic dose adjustment and renal function monitoring, adding complexity to management.',
+  'cardiac': 'Comorbid cardiac disease increases risk of fluid overload during IV therapy, requiring careful fluid balance monitoring.',
+  'immunocompromised': 'Immunocompromised state increases infection severity and reduces treatment response rate, likely extending LOS.',
+};
+
+const generateComorbidityImpactStatement = (clinical: Partial<ClinicalDetails>): string => {
+  const pmh = clinical.diagnoses?.map(d => d.diagnosis.toLowerCase()) || []; 
+  // Should ideally check record.admission.pastMedicalHistory, but we can also check ClinicalDetails diagnoses
+  // Actually let's just use what's available in the medical necessity flow
+  
+  const impacts: string[] = [];
+  
+  // Also check clinical finding text for common comorbidities
+  const fullText = (clinical.relevantClinicalFindings || '') + (clinical.additionalClinicalNotes || '');
+  
+  Object.keys(COMORBIDITY_LOS_IMPACT).forEach(key => {
+    if (fullText.toLowerCase().includes(key)) {
+      impacts.push(COMORBIDITY_LOS_IMPACT[key]);
+    }
+  });
+  
+  return impacts.join('\n\n');
+};
 
 /**
  * If the cost estimate is all zeros, auto-calculate from ICD cost database.
@@ -20,33 +242,31 @@ function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate
     if (!icdCode) return cost ?? {};
 
     const roomCategory = record.admission?.roomCategory ?? 'General Ward';
-    const isPMJAY = record.insurance?.policyType?.toLowerCase().includes('pmjay') ||
-        record.insurance?.policyType?.toLowerCase().includes('ayushman') || false;
-
-    console.log(`[CostFix] Auto-calculating costs from ICD database for ${icdCode}, room=${roomCategory}, PMJAY=${isPMJAY}`);
-
-    const est = calculateCost(icdCode, roomCategory, isPMJAY);
-
-    console.log(`[CostFix] Result: LOS=${est.los.total_days}, Total=₹${est.total_estimated}`, est.breakdown);
+    const wardType = roomCategory.toLowerCase().includes('icu') ? 'icu' : 
+                    roomCategory.toLowerCase().includes('private') ? 'privateRoom' : 'generalWard';
+    
+    const los = record.admission?.expectedLengthOfStay ?? 3;
+    const dbCost = estimateCost(icdCode, wardType as any, los);
+    const pmjay = isPMJAYEligible(icdCode);
 
     const enriched = calculateTotals({
-        roomRentPerDay: est.breakdown.room_rent / Math.max(1, est.los.ward_days),
-        expectedRoomDays: est.los.ward_days,
-        nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, est.los.ward_days),
-        icuChargesPerDay: est.los.icu_days > 0 ? est.breakdown.icu_charges / est.los.icu_days : 0,
-        expectedIcuDays: est.los.icu_days,
-        otCharges: est.breakdown.ot_charges,
-        surgeonFee: est.breakdown.surgeon_fee,
-        anesthetistFee: est.breakdown.anesthetist_fee,
-        consultantFee: est.breakdown.consultant_fee,
-        investigationsEstimate: est.breakdown.investigations,
-        medicinesEstimate: est.breakdown.medicines,
-        consumablesEstimate: est.breakdown.consumables,
-        miscCharges: est.breakdown.miscellaneous,
-        ...(est.source === 'PMJAY' && est.pmjay_details ? {
+        roomRentPerDay: dbCost.breakdown.roomCharges / los,
+        expectedRoomDays: los,
+        nursingChargesPerDay: dbCost.breakdown.nursing / los,
+        icuChargesPerDay: wardType === 'icu' ? (dbCost.breakdown.roomCharges / los) : 0,
+        expectedIcuDays: wardType === 'icu' ? los : 0,
+        otCharges: dbCost.breakdown.procedures * 0.5, // Ot is subset of procedures
+        surgeonFee: dbCost.breakdown.consultantFees,
+        anesthetistFee: dbCost.breakdown.consultantFees * 0.3,
+        consultantFee: dbCost.breakdown.consultantFees * 0.2,
+        investigationsEstimate: dbCost.breakdown.investigations,
+        medicinesEstimate: dbCost.breakdown.medicines,
+        consumablesEstimate: dbCost.breakdown.miscellaneous,
+        miscCharges: 1000,
+        ...(pmjay.eligible ? {
             isPackageRate: true,
-            packageName: est.pmjay_details.package_name,
-            packageAmount: est.pmjay_details.package_rate,
+            packageName: pmjay.hbpCode,
+            packageAmount: pmjay.packageRate,
         } : {}),
     }, record.insurance?.sumInsured ?? 0);
 
@@ -57,7 +277,6 @@ function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate
  * Auto-generates a medical necessity statement from collected data.
  */
 export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): MedicalNecessityStatement => {
-    const patient = record.patient;
     const clinical = record.clinical;
     const admission = record.admission;
     // ✅ FIX: Auto-enrich cost from ICD database if totalEstimatedCost is 0
@@ -66,27 +285,20 @@ export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): Medica
     const selectedDx = clinical?.diagnoses?.[clinical.selectedDiagnosisIndex ?? 0];
     const vitals = clinical?.vitals;
 
-    const abnormalFindings: string[] = [];
-    const vfList = clinical?.voiceCapturedFindings ?? [];
-    vfList.filter(f => f.interpretation !== 'normal').forEach(f => {
-        abnormalFindings.push(`• ${f.testName}: ${f.result}`);
+    // ── BUG 5: SEVERITY CALCULATION ──────────────────────────────────────
+    const severityResult = classifySeverity({
+        spo2: vitals?.spo2 ? parseInt(vitals.spo2) : 98,
+        rr: vitals?.rr ? parseInt(vitals.rr) : 18,
+        pulse: vitals?.pulse ? parseInt(vitals.pulse) : 72,
+        temp: vitals?.temp ? parseFloat(vitals.temp) : 98.6,
+        bp: vitals?.bp || '120/80',
+        phenoIntensity: clinical?.severity?.phenoIntensity,
+        deteriorationVelocity: clinical?.severity?.deteriorationVelocity,
+        curb65Score: 0, // Could be extracted from text
+        failedOutpatientTreatment: clinical?.treatmentTakenSoFar && clinical.treatmentTakenSoFar !== 'nil' && clinical.treatmentTakenSoFar !== 'none'
     });
 
-    const severityPoints: string[] = [];
-    const sev = clinical?.severity;
-    if (sev) {
-        if (sev.phenoIntensity > 0.7) severityPoints.push('Severe symptom presentation');
-        if (sev.urgencyQuotient > 0.7) severityPoints.push('Time-critical intervention required');
-        if (sev.deteriorationVelocity > 0.7) severityPoints.push('High risk of rapid deterioration');
-    }
-    const spo2 = vitals?.spo2 ? parseInt(vitals.spo2) : null;
-    if (spo2 !== null && spo2 < 94) severityPoints.push(`Hypoxia (SpO2 ${spo2}%)`);
-
-    const opdContra: string[] = [
-        ...(clinical?.reasonForHospitalisation ? [clinical.reasonForHospitalisation] : []),
-        ...(spo2 !== null && spo2 < 94 ? ['Oxygen requirement cannot be safely met at home'] : []),
-        'Need for continuous inpatient monitoring and IV management',
-    ];
+    const opdContra = generateNecessityBullets(clinical || {});
 
     const treatmentLines: string[] = [];
     const plt = clinical?.proposedLineOfTreatment;
@@ -95,92 +307,65 @@ export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): Medica
     if (plt?.intensiveCare) treatmentLines.push('Intensive care');
     if (plt?.investigation) treatmentLines.push('Investigation');
 
-    // ── ICD Database enrichment (255-condition database) ────────────────────
-    const icdCondition = selectedDx?.icd10Code
-        ? getConditionByCode(selectedDx.icd10Code)
-        : selectedDx?.diagnosis
-            ? getConditionByName(selectedDx.diagnosis)
-            : undefined;
+    // ── ICD Database enrichment ──
+    const icdCondition = selectedDx?.icd10Code ? getConditionByCode(selectedDx.icd10Code) : undefined;
 
     let icdEnrichment = '';
     if (icdCondition) {
-        const admissionCriteria = (icdCondition.admission_criteria ?? []).slice(0, 5);
-        const procedures = (icdCondition.expected_procedures ?? []).slice(0, 5);
-        const tpaRisks = (icdCondition.tpa_query_triggers ?? []).slice(0, 3);
-        const mustDocs = (icdCondition.must_include_docs ?? []).slice(0, 5);
-        const los = icdCondition.los;
-        const pmjayNote = icdCondition.pmjay_eligible ? 'Eligible for PMJAY (Ayushman Bharat) coverage.' : '';
+        const severityMarkers = getSeverityMarkers(icdCondition.code);
+        const specialNotes = getSpecialNotes(icdCondition.code);
+        const tpaQueries = icdCondition.commonTPAQueries;
+        
         icdEnrichment = `
+CLINICAL SEVERITY MARKERS (Condition Specific):
+${severityMarkers.map(m => `• ${m}`).join('\n')}
 
-CONDITION-SPECIFIC ADMISSION CRITERIA (ICD-10-CM 2024: ${icdCondition.primary_code}):
-${admissionCriteria.map((c: string) => `• ${c}`).join('\n') || '• Clinical severity warrants inpatient monitoring'}
+SPECIAL CLINICAL CONSIDERATIONS:
+${specialNotes.map(n => `• ${n}`).join('\n')}
 
-EXPECTED INVESTIGATIONS & PROCEDURES:
-${procedures.map((p: string) => `• ${p}`).join('\n')}
-
-EXPECTED LENGTH OF STAY: ${los.min}\u2013${los.typical} days${los.icu_days > 0 ? ` (up to ${los.icu_days} ICU days)` : ''}.
-${los.note ? `Clinical Note: ${los.note}` : ''}
-
-INDIA-SPECIFIC CONTEXT: ${icdCondition.india_notes} ${pmjayNote}
-
-DOCUMENTATION THAT MUST BE ATTACHED:
-${mustDocs.map((d: string) => `\u2610 ${d}`).join('\n')}
-
-\u26A0\uFE0F COMMON TPA QUERY TRIGGERS (preemptively addressed):
-${tpaRisks.map((t: string) => `• ${t}`).join('\n')}`;
+ANTICIPATED TPA QUERIES & MITIGATION:
+${tpaQueries.map(q => `• ${q}`).join('\n')}`;
     }
+
+    // ── BUG 6: LOS SINGLE SOURCE OF TRUTH ─────────────────────────────────
+    const expectedLOS = 
+        admission?.expectedLengthOfStay || 
+        clinical?.severity?.expectedLOS || 
+        (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typicalLOS.average ?? 0) : 0) ||
+        0;
+
+    const wardDays = admission?.expectedDaysInRoom ?? Math.max(0, expectedLOS - (admission?.expectedDaysInICU || 0));
+    const icuDays = admission?.expectedDaysInICU ?? 0;
 
     const text = `MEDICAL NECESSITY STATEMENT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Patient: ${patient?.patientName ?? 'N/A'}, ${patient?.age ?? '?'} years, ${patient?.gender ?? 'N/A'}
+Patient: ${record.patient?.patientName ?? 'N/A'}, ${record.patient?.age ?? '?'} years, ${record.patient?.gender ?? 'N/A'}
 Diagnosis: ${selectedDx?.diagnosis ?? 'N/A'} (ICD-10: ${selectedDx?.icd10Code ?? 'N/A'})
-Diagnostic Confidence: ${selectedDx ? `${Math.round((selectedDx.probability ?? 0.85) * 100)}%` : 'N/A'}
 
 CLINICAL PRESENTATION:
-${clinical?.historyOfPresentIllness || clinical?.chiefComplaints || 'As documented in attached clinical notes.'}
+${clinical?.chiefComplaints || 'N/A'} (Duration: ${clinical?.durationOfPresentAilment || 'N/A'})
+${clinical?.historyOfPresentIllness || ''}
 
-CHIEF COMPLAINTS:
-${clinical?.chiefComplaints || 'N/A'}
-Duration: ${clinical?.durationOfPresentAilment || 'N/A'}
-Nature of Illness: ${clinical?.natureOfIllness || 'N/A'}
-
-RELEVANT CLINICAL FINDINGS:
-${clinical?.relevantClinicalFindings || 'As documented.'}
-
-${abnormalFindings.length > 0 ? `KEY ABNORMAL FINDINGS:\n${abnormalFindings.join('\n')}` : ''}
-
-VITAL SIGNS AT PRESENTATION:
-BP: ${vitals?.bp || 'N/R'} mmHg | Pulse: ${vitals?.pulse || 'N/R'}/min | Temp: ${vitals?.temp || 'N/R'}°F
-SpO2: ${vitals?.spo2 || 'N/R'}% | RR: ${vitals?.rr || 'N/R'}/min
+VITAL SIGNS:
+BP: ${vitals?.bp || 'N/R'} | Pulse: ${vitals?.pulse || 'N/R'} | SpO2: ${vitals?.spo2 || 'N/R'}% | RR: ${vitals?.rr || 'N/R'}
 
 SEVERITY ASSESSMENT:
-Overall Risk: ${sev?.overallRisk ?? 'Moderate'}
-${severityPoints.map(s => `• ${s}`).join('\n') || '• Moderate severity requiring inpatient care'}
+Overall Risk: ${severityResult.level}
+Contributing Factors:
+${severityResult.triggeringFactors.map(f => `• ${f}`).join('\n') || '• Clinical presentation warrants inpatient care'}
 
 MEDICAL NECESSITY JUSTIFICATION:
-Hospitalization is medically necessary due to:
-${severityPoints.map(s => `• ${s}`).join('\n') || '• Clinical severity requiring supervised inpatient care'}
+Hospitalization is medically necessary based on the following clinical factors:
+${opdContra.map(c => `• ${c}`).join('\n')}
 
-WHY OPD MANAGEMENT IS NOT APPROPRIATE:
-${opdContra.filter(Boolean).map(c => `• ${c}`).join('\n')}
+COMORBIDITY IMPACT ON TREATMENT AND LOS:
+${generateComorbidityImpactStatement(clinical || {})}
 
-${clinical?.treatmentTakenSoFar ? `PRIOR TREATMENT:\n${clinical.treatmentTakenSoFar}\n` : ''}
+PROPOSED TREATMENT PLAN:
+${generateTreatmentPlanText(clinical?.proposedTreatmentDetails, admission?.admissionType)}
 
-PROPOSED MANAGEMENT:
-${treatmentLines.length > 0 ? treatmentLines.map(l => `• ${l}`).join('\n') : '• Medical management'}
-• Admission: ${admission?.admissionType ?? 'N/A'} - ${admission?.roomCategory ?? 'General Ward'}
-• Expected Length of Stay: ${(() => {
-            let los = admission?.expectedLengthOfStay ?? 0;
-            let ward = admission?.expectedDaysInRoom ?? 0;
-            let icu = admission?.expectedDaysInICU ?? 0;
-            if (los === 0 && selectedDx?.icd10Code) {
-                const icdCond = findConditionByICD(selectedDx.icd10Code);
-                if (icdCond) { los = icdCond.los.avg; ward = icdCond.los.avg - icdCond.los.icu; icu = icdCond.los.icu; }
-            }
-            return `${los} days (${ward} ward + ${icu} ICU days)`;
-        })()}
-• Total Estimated Cost: ₹${(cost?.totalEstimatedCost ?? 0).toLocaleString('en-IN')}
+EXPECTED LENGTH OF STAY: ${expectedLOS} days (${wardDays} ward + ${icuDays} ICU days)
 ${icdEnrichment}`;
 
     const { strength, reasons } = scoreNecessityStrength(record);
@@ -198,29 +383,68 @@ ${icdEnrichment}`;
  * Generates the full IRDAI Part C formatted text from a complete PreAuthRecord
  */
 export const generateIRDAITextFromRecord = (record: Partial<PreAuthRecord>): string => {
-    const p = record.patient;
-    const ins = record.insurance;
+    // ── BUG 1: NORMALIZATION LAYER ──────────────────────────────────────────
+    const rawPatient = record.patient || {};
+    const rawPolicy = record.insurance || {};
+    const rawDoctor = record.declarations?.doctor || {};
+    const rawHospital = record.declarations?.hospital || {};
+
+    const p = {
+        name: rawPatient.patientName ?? (rawPatient as any).name ?? 'N/A',
+        age: rawPatient.age ?? 'N/A',
+        gender: rawPatient.gender ?? 'N/A',
+        dob: rawPatient.dateOfBirth ?? (rawPatient as any).dob ?? 'N/A',
+        mobile: rawPatient.mobileNumber ?? (rawPatient as any).mobile ?? 'N/A',
+        address: rawPatient.address ?? 'N/A',
+        city: rawPatient.city ?? 'N/A',
+        state: rawPatient.state ?? 'N/A',
+        pincode: rawPatient.pincode ?? 'N/A',
+        uhid: rawPatient.uhid ?? 'N/A',
+        abhaId: rawPatient.abhaId ?? 'N/A',
+        occupation: rawPatient.occupation ?? 'N/A',
+        maritalStatus: rawPatient.maritalStatus ?? 'N/A'
+    };
+
+    const ins = {
+        insurerName: rawPolicy.insurerName ?? 'N/A',
+        tpaName: rawPolicy.tpaName ?? 'N/A',
+        tpaIdCardNumber: rawPolicy.tpaIdCardNumber ?? 'N/A',
+        policyNumber: rawPolicy.policyNumber ?? 'N/A',
+        policyType: rawPolicy.policyType ?? 'N/A',
+        policyStartDate: rawPolicy.policyStartDate ?? (rawPolicy as any).policyFrom ?? 'N/A',
+        policyEndDate: rawPolicy.policyEndDate ?? (rawPolicy as any).policyTo ?? 'N/A',
+        sumInsured: rawPolicy.sumInsured ?? 0,
+        proposerName: rawPolicy.proposerName ?? 'N/A',
+        relationship: rawPolicy.relationshipWithProposer ?? (rawPolicy as any).relationship ?? 'N/A',
+        insuredName: rawPolicy.insuredName ?? p.name,
+    };
+
+    const docDecl = {
+        name: rawDoctor.doctorName ?? 'N/A',
+        registrationNumber: rawDoctor.doctorRegistrationNumber ?? 'N/A',
+        qualification: rawDoctor.doctorQualification ?? 'N/A'
+    };
+
+    const hospDecl = {
+        signatoryName: rawHospital.authorizedSignatoryName ?? 'N/A',
+        designation: rawHospital.designation ?? 'N/A'
+    };
+
     const c = record.clinical;
     const a = record.admission;
-    // ✅ FIX: Auto-enrich cost from ICD database if totalEstimatedCost is 0
     const cost = enrichCostFromICD(record);
     const necessity = record.medicalNecessity;
-    const decl = record.declarations;
-    const selectedDx = c?.diagnoses?.[c.selectedDiagnosisIndex ?? 0];
+    const selectedDx = c?.diagnoses?.[c?.selectedDiagnosisIndex ?? 0];
 
-    // ✅ FIX: Auto-enrich admission LOS from ICD database if expectedLengthOfStay is 0
-    let admissionLOS = a?.expectedLengthOfStay ?? 0;
-    let admissionWard = a?.expectedDaysInRoom ?? 0;
-    let admissionICU = a?.expectedDaysInICU ?? 0;
-    if (admissionLOS === 0 && selectedDx?.icd10Code) {
-        const icdCond = findConditionByICD(selectedDx.icd10Code);
-        if (icdCond) {
-            admissionLOS = icdCond.los.avg;
-            admissionWard = icdCond.los.avg - icdCond.los.icu;
-            admissionICU = icdCond.los.icu;
-            console.log(`[LOSFix] Auto-set LOS from ICD DB: total=${admissionLOS}, ward=${admissionWard}, icu=${admissionICU}`);
-        }
-    }
+    // ✅ BUG 3: ICD-10 VALIDATION & CORRECTION
+    const icdValidation = validateAndSuggestICD10(selectedDx?.icd10Code || '');
+    const finalICD10 = icdValidation.isBillable ? icdValidation.originalCode : icdValidation.suggestedCode;
+    const icdNote = !icdValidation.isBillable ? ` [Auto-corrected from ${icdValidation.originalCode}]` : '';
+
+    // ✅ BUG 6: LOS UNIFICATION
+    const admissionLOS = a?.expectedLengthOfStay || (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typicalLOS.average ?? 0) : 0);
+    const admissionWard = a?.expectedDaysInRoom ?? Math.max(0, (admissionLOS || 0) - (a?.expectedDaysInICU || 0));
+    const admissionICU = a?.expectedDaysInICU ?? 0;
 
     const pmh = a?.pastMedicalHistory;
     const pmhList = pmh ? [
@@ -244,35 +468,33 @@ Status      : ${record.status?.toUpperCase() ?? 'DRAFT'}
 ────────────────────────────────────────────────────────────────────────────────
 SECTION 1: INSURANCE / TPA / HOSPITAL DETAILS
 ────────────────────────────────────────────────────────────────────────────────
-Insurance Company  : ${ins?.insurerName ?? 'N/A'}
-TPA Name           : ${ins?.tpaName ?? 'N/A'}
-TPA Card No        : ${ins?.tpaIdCardNumber ?? 'N/A'}
+Insurance Company  : ${ins.insurerName}
+TPA Name           : ${ins.tpaName}
+TPA Card No        : ${ins.tpaIdCardNumber}
 
 ────────────────────────────────────────────────────────────────────────────────
 SECTION 2: POLICY DETAILS
 ────────────────────────────────────────────────────────────────────────────────
-Policy Number      : ${ins?.policyNumber ?? 'N/A'}
-Policy Type        : ${ins?.policyType ?? 'N/A'}
-Policy Period      : ${ins?.policyStartDate ?? 'N/A'} to ${ins?.policyEndDate ?? 'N/A'}
-Sum Insured        : ₹${(ins?.sumInsured ?? 0).toLocaleString('en-IN')}
-Proposer Name      : ${ins?.proposerName ?? 'N/A'}
-Insured Name       : ${ins?.insuredName ?? 'N/A'}
-Relationship       : ${ins?.relationshipWithProposer ?? 'N/A'}
-${ins?.employeeId ? `Employee ID        : ${ins.employeeId}` : ''}
-${ins?.corporateName ? `Corporate Name     : ${ins.corporateName}` : ''}
+Policy Number      : ${ins.policyNumber}
+Policy Type        : ${ins.policyType}
+Policy Period      : ${ins.policyStartDate} to ${ins.policyEndDate}
+Sum Insured        : ₹${(ins.sumInsured ?? 0).toLocaleString('en-IN')}
+Proposer Name      : ${ins.proposerName}
+Insured Name       : ${ins.insuredName}
+Relationship       : ${ins.relationship}
 
 ────────────────────────────────────────────────────────────────────────────────
 SECTION 3: PATIENT PERSONAL DETAILS
 ────────────────────────────────────────────────────────────────────────────────
-Patient Name       : ${p?.patientName ?? 'N/A'}
-Date of Birth      : ${p?.dateOfBirth ?? 'N/A'}
-Age / Gender       : ${p?.age ?? 'N/A'} years / ${p?.gender ?? 'N/A'}
-Marital Status     : ${p?.maritalStatus ?? 'N/A'}
-Occupation         : ${p?.occupation ?? 'N/A'}
-Address            : ${p?.address ?? 'N/A'}, ${p?.city ?? ''}, ${p?.state ?? ''} - ${p?.pincode ?? ''}
-Mobile             : ${p?.mobileNumber ?? 'N/A'}
-UHID               : ${p?.uhid ?? 'N/A'}
-ABHA ID            : ${p?.abhaId ?? 'N/A'}
+Patient Name       : ${p.name}
+Date of Birth      : ${p.dob}
+Age / Gender       : ${p.age} years / ${p.gender}
+Marital Status     : ${p.maritalStatus}
+Occupation         : ${p.occupation}
+Address            : ${p.address}, ${p.city}, ${p.state} - ${p.pincode}
+Mobile             : ${p.mobile}
+UHID               : ${p.uhid}
+ABHA ID            : ${p.abhaId}
 
 ────────────────────────────────────────────────────────────────────────────────
 SECTION 4: CLINICAL DETAILS (Filled by Treating Doctor)
@@ -284,11 +506,17 @@ Nature of Illness  : ${c?.natureOfIllness ?? 'N/A'}
 Relevant Clinical Findings:
 ${c?.relevantClinicalFindings ?? 'N/A'}
 
+INVESTIGATIONS:
+${generateInvestigationsText(c || {})}
+
 PROVISIONAL DIAGNOSIS  : ${selectedDx?.diagnosis ?? 'N/A'}
-ICD-10 CODE            : ${selectedDx?.icd10Code ?? 'N/A'} — ${selectedDx?.icd10Description ?? 'N/A'}
+ICD-10 CODE            : ${finalICD10}${icdNote} — ${selectedDx?.icd10Description ?? 'N/A'}
 
 Proposed Line of Treatment:
 [${c?.proposedLineOfTreatment?.medical ? 'X' : ' '}] Medical  [${c?.proposedLineOfTreatment?.surgical ? 'X' : ' '}] Surgical  [${c?.proposedLineOfTreatment?.intensiveCare ? 'X' : ' '}] ICU  [${c?.proposedLineOfTreatment?.investigation ? 'X' : ' '}] Investigation
+
+Specific Treatment Plan:
+${generateTreatmentPlanText(c?.proposedTreatmentDetails, a?.admissionType)}
 
 ${necessity ? `\n--- MEDICAL NECESSITY & OPD CONTRAINDICATION -----------------------------------\n${necessity.editedText ?? necessity.generatedText}\n--------------------------------------------------------------------------------` : ''}
 
@@ -325,11 +553,10 @@ CLAIMED FROM INS.  : ₹${(cost?.amountClaimedFromInsurer ?? 0).toLocaleString('
 ────────────────────────────────────────────────────────────────────────────────
 SECTION 7: DECLARATIONS
 ────────────────────────────────────────────────────────────────────────────────
-Doctor Declaration : Dr. ${decl?.doctor?.doctorName ?? 'N/A'} (Reg: ${decl?.doctor?.doctorRegistrationNumber ?? 'N/A'})
-Confirmed          : ${decl?.doctor?.confirmed ? 'YES — ' + (decl.doctor.confirmationMethod ?? 'in_app') : 'PENDING'}
+Doctor Declaration : Dr. ${docDecl.name} (Reg: ${docDecl.registrationNumber})
+Confirmed          : ${record.declarations?.doctor?.confirmed ? 'YES' : 'PENDING'}
 
-Patient Consent    : ${decl?.patient?.agreedToTerms ? 'Patient has consented and agreed to terms' : 'PENDING'}
-Hospital Signatory : ${decl?.hospital?.authorizedSignatoryName ?? 'N/A'} (${decl?.hospital?.designation ?? 'N/A'})
+Hospital Signatory : ${hospDecl.signatoryName} (${hospDecl.designation})
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Generated by Aivana Clinical Documentation System | ${new Date().toLocaleString('en-IN')}

@@ -12,7 +12,7 @@ import { VoiceDictationMode } from './VoiceDictationMode';
 import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
-import { calculateCost, findConditionByICD } from '../../services/costEstimationService';
+import { getConditionByCode, estimateCost, isPMJAYEligible } from '../../data/icd10MasterDatabase';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 
 interface PreAuthWizardProps {
@@ -36,6 +36,19 @@ const buildEmptyRecord = (): Partial<PreAuthRecord> => ({
         selectedDiagnosisIndex: 0,
         proposedLineOfTreatment: { medical: false, surgical: false, intensiveCare: false, investigation: false, nonAllopathic: false },
         vitals: { bp: '', pulse: '', temp: '', spo2: '', rr: '' },
+        proposedTreatmentDetails: {
+            antibiotics: '', oxygenTherapy: false, oxygenDetails: '',
+            ivFluids: false, ivFluidDetails: '',
+            nebulization: false, nebulizationDetails: '',
+            insulinProtocol: false, insulinDetails: '',
+            pendingInvestigations: '', otherTreatments: '',
+        },
+        investigationsSent: {
+            bloodCulture: false, sputumCulture: false, urineCulture: false,
+            abg: false, ecg: false, echo: false, ctScan: false, mri: false, other: '',
+        },
+        investigationsResultsAvailable: '',
+        investigationsPending: '',
         voiceCapturedFindings: [],
         chiefComplaints: '',
         durationOfPresentAilment: '',
@@ -132,36 +145,34 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         const voiceICD = voiceDx?.icd10Code;
         if (voiceICD) {
             const roomCat = data.admission.roomCategory ?? 'General Ward';
-            const isPMJAY = data.insurance.policyType?.toLowerCase().includes('pmjay') ||
-                data.insurance.policyType?.toLowerCase().includes('ayushman') || false;
+            const wardType = roomCat.toLowerCase().includes('icu') ? 'icu' : 
+                            roomCat.toLowerCase().includes('private') ? 'privateRoom' : 'generalWard';
+            
+            const finalLOS = los || (getConditionByCode(voiceICD)?.typicalLOS.average ?? 3);
+            console.log(`[VoiceCostFix] Calculating costs from ICD DB: ${voiceICD}, room=${roomCat}`);
+            const est = estimateCost(voiceICD, wardType as any, finalLOS);
 
-            console.log(`[VoiceCostFix] Calculating costs from ICD DB: ${voiceICD}, room=${roomCat}, PMJAY=${isPMJAY}`);
-            const est = calculateCost(voiceICD, roomCat, isPMJAY, los || undefined, icuDays || undefined);
-
-            // Also fix LOS from ICD database if voice didn't capture it
-            const icdCond = findConditionByICD(voiceICD);
-            const finalLOS = los || (icdCond?.los.avg ?? 5);
-            const finalICU = icuDays || (icdCond?.los.icu ?? 0);
+            const finalICU = icuDays || (wardType === 'icu' ? finalLOS : 0);
             const finalWard = finalLOS - finalICU;
 
             baseCost = calculateTotals({
-                roomRentPerDay: est.breakdown.room_rent / Math.max(1, est.los.ward_days),
+                roomRentPerDay: est.breakdown.roomCharges / finalLOS,
                 expectedRoomDays: finalWard,
-                nursingChargesPerDay: est.breakdown.nursing_charges / Math.max(1, est.los.ward_days),
-                icuChargesPerDay: finalICU > 0 ? est.breakdown.icu_charges / finalICU : 0,
+                nursingChargesPerDay: est.breakdown.nursing / finalLOS,
+                icuChargesPerDay: finalICU > 0 ? (est.breakdown.roomCharges / finalLOS) : 0,
                 expectedIcuDays: finalICU,
-                otCharges: est.breakdown.ot_charges,
-                surgeonFee: est.breakdown.surgeon_fee,
-                anesthetistFee: est.breakdown.anesthetist_fee,
-                consultantFee: est.breakdown.consultant_fee,
+                otCharges: est.breakdown.procedures * 0.5,
+                surgeonFee: est.breakdown.consultantFees,
+                anesthetistFee: est.breakdown.consultantFees * 0.3,
+                consultantFee: est.breakdown.consultantFees * 0.2,
                 investigationsEstimate: est.breakdown.investigations,
                 medicinesEstimate: est.breakdown.medicines,
-                consumablesEstimate: est.breakdown.consumables,
-                miscCharges: est.breakdown.miscellaneous,
-                ...(est.source === 'PMJAY' && est.pmjay_details ? {
+                consumablesEstimate: est.breakdown.miscellaneous,
+                miscCharges: 1000,
+                ...(isPMJAYEligible(voiceICD).eligible ? {
                     isPackageRate: true,
-                    packageName: est.pmjay_details.package_name,
-                    packageAmount: est.pmjay_details.package_rate,
+                    packageName: isPMJAYEligible(voiceICD).hbpCode,
+                    packageAmount: isPMJAYEligible(voiceICD).packageRate,
                 } : {}),
             }, data.insurance.sumInsured ?? 0);
 

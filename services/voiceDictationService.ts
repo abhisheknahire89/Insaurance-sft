@@ -50,6 +50,21 @@ Return ONLY valid JSON, no markdown, no code fences.
       "surgical": true_or_false,
       "intensiveCare": true_or_false,
       "investigation": true_or_false
+    },
+    "proposedTreatmentDetails": {
+      "antibiotics": "specific IV/Oral meds mentioned",
+      "oxygenTherapy": true_or_false,
+      "oxygenDetails": "e.g. 2L via nasal prongs or null",
+      "ivFluids": true_or_false,
+      "nebulization": true_or_false,
+      "insulinProtocol": true_or_false,
+      "pendingInvestigations": "any tests doctors said are ordered or pending"
+    },
+    "investigationsSent": {
+      "bloodCulture": true_or_false,
+      "sputumCulture": true_or_false,
+      "abg": true_or_false,
+      "ctScan": true_or_false
     }
   },
   "admission": {
@@ -160,6 +175,32 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
         investigation: c.proposedLineOfTreatment?.investigation ?? false,
         nonAllopathic: false,
       },
+      proposedTreatmentDetails: {
+        antibiotics: c.proposedTreatmentDetails?.antibiotics ?? '',
+        oxygenTherapy: c.proposedTreatmentDetails?.oxygenTherapy ?? false,
+        oxygenDetails: c.proposedTreatmentDetails?.oxygenDetails ?? '',
+        ivFluids: c.proposedTreatmentDetails?.ivFluids ?? false,
+        ivFluidDetails: '',
+        nebulization: c.proposedTreatmentDetails?.nebulization ?? false,
+        nebulizationDetails: '',
+        insulinProtocol: c.proposedTreatmentDetails?.insulinProtocol ?? false,
+        insulinDetails: '',
+        pendingInvestigations: c.proposedTreatmentDetails?.pendingInvestigations ?? '',
+        otherTreatments: '',
+      },
+      investigationsSent: {
+        bloodCulture: c.investigationsSent?.bloodCulture ?? false,
+        sputumCulture: c.investigationsSent?.sputumCulture ?? false,
+        urineCulture: false,
+        abg: c.investigationsSent?.abg ?? false,
+        ecg: false,
+        echo: false,
+        ctScan: c.investigationsSent?.ctScan ?? false,
+        mri: false,
+        other: '',
+      },
+      investigationsResultsAvailable: '',
+      investigationsPending: c.proposedTreatmentDetails?.pendingInvestigations ?? '',
       voiceCapturedFindings,
     },
     admission: {

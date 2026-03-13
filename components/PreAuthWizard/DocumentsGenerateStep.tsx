@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PreAuthRecord, WizardDocument, WizardDocCategory, MedicalNecessityStatement, DoctorDeclarationData, PatientDeclarationData, HospitalDeclarationData } from '../PreAuthWizard/types';
 import { generateMedicalNecessity, generateIRDAITextFromRecord } from '../../services/medicalNecessityService';
 import { scoreNecessityStrength } from '../../utils/strengthScorer';
-import { getRequiredDocuments } from '../../utils/documentRequirements';
+import { getDocumentChecklist } from '../../data/icd10MasterDatabase';
 import { DEFAULT_DOCTORS } from '../../config/hospitalConfig';
 import { formatFileSize } from '../../utils/formatters';
 
@@ -33,8 +33,40 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
 
     const docs = record.uploadedDocuments ?? [];
     const selectedDx = record.clinical?.diagnoses?.[record.clinical.selectedDiagnosisIndex ?? 0];
-    const diagnosisText = selectedDx?.diagnosis ?? '';
-    const requiredDocs = getRequiredDocuments(selectedDx?.icd10Code ?? diagnosisText);
+    
+    // Get rich requirements from master database
+    const dbChecklist = getDocumentChecklist(selectedDx?.icd10Code ?? '', 'cashless');
+    
+    const mapToWizardCategory = (name: string): WizardDocCategory => {
+        const n = name.toLowerCase();
+        if (n.includes('x-ray') || n.includes('cxr')) return 'chest_xray';
+        if (n.includes('cbc') || n.includes('blood count')) return 'cbc';
+        if (n.includes('abg')) return 'abg';
+        if (n.includes('ecg')) return 'ecg';
+        if (n.includes('ct scan')) return 'ct_scan';
+        if (n.includes('mri')) return 'mri';
+        if (n.includes('usg') || n.includes('ultrasound')) return 'ultrasound';
+        if (n.includes('culture')) return 'blood_culture';
+        if (n.includes('urine')) return 'urine_routine';
+        if (n.includes('lft')) return 'lft';
+        if (n.includes('kft') || n.includes('creatinine')) return 'kft';
+        if (n.includes('policy') || n.includes('insurance')) return 'policy_copy';
+        return 'other';
+    };
+
+    const diagnosisText = selectedDx?.diagnosis ?? 'Unknown Diagnosis';
+    const requiredDocs = [...dbChecklist.mandatory, ...dbChecklist.recommended].map(r => ({
+        category: mapToWizardCategory(r.name),
+        displayName: r.name,
+        isRequired: r.mandatory,
+        description: r.tpaQueryIfMissing,
+        status: statusForReq(r.name, mapToWizardCategory(r.name))
+    }));
+
+    function statusForReq(name: string, cat: WizardDocCategory) {
+        const isUploaded = docs.some(d => d.documentCategory === cat || d.fileName.toLowerCase().includes(name.toLowerCase()));
+        return isUploaded ? 'uploaded' as const : 'missing_optional' as const;
+    }
 
     const docDecl = record.declarations?.patient ?? {} as Partial<PatientDeclarationData>;
     const drDecl = record.declarations?.doctor ?? {} as Partial<DoctorDeclarationData>;

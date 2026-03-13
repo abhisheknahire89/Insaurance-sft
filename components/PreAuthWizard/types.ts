@@ -207,6 +207,7 @@ export interface SeverityAssessment {
     mustNotMiss: boolean;
     overrideJustification?: string;
     isOverridden?: boolean;
+    expectedLOS?: number;
 }
 
 export interface ClinicalDetails {
@@ -252,6 +253,32 @@ export interface ClinicalDetails {
         edd?: string;
         deliveryType?: 'Normal' | 'Cesarean' | 'Assisted';
     };
+    proposedTreatmentDetails: {
+        antibiotics: string;
+        oxygenTherapy: boolean;
+        oxygenDetails: string;
+        ivFluids: boolean;
+        ivFluidDetails: string;
+        nebulization: boolean;
+        nebulizationDetails: string;
+        insulinProtocol: boolean;
+        insulinDetails: string;
+        pendingInvestigations: string;
+        otherTreatments: string;
+    };
+    investigationsSent: {
+        bloodCulture: boolean;
+        sputumCulture: boolean;
+        urineCulture: boolean;
+        abg: boolean;
+        ecg: boolean;
+        echo: boolean;
+        ctScan: boolean;
+        mri: boolean;
+        other: string;
+    };
+    investigationsResultsAvailable: string;
+    investigationsPending: string;
     voiceCapturedFindings: WizardVoiceFinding[];
     additionalClinicalNotes: string;
     matchedPackageData?: {
