@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import { ClinicalDetails, ClinicalDataSource, DiagnosisEntry, WizardVitals } from '../PreAuthWizard/types';
 import { 
     validateAndSuggestICD10, 
-    ICD10ValidationResult, 
     searchConditions, 
-    getConditionByCode, 
     predictTPAQueries, 
     getAdmissionJustificationTemplate,
     getSeverityMarkers,
     getSpecialNotes
 } from '../../data/icd10MasterDatabase';
+import { suggestICDCode } from '../../services/icdIntelligentLookup';
+import { logICDSelection } from '../../services/icdAuditLogger';
+import { ICDSuggestionDisplay } from './ICDSuggestionDisplay';
 
 interface ClinicalDetailsStepProps {
     clinical: Partial<ClinicalDetails>;
@@ -41,7 +42,12 @@ export const ClinicalDetailsStep: React.FC<ClinicalDetailsStepProps> = ({
 
     const handleIcdSearch = (q: string) => {
         setIcdQuery(q);
-        setIcdResults(q.length >= 2 ? searchConditions(q) : []);
+        if (q.length >= 2) {
+             const results = searchConditions(q);
+             setIcdResults(results);
+        } else {
+             setIcdResults([]);
+        }
     };
 
     const addDiagnosis = (entry: any) => {
@@ -49,14 +55,28 @@ export const ClinicalDetailsStep: React.FC<ClinicalDetailsStepProps> = ({
         if (existing.some(d => d.icd10Code === entry.code)) return;
         
         const template = getAdmissionJustificationTemplate(entry.code);
+        
+        // Intelligent resolution
+        const symptoms = [c.chiefComplaints, c.historyOfPresentIllness].filter(Boolean) as string[];
+        const intelligentMatch = suggestICDCode(entry.commonName ?? entry.description, c.relevantClinicalFindings ?? '', symptoms);
+        
+        logICDSelection({
+            originalDiagnosisTerm: entry.commonName ?? entry.description,
+            selectedICD: intelligentMatch.isFloorCode ? entry.code : intelligentMatch.icdCode,
+            matchLayer: intelligentMatch.isFloorCode ? 'MANUAL_SEARCH_FALLBACK' : intelligentMatch.matchLayer,
+            confidenceScore: intelligentMatch.confidence,
+            userId: 'doctor_profile_123',
+            recordId: 'wizard_on_the_fly'
+        });
 
         const newEntry: DiagnosisEntry = {
             diagnosis: entry.commonName ?? entry.description,
-            icd10Code: entry.code,
-            icd10Description: entry.description,
-            probability: 0.85,
-            reasoning: '',
+            icd10Code: intelligentMatch.isFloorCode ? entry.code : intelligentMatch.icdCode, // Use DB code if fallback triggers
+            icd10Description: intelligentMatch.isFloorCode ? entry.description : intelligentMatch.icdDescription,
+            probability: intelligentMatch.confidence / 100,
+            reasoning: intelligentMatch.reasoning,
             isSelected: existing.length === 0,
+            matchResult: intelligentMatch
         };
 
         const updatedDiagnoses = [...existing, newEntry];
@@ -242,9 +262,27 @@ export const ClinicalDetailsStep: React.FC<ClinicalDetailsStepProps> = ({
                                         <button onClick={e => { e.stopPropagation(); removeDx(i); }} className="text-gray-600 hover:text-red-400 text-xs p-1">✕</button>
                                     </div>
                                     
+                                    {/* Intelligence Suggestion Module */}
+                                    {dx.matchResult && (
+                                        <div className="mx-2 mt-2">
+                                            <ICDSuggestionDisplay 
+                                                result={dx.matchResult} 
+                                                onSelectAlternative={(altCode) => {
+                                                    const updatedDx = [...(c.diagnoses || [])];
+                                                    updatedDx[i] = { 
+                                                        ...dx, 
+                                                        icd10Code: altCode,
+                                                        icd10Description: "Updated from Alternative Selection" 
+                                                    };
+                                                    update({ diagnoses: updatedDx });
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+
                                     {/* BUG 3: ICD-10 Validation Feedback */}
                                     {!validation.isBillable && validation.isValid && (
-                                        <div className="mx-2 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg space-y-2">
+                                        <div className="mx-2 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg space-y-2 mt-2">
                                             <div className="flex items-start gap-2">
                                                 <span className="text-amber-400 text-sm">⚠️</span>
                                                 <p className="text-amber-300 text-xs leading-relaxed">{validation.warningMessage}</p>

@@ -197,6 +197,7 @@ export interface DiagnosisEntry {
     probability: number;
     reasoning: string;
     isSelected: boolean;
+    matchResult?: any; // Replace with MatchResult type later to avoid circular dependency or just use any here
 }
 
 export interface SeverityAssessment {

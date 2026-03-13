@@ -13,6 +13,8 @@ import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
 import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdUnifiedLookup';
+import { suggestICDCode } from '../../services/icdIntelligentLookup';
+import { logICDSelection } from '../../services/icdAuditLogger';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 
 interface PreAuthWizardProps {
@@ -140,13 +142,19 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
 
     console.log(`[ICD Input] Code: "${icdCode}", Name: "${diagnosisName}"`);
 
-    // Step 1: Infer ICD if missing
-    if (!icdCode && diagnosisName) {
+    // Step 1: Intelligent Match
+    const symptoms = [data.clinical?.chiefComplaints, data.clinical?.historyOfPresentIllness].filter(Boolean) as string[];
+    const intelligentMatch = suggestICDCode(diagnosisName, data.clinical?.relevantClinicalFindings ?? '', symptoms);
+
+    if (!icdCode && diagnosisName && !intelligentMatch.isFloorCode) {
+        icdCode = intelligentMatch.icdCode;
+        console.log(`[ICD Inferred (Intelligent)] ${icdCode} from "${diagnosisName}"`);
+    } else if (!icdCode && diagnosisName) {
         icdCode = inferICDFromDiagnosis(diagnosisName);
-        console.log(`[ICD Inferred] ${icdCode} from "${diagnosisName}"`);
+        console.log(`[ICD Inferred (Legacy)] ${icdCode} from "${diagnosisName}"`);
     }
 
-    // Step 2: Lookup with 4-layer failsafe
+    // Step 2: Lookup with 4-layer failsafe to get cost
     const icdLookup = lookupICD(icdCode, diagnosisName);
     console.log(`[ICD Lookup] Source: ${icdLookup.source}, Code: ${icdLookup.icdCode}, Specialty: ${icdLookup.specialty}`);
 
@@ -154,7 +162,18 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
     if (data.clinical?.diagnoses?.[0]) {
         data.clinical.diagnoses[0].icd10Code = icdLookup.icdCode;
         data.clinical.diagnoses[0].icd10Description = icdLookup.conditionName;
+        data.clinical.diagnoses[0].matchResult = intelligentMatch;
+        
+        logICDSelection({
+            originalDiagnosisTerm: diagnosisName,
+            selectedICD: icdLookup.icdCode,
+            matchLayer: intelligentMatch.isFloorCode ? 'FLOOR_INFER_FALLBACK' : intelligentMatch.matchLayer,
+            confidenceScore: intelligentMatch.confidence,
+            userId: 'doctor_profile_123', // Demo user
+            recordId: record.id
+        });
     }
+
 
     // Step 4: Calculate costs (guaranteed non-zero)
     const roomCat = data.admission?.roomCategory ?? 'General Ward';
@@ -211,13 +230,15 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         expectedDaysInICU: finalICU,
     };
     setSaving(true);
-    // Update record
+    // Update record — CRITICAL: Explicitly clear medicalNecessity to prevent stale data
     await updateRecord({
         patient: data.patient as any,
         insurance: data.insurance as any,
         clinical: data.clinical as any,
         admission: updatedAdmission as any,
         costEstimate: calculatedCost as any,
+        medicalNecessity: undefined, // Clear stale statement
+        outputs: {}, // Clear stale generated text
     });
     setSaving(false);
     setShowVoiceMode(false);
@@ -295,15 +316,15 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
                         <PatientInsuranceStep
                             patient={record.patient ?? {}}
                             insurance={record.insurance ?? {}}
-                            onPatientChange={p => updateRecord({ patient: p })}
-                            onInsuranceChange={ins => updateRecord({ insurance: ins })}
+                            onPatientChange={p => updateRecord({ patient: p, medicalNecessity: undefined, outputs: {} })}
+                            onInsuranceChange={ins => updateRecord({ insurance: ins, medicalNecessity: undefined, outputs: {} })}
                             onNext={handleNext}
                         />
                     )}
                     {step === 2 && (
                         <ClinicalDetailsStep
                             clinical={record.clinical ?? {}}
-                            onClinicalChange={c => updateRecord({ clinical: c })}
+                            onClinicalChange={c => updateRecord({ clinical: c, medicalNecessity: undefined, outputs: {} })}
                             onNext={handleNext}
                             onBack={handleBack}
                         />
@@ -314,8 +335,8 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
                             cost={record.costEstimate ?? {}}
                             clinical={record.clinical ?? {}}
                             sumInsured={record.insurance?.sumInsured ?? 0}
-                            onAdmissionChange={a => updateRecord({ admission: a })}
-                            onCostChange={c => updateRecord({ costEstimate: c })}
+                            onAdmissionChange={a => updateRecord({ admission: a, medicalNecessity: undefined, outputs: {} })}
+                            onCostChange={c => updateRecord({ costEstimate: c, medicalNecessity: undefined, outputs: {} })}
                             onNext={handleNext}
                             onBack={handleBack}
                         />

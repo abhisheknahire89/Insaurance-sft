@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { PreAuthRecord, WizardDocument, WizardDocCategory, MedicalNecessityStatement, DoctorDeclarationData, PatientDeclarationData, HospitalDeclarationData } from '../PreAuthWizard/types';
-import { generateMedicalNecessity, generateIRDAITextFromRecord } from '../../services/medicalNecessityService';
+import { generateMedicalNecessity, generateIRDAITextFromRecord, verifyNecessityMatchesPatient } from '../../services/medicalNecessityService';
 import { scoreNecessityStrength } from '../../utils/strengthScorer';
 import { getDocumentChecklist } from '../../data/icd10MasterDatabase';
 import { DEFAULT_DOCTORS } from '../../config/hospitalConfig';
@@ -29,10 +29,12 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
     const [generating, setGenerating] = useState(false);
     const [generated, setGenerated] = useState(false);
     const [irdaiText, setIrdaiText] = useState('');
+    const [vismatchError, setVismatchError] = useState<string | null>(null);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const docs = record.uploadedDocuments ?? [];
     const selectedDx = record.clinical?.diagnoses?.[record.clinical.selectedDiagnosisIndex ?? 0];
+    const patientName = record.patient?.patientName;
     
     // Get rich requirements from master database
     const dbChecklist = getDocumentChecklist(selectedDx?.icd10Code ?? '', 'cashless');
@@ -81,12 +83,25 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
     const generateNecessity = () => {
         const result = generateMedicalNecessity(record);
         setNecessity(result);
+        setVismatchError(null);
         onRecordChange({ ...record, medicalNecessity: result });
     };
 
+    // ── STALE DATA FAILSAFE ──
     useEffect(() => {
-        if (!necessity) generateNecessity();
-    }, []);
+        // 1. If it's totally missing, generate it
+        if (!necessity) {
+            generateNecessity();
+            return;
+        }
+
+        // 2. If it's present, verify it matches the current patient/record
+        const verification = verifyNecessityMatchesPatient(necessity, record);
+        if (!verification.isValid) {
+            console.warn(`[DOCS] Stale Medical Necessity detected: ${verification.reason}. Regenerating...`);
+            generateNecessity();
+        }
+    }, [patientName, selectedDx?.icd10Code, selectedDx?.diagnosis]);
 
     const handleFileUpload = (file: File) => {
         const reader = new FileReader();
@@ -119,7 +134,17 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
     };
 
     const handleGenerate = async () => {
+        // FINAL VALIDATION before PDF generation
+        const verify = verifyNecessityMatchesPatient(necessity || undefined, record);
+        if (!verify.isValid) {
+            setVismatchError(verify.reason || 'Data mismatch detected');
+            setActiveTab('necessity'); // Jump to tab to show error
+            return;
+        }
+
         setGenerating(true);
+        setVismatchError(null);
+        
         const finalNecessity = necessity ? { ...necessity, editedText: isEditing ? editText : undefined, wasEdited: isEditing } : generateMedicalNecessity(record);
         const finalRecord = { ...record, medicalNecessity: finalNecessity };
         const text = generateIRDAITextFromRecord(finalRecord);
@@ -349,6 +374,16 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
             {/* Medical Necessity Tab */}
             {activeTab === 'necessity' && (
                 <div className="space-y-4">
+                    {vismatchError && (
+                        <div className="bg-red-900/20 border border-red-500/40 rounded-xl p-4 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 text-red-300 text-xs font-semibold">
+                                <span className="text-xl">🚨</span> {vismatchError}
+                            </div>
+                            <button onClick={generateNecessity} className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded-lg transition-colors">
+                                FORCE FIX NOW
+                            </button>
+                        </div>
+                    )}
                     <div className={`flex items-center justify-between p-3 rounded-xl border ${strCfg.color}`}>
                         <span className="font-semibold text-sm">Necessity Strength: {strCfg.icon} {strCfg.label}</span>
                         <button onClick={() => { setEditText(necessity?.generatedText ?? ''); setIsEditing(!isEditing); }} className="text-xs underline opacity-70 hover:opacity-100">

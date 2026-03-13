@@ -231,35 +231,44 @@ const generateComorbidityImpactStatement = (clinical: Partial<ClinicalDetails>):
  * If the cost estimate is all zeros, auto-calculate from ICD cost database.
  * This is the FIX for the "LOS=0, Cost=₹0" bug.
  */
+/**
+ * If the cost estimate is all zeros, auto-calculate from ICD cost database.
+ * This is the FIX for the "LOS=0, Cost=₹0" bug.
+ */
 function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate> {
     const cost = record.costEstimate;
     
-    // If costs are already valid, return as-is
-    if (cost && (cost.totalEstimatedCost ?? 0) > 0) {
+    // If costs are already valid (total > 0), return them
+    // MUST be a positive number
+    if (cost && (cost.totalEstimatedCost || 0) > 0) {
         return cost;
     }
 
     const selectedDx = record.clinical?.diagnoses?.[record.clinical.selectedDiagnosisIndex ?? 0];
-    let icdCode = selectedDx?.icd10Code || '';
+    let icdCode = (selectedDx?.icd10Code || '').trim();
     const diagnosisName = selectedDx?.diagnosis || '';
 
-    // Infer ICD if missing
+    // Step 1: Infer ICD if missing
     if (!icdCode && diagnosisName) {
         icdCode = inferICDFromDiagnosis(diagnosisName);
     }
+    
+    // Step 2: Fallback to R69 if still missing
     if (!icdCode) icdCode = 'R69';
 
     const roomCategory = record.admission?.roomCategory ?? 'General Ward';
-    const isPMJAY = (record.insurance?.policyType || '').toLowerCase().includes('pmjay');
+    const isPMJAY = (record.insurance?.policyType || '').toLowerCase().includes('pmjay') || 
+                  (record.insurance?.policyType || '').toLowerCase().includes('ayushman');
+    
     const los = record.admission?.expectedLengthOfStay;
     const icuDays = record.admission?.expectedDaysInICU;
 
-    console.log(`[CostEnrich] ICD: ${icdCode}, Room: ${roomCategory}`);
+    console.log(`[CostEnrich] Stale/Zero cost detected. Regenerating for ICD: ${icdCode}, Patient: ${record.patient?.patientName}`);
 
-    let est = calculateGuaranteedCost(icdCode, diagnosisName, roomCategory, isPMJAY, los, icuDays);
+    // Step 3: Use unified lookup and guaranteed cost calculation
+    const lookup = lookupICD(icdCode, diagnosisName);
+    let est = calculateGuaranteedCost(lookup.icdCode, lookup.conditionName, roomCategory, isPMJAY, los, icuDays);
     est = validateAndFixCostEstimate(est);
-
-    console.log(`[CostEnrich] Result: ₹${est.total_estimated}`);
 
     return {
         roomRentPerDay: Math.round(est.breakdown.room_rent / Math.max(1, est.los.ward_days)),
@@ -280,6 +289,10 @@ function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate
         miscCharges: est.breakdown.miscellaneous,
         totalEstimatedCost: est.total_estimated,
         amountClaimedFromInsurer: est.claimed_amount,
+        isPackageRate: false,
+        patientResponsibility: est.total_estimated - est.claimed_amount,
+        exceedsSumInsured: est.claimed_amount > (record.insurance?.sumInsured ?? 9999999),
+        excessAmount: Math.max(0, est.claimed_amount - (record.insurance?.sumInsured ?? 9999999)),
     };
 }
 
@@ -384,6 +397,55 @@ ${icdEnrichment}`;
         strengthReasons: reasons,
         generatedAt: new Date().toISOString(),
     };
+};
+
+/**
+ * CRITICAL VALIDATION: Ensures the Medical Necessity statement matches the current record.
+ * Prevents data from a previous patient case appearing in the current PDF.
+ */
+export const verifyNecessityMatchesPatient = (
+    necessity: MedicalNecessityStatement | undefined, 
+    record: Partial<PreAuthRecord>
+): { isValid: boolean; reason?: string } => {
+    if (!necessity || !necessity.generatedText) {
+        return { isValid: false, reason: 'Medical Necessity statement is missing' };
+    }
+
+    const patientName = (record.patient?.patientName || '').toLowerCase().trim();
+    const dxName = (record.clinical?.diagnoses?.[record.clinical?.selectedDiagnosisIndex ?? 0]?.diagnosis || '').toLowerCase().trim();
+    
+    if (!patientName) return { isValid: true }; // Skip if empty record
+
+    const text = necessity.generatedText.toLowerCase();
+    
+    // 1. Check Patient Name (First 10 lines)
+    const headerLines = text.split('\n').slice(0, 10).join(' ');
+    
+    // Extract first 2 words of patient name for more robust checking
+    const nameParts = patientName.split(' ').filter(p => p.length > 2);
+    const firstName = nameParts[0] || '';
+    
+    if (firstName && !headerLines.includes(firstName)) {
+        return { 
+            isValid: false, 
+            reason: `Data Mismatch: Statement refers to a different patient. Record: "${patientName}", Statement lacks this name.`
+        };
+    }
+
+    // 2. Check Diagnosis (First 10 lines)
+    const dxParts = dxName.split(' ').filter(p => p.length > 3);
+    const mainDxWord = dxParts[0] || '';
+    
+    if (mainDxWord && !headerLines.includes(mainDxWord)) {
+        // If name matches but diagnosis doesn't, it might be a partial update or very fuzzy name.
+        // Still flagged as suspicious.
+        return {
+            isValid: false,
+            reason: `Diagnosis Mismatch: Record is "${dxName}", but Statement seems different.`
+        };
+    }
+
+    return { isValid: true };
 };
 
 /**
