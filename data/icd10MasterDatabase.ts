@@ -125,6 +125,48 @@ export const ICD10_MASTER_DB: ICD10Condition[] = [
   },
 
   {
+    code: 'J15.9',
+    description: 'Bacterial pneumonia, unspecified',
+    commonName: 'Bacterial Pneumonia',
+    specialty: 'Respiratory',
+    subcategory: 'Respiratory Infections',
+    typicalLOS: { min: 5, max: 10, average: 6 },
+    admissionType: 'emergency',
+    wardType: 'any',
+    icuProbability: 'moderate',
+    surgeryRequired: false,
+    procedureCodes: ['96.04', '93.90'],
+    costEstimate: {
+      generalWard: { min: 30000, max: 70000 },
+      privateRoom: { min: 60000, max: 140000 },
+      icu: { min: 100000, max: 250000 },
+      daycare: null
+    },
+    pmjayEligible: true,
+    pmjayHBPCode: 'MD-1023',
+    pmjayPackageRate: 15000,
+    daycareEligible: false,
+    commonTPAQueries: [
+      'Submit sputum culture report',
+      'Provide daily vital charts including temperature',
+      'Justify IV antibiotic selection'
+    ],
+    highRejectionRisk: false,
+    rejectionReasons: [],
+    preAuthRequired: true,
+    preAuthUrgency: 'urgent',
+    mandatoryDocuments: [
+      { id: 'cxr_pneumonia', name: 'Chest X-Ray / CT Chest', category: 'investigation', mandatory: true, tpaQueryIfMissing: '' },
+      { id: 'cbc_pneumonia', name: 'CBC indicating leukocytosis', category: 'investigation', mandatory: true, tpaQueryIfMissing: '' }
+    ],
+    recommendedDocuments: [],
+    severityMarkers: ['SpO2 <92%', 'Hypotension', 'Altered mental status'],
+    mustNotMissFlags: ['Sepsis', 'Empyema'],
+    specialNotes: ['Sputum culture often required for antibiotic justification'],
+    admissionJustificationTemplate: 'Patient presents with Bacterial Pneumonia (J15.9). Vitals: SpO2 {spo2}%, RR {rr}. Chest X-ray shows {findings}. Clinical severity warrants inpatient management and IV antibiotics.'
+  },
+
+  {
     code: 'A09',
     description: 'Infectious gastroenteritis and colitis, unspecified',
     commonName: 'Acute Gastroenteritis',
@@ -4718,7 +4760,19 @@ export const estimateCost = (
   los: number
 ): { min: number; max: number; average: number; breakdown: Record<string, number> } => {
   const condition = getConditionByCode(icd10Code);
-  if (!condition) return { min: 0, max: 0, average: 0, breakdown: {} };
+  
+  // Default values if condition not found
+  const defaultBreakdown = {
+    roomCharges: 0,
+    consultantFees: 0,
+    nursing: 0,
+    investigations: 0,
+    medicines: 0,
+    procedures: 0,
+    miscellaneous: 0,
+  };
+
+  if (!condition) return { min: 0, max: 0, average: 0, breakdown: defaultBreakdown };
 
   const range = wardType === 'icu'
     ? condition.costEstimate.icu
@@ -4726,7 +4780,7 @@ export const estimateCost = (
     ? condition.costEstimate.privateRoom
     : condition.costEstimate.generalWard;
 
-  if (!range) return { min: 0, max: 0, average: 0, breakdown: {} };
+  if (!range) return { min: 0, max: 0, average: 0, breakdown: defaultBreakdown };
 
   // Scale by LOS vs average LOS
   const losRatio = los / condition.typicalLOS.average;

@@ -104,10 +104,40 @@ export function findConditionByICD(icdCode: string): ICDCostCondition | null {
 
 export function findConditionByName(name: string): ICDCostCondition | null {
     if (!name) return null;
-    const n = name.toLowerCase();
-    return allConditions.find(c => c.condition.toLowerCase().includes(n)) ??
-        allConditions.find(c => n.includes(c.condition.toLowerCase())) ??
-        null;
+    const n = name.toLowerCase().trim();
+    
+    // Exact substring match
+    const exactMatch = allConditions.find(c => 
+        c.condition.toLowerCase().includes(n) || 
+        n.includes(c.condition.toLowerCase())
+    );
+    if (exactMatch) return exactMatch;
+    
+    // Keyword matching for common conditions
+    const keywords: Record<string, string[]> = {
+        'pneumonia': ['J15.9', 'J18.9'],
+        'dengue': ['A90'],
+        'typhoid': ['A01.0'],
+        'malaria': ['B50.9'],
+        'appendicitis': ['K35.80'],
+        'heart attack': ['I21.9'],
+        'myocardial infarction': ['I21.9'],
+        'stroke': ['I63.9'],
+        'sepsis': ['A41.9'],
+        'diabetes': ['E11.9'],
+        'ketoacidosis': ['E10.10'],
+        'copd': ['J44.1'],
+        'asthma': ['J45.901'],
+    };
+    
+    for (const [keyword, codes] of Object.entries(keywords)) {
+        if (n.includes(keyword)) {
+            const match = allConditions.find(c => codes.includes(c.icd_code));
+            if (match) return match;
+        }
+    }
+    
+    return null;
 }
 
 // -----------------------------------------------------------------------------
@@ -121,9 +151,20 @@ export function calculateCost(
     customLOS?: number,
     customICUDays?: number,
 ): CostEstimateResult {
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // FIX: Handle empty/null ICD code gracefully
+    // ═══════════════════════════════════════════════════════════════════════
+    if (!icdCode || icdCode.trim() === '') {
+        console.warn('[CostCalc] Empty ICD code provided, using default estimate');
+        return getDefaultEstimate(roomCategory, isPMJAY);
+    }
+    // ═══════════════════════════════════════════════════════════════════════
+
     const condition = findConditionByICD(icdCode);
 
     if (!condition) {
+        console.warn(`[CostCalc] ICD code ${icdCode} not found in database, using default estimate`);
         return getDefaultEstimate(roomCategory, isPMJAY);
     }
 

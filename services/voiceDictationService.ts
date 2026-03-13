@@ -4,9 +4,9 @@ import {
   AdmissionDetails, DiagnosisEntry, WizardVoiceFinding
 } from '../components/PreAuthWizard/types';
 
-const PROMPT = `You are a medical AI that parses a doctor's dictated clinical notes into a structured JSON for an insurance pre-authorization form.
+const PROMPT = `You are a medical AI that parses a doctor's dictated clinical notes into structured JSON for an insurance pre-authorization form.
 
-Extract ALL available information from the transcript and return a JSON object with the following structure.
+Extract ALL available information from the transcript and return a JSON object.
 If a field is not mentioned, use null. Do NOT make up values not in the transcript.
 Return ONLY valid JSON, no markdown, no code fences.
 
@@ -36,7 +36,12 @@ Return ONLY valid JSON, no markdown, no code fences.
     "reasonForHospitalisation": "why OPD is not sufficient",
     "additionalClinicalNotes": "any other relevant info",
     "diagnoses": [
-      { "diagnosis": "Full condition name", "icd10Code": "best ICD-10 code", "icd10Description": "ICD-10 description" }
+      { 
+        "diagnosis": "Full medical condition name", 
+        "icd10Code": "REQUIRED ICD-10 code - see rules below", 
+        "icd10Description": "Standard ICD-10 description",
+        "isSurgical": true_or_false
+      }
     ],
     "vitals": {
       "bp": "systolic/diastolic e.g. 100/70",
@@ -50,21 +55,6 @@ Return ONLY valid JSON, no markdown, no code fences.
       "surgical": true_or_false,
       "intensiveCare": true_or_false,
       "investigation": true_or_false
-    },
-    "proposedTreatmentDetails": {
-      "antibiotics": "specific IV/Oral meds mentioned",
-      "oxygenTherapy": true_or_false,
-      "oxygenDetails": "e.g. 2L via nasal prongs or null",
-      "ivFluids": true_or_false,
-      "nebulization": true_or_false,
-      "insulinProtocol": true_or_false,
-      "pendingInvestigations": "any tests doctors said are ordered or pending"
-    },
-    "investigationsSent": {
-      "bloodCulture": true_or_false,
-      "sputumCulture": true_or_false,
-      "abg": true_or_false,
-      "ctScan": true_or_false
     }
   },
   "admission": {
@@ -75,7 +65,7 @@ Return ONLY valid JSON, no markdown, no code fences.
     "expectedLengthOfStay": number,
     "pastMedicalHistory": {
       "diabetes": { "present": true_or_false, "duration": "e.g. 8 years or null" },
-      "hypertension": { "present": true_or_false },
+      "hypertension": { "present": true_or_false, "duration": "string or null" },
       "heartDisease": { "present": true_or_false },
       "asthma": { "present": true_or_false },
       "epilepsy": { "present": true_or_false },
@@ -87,7 +77,98 @@ Return ONLY valid JSON, no markdown, no code fences.
       "smoking": { "present": true_or_false }
     }
   }
-}`;
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+CRITICAL ICD-10 CODE RULES — YOU MUST FOLLOW THESE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. The icd10Code field is MANDATORY. NEVER return empty, null, or blank for icd10Code.
+
+2. Use the MOST SPECIFIC ICD-10-CM code available. Format: Letter + 2 digits + optional decimal + up to 4 more characters.
+
+3. COMMON ICD-10 CODES BY SPECIALTY:
+
+RESPIRATORY:
+- J15.9 = Bacterial pneumonia, unspecified
+- J18.9 = Pneumonia, unspecified organism  
+- J44.1 = COPD with acute exacerbation
+- J45.901 = Asthma, acute exacerbation
+- J96.00 = Acute respiratory failure
+
+CARDIAC:
+- I21.9 = Acute myocardial infarction, unspecified
+- I21.3 = STEMI of unspecified site
+- I50.9 = Heart failure, unspecified
+- I48.91 = Atrial fibrillation
+- I10 = Essential hypertension
+
+INFECTIOUS:
+- A41.9 = Sepsis, unspecified organism
+- A09 = Infectious gastroenteritis
+- A41.01 = Sepsis due to MSSA
+- B34.9 = Viral infection, unspecified
+- A75.3 = Scrub typhus
+
+GASTROINTESTINAL:
+- K35.80 = Acute appendicitis, unspecified
+- K80.00 = Cholelithiasis (gallstones)
+- K85.9 = Acute pancreatitis, unspecified
+- K92.2 = GI hemorrhage, unspecified
+- K56.7 = Intestinal obstruction
+
+RENAL/UROLOGICAL:
+- N17.9 = Acute kidney injury, unspecified
+- N39.0 = Urinary tract infection
+- N20.0 = Kidney stones
+- N18.6 = End-stage renal disease
+
+NEUROLOGICAL:
+- I63.9 = Cerebral infarction (stroke), unspecified
+- I61.9 = Intracerebral hemorrhage
+- G40.909 = Epilepsy, unspecified
+- G41.9 = Status epilepticus
+
+ENDOCRINE:
+- E11.9 = Type 2 diabetes mellitus without complications
+- E10.10 = Type 1 DM with ketoacidosis
+- E11.65 = Type 2 DM with hyperglycemia
+- E05.90 = Thyrotoxicosis/hyperthyroidism
+
+TRAUMA/SURGICAL:
+- S72.90 = Fracture of femur
+- S82.90 = Fracture of leg
+- T79.4 = Traumatic shock
+- K40.90 = Inguinal hernia
+
+OBSTETRIC:
+- O80 = Normal delivery
+- O82 = Cesarean delivery
+- O14.1 = Severe pre-eclampsia
+- O72.0 = Postpartum hemorrhage
+
+PSYCHIATRIC:
+- F32.9 = Major depressive disorder
+- F31.9 = Bipolar disorder
+- F20.9 = Schizophrenia
+
+PEDIATRIC:
+- P59.9 = Neonatal jaundice
+- J21.9 = Acute bronchiolitis
+- A08.0 = Rotavirus enteritis
+
+4. THE "IF IN DOUBT" RULE:
+If the diagnosis name is mentioned but the ICD code is not, YOU MUST infer the most likely code from the lists above. 
+- If "Pneumonia" -> use J18.9
+- If "Heart Attack" -> use I21.9
+- If "Stroke" -> use I63.9
+- If "Appendicitis" -> use K35.80
+- If NO clue remains, use "R69" (Illness, unspecified), but NEVER leave it blank.
+
+5. Use the MOST SPECIFIC UNSPECIFIED variant (usually .9 or .90) if clinical specifics are missing.
+
+6. For multiple diagnoses, list PRIMARY diagnosis first. 
+`;
 
 export interface VoiceExtractedData {
   patient: Partial<PatientRecord>;

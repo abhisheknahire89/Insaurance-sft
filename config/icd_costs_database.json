@@ -13,61 +13,88 @@
     },
     "conditions": [
         {
-            "id": "RESP-001",
-            "icd_code": "J18.9",
-            "condition": "Community Acquired Pneumonia (Unspecified)",
-            "specialty": "Respiratory",
-            "is_surgical": false,
-            "los": {
-                "min": 5,
-                "max": 7,
-                "avg": 6,
-                "icu": 0
-            },
-            "pmjay": {
-                "eligible": true,
-                "hbp_code": "HBP-M-4-1-002",
-                "rate": 15000
-            },
-            "private": {
-                "ward": 3000,
-                "semi": 5500,
-                "pvt": 10000,
-                "icu": 20000,
-                "invest": 7500,
-                "med_per_day": 2500,
-                "consult": 800
-            }
+          "id": "RESP-001",
+          "icd_code": "J15.9",
+          "condition": "Bacterial Pneumonia",
+          "specialty": "Pulmonology",
+          "is_surgical": false,
+          "los": {
+            "min": 5,
+            "max": 10,
+            "avg": 6,
+            "icu": 0
+          },
+          "pmjay": {
+            "eligible": true,
+            "hbp_code": "HBP-M-4-1-002",
+            "rate": 15000
+          },
+          "private": {
+            "ward": 3000,
+            "semi": 5500,
+            "pvt": 10000,
+            "icu": 22000,
+            "invest": 8000,
+            "med_per_day": 3000,
+            "consult": 800
+          }
         },
         {
-            "id": "RESP-002",
-            "icd_code": "J15.9",
-            "condition": "Bacterial Pneumonia",
-            "specialty": "Respiratory",
-            "is_surgical": false,
-            "los": {
-                "min": 5,
-                "max": 8,
-                "avg": 6,
-                "icu": 0
-            },
-            "pmjay": {
-                "eligible": true,
-                "hbp_code": "HBP-M-4-1-002",
-                "rate": 15000
-            },
-            "private": {
-                "ward": 3000,
-                "semi": 5500,
-                "pvt": 10000,
-                "icu": 20000,
-                "invest": 8000,
-                "med_per_day": 3000,
-                "consult": 800
-            }
+          "id": "RESP-002",
+          "icd_code": "J18.9",
+          "condition": "Community-Acquired Pneumonia",
+          "specialty": "Pulmonology",
+          "is_surgical": false,
+          "los": {
+            "min": 5,
+            "max": 10,
+            "avg": 6,
+            "icu": 0
+          },
+          "pmjay": {
+            "eligible": true,
+            "hbp_code": "HBP-M-4-1-001",
+            "rate": 15000
+          },
+          "private": {
+            "ward": 3000,
+            "semi": 5500,
+            "pvt": 10000,
+            "icu": 22000,
+            "invest": 8000,
+            "med_per_day": 3000,
+            "consult": 800
+          }
         },
         {
-            "id": "RESP-003",
+          "id": "RESP-003",
+          "icd_code": "J15",
+          "condition": "Bacterial Pneumonia Unspecified",
+          "specialty": "Pulmonology",
+          "is_surgical": false,
+          "los": {
+            "min": 5,
+            "max": 10,
+            "avg": 6,
+            "icu": 0
+          },
+          "pmjay": {
+            "eligible": true,
+            "hbp_code": "HBP-M-4-1-002",
+            "rate": 15000
+          },
+          "private": {
+            "ward": 3000,
+            "semi": 5500,
+            "pvt": 10000,
+            "icu": 22000,
+            "invest": 8000,
+            "med_per_day": 3000,
+            "consult": 800
+          }
+        },
+        {
+            "id": "RESP-004",
             "icd_code": "J69.0",
             "condition": "Aspiration Pneumonia",
             "specialty": "Respiratory",

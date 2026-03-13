@@ -12,7 +12,7 @@ import { VoiceDictationMode } from './VoiceDictationMode';
 import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
-import { getConditionByCode, estimateCost, isPMJAYEligible } from '../../data/icd10MasterDatabase';
+import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdUnifiedLookup';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 
 interface PreAuthWizardProps {
@@ -130,82 +130,100 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
 
     // ── Voice dictation: bulk-fill all sections, auto-calculate costs, jump to step 4 ──
     const handleVoiceComplete = async (data: VoiceExtractedData) => {
-        const los = data.admission.expectedLengthOfStay ?? 0;
-        const roomDays = data.admission.expectedDaysInRoom ?? los;
-        const icuDays = data.admission.expectedDaysInICU ?? 0;
+    // ═══════════════════════════════════════════════════════════════════
+    // 100% BULLETPROOF ICD & COST CALCULATION
+    // ═══════════════════════════════════════════════════════════════════
+    
+    const voiceDx = data.clinical?.diagnoses?.[0];
+    let icdCode = (voiceDx?.icd10Code || '').trim();
+    const diagnosisName = voiceDx?.diagnosis || '';
 
-        // Build a smart cost estimate from the Gemini-extracted admission info
-        let baseCost = calculateTotals({
-            expectedRoomDays: roomDays,
-            expectedIcuDays: icuDays,
-        }, data.insurance.sumInsured ?? 0);
+    console.log(`[ICD Input] Code: "${icdCode}", Name: "${diagnosisName}"`);
 
-        // ✅ FIX: If voice extracted ICD code, auto-calculate costs from ICD database
-        const voiceDx = data.clinical?.diagnoses?.[0];
-        const voiceICD = voiceDx?.icd10Code;
-        if (voiceICD) {
-            const roomCat = data.admission.roomCategory ?? 'General Ward';
-            const wardType = roomCat.toLowerCase().includes('icu') ? 'icu' : 
-                            roomCat.toLowerCase().includes('private') ? 'privateRoom' : 'generalWard';
-            
-            const finalLOS = los || (getConditionByCode(voiceICD)?.typicalLOS.average ?? 3);
-            console.log(`[VoiceCostFix] Calculating costs from ICD DB: ${voiceICD}, room=${roomCat}`);
-            const est = estimateCost(voiceICD, wardType as any, finalLOS);
+    // Step 1: Infer ICD if missing
+    if (!icdCode && diagnosisName) {
+        icdCode = inferICDFromDiagnosis(diagnosisName);
+        console.log(`[ICD Inferred] ${icdCode} from "${diagnosisName}"`);
+    }
 
-            const finalICU = icuDays || (wardType === 'icu' ? finalLOS : 0);
-            const finalWard = finalLOS - finalICU;
+    // Step 2: Lookup with 4-layer failsafe
+    const icdLookup = lookupICD(icdCode, diagnosisName);
+    console.log(`[ICD Lookup] Source: ${icdLookup.source}, Code: ${icdLookup.icdCode}, Specialty: ${icdLookup.specialty}`);
 
-            baseCost = calculateTotals({
-                roomRentPerDay: est.breakdown.roomCharges / finalLOS,
-                expectedRoomDays: finalWard,
-                nursingChargesPerDay: est.breakdown.nursing / finalLOS,
-                icuChargesPerDay: finalICU > 0 ? (est.breakdown.roomCharges / finalLOS) : 0,
-                expectedIcuDays: finalICU,
-                otCharges: est.breakdown.procedures * 0.5,
-                surgeonFee: est.breakdown.consultantFees,
-                anesthetistFee: est.breakdown.consultantFees * 0.3,
-                consultantFee: est.breakdown.consultantFees * 0.2,
-                investigationsEstimate: est.breakdown.investigations,
-                medicinesEstimate: est.breakdown.medicines,
-                consumablesEstimate: est.breakdown.miscellaneous,
-                miscCharges: 1000,
-                ...(isPMJAYEligible(voiceICD).eligible ? {
-                    isPackageRate: true,
-                    packageName: isPMJAYEligible(voiceICD).hbpCode,
-                    packageAmount: isPMJAYEligible(voiceICD).packageRate,
-                } : {}),
-            }, data.insurance.sumInsured ?? 0);
+    // Step 3: Update diagnosis in data
+    if (data.clinical?.diagnoses?.[0]) {
+        data.clinical.diagnoses[0].icd10Code = icdLookup.icdCode;
+        data.clinical.diagnoses[0].icd10Description = icdLookup.conditionName;
+    }
 
-            console.log(`[VoiceCostFix] Result: LOS=${finalLOS}, Total=₹${baseCost.totalEstimatedCost}`);
-        }
+    // Step 4: Calculate costs (guaranteed non-zero)
+    const roomCat = data.admission?.roomCategory ?? 'General Ward';
+    const isPMJAY = (data.insurance?.policyType || '').toLowerCase().includes('pmjay') ||
+        (data.insurance?.policyType || '').toLowerCase().includes('ayushman');
+    
+    const customLOS = data.admission?.expectedLengthOfStay || undefined;
+    const customICU = data.admission?.expectedDaysInICU || undefined;
 
-        const merged: Partial<PreAuthRecord> = {
-            ...record,
-            patient: { ...record.patient, ...data.patient },
-            insurance: { ...record.insurance, ...data.insurance, dataSource: 'manual' as const },
-            clinical: {
-                ...record.clinical,
-                ...data.clinical,
-            } as Partial<ClinicalDetails>,
-            admission: {
-                ...record.admission,
-                ...data.admission,
-                dateOfAdmission: record.admission?.dateOfAdmission ?? todayISO(),
-                timeOfAdmission: record.admission?.timeOfAdmission ?? nowTimeString(),
-            } as Partial<AdmissionDetails>,
-            costEstimate: baseCost,
-            updatedAt: new Date().toISOString(),
-        };
+    let costEst = calculateGuaranteedCost(
+        icdLookup.icdCode,
+        icdLookup.conditionName,
+        roomCat,
+        isPMJAY,
+        customLOS,
+        customICU
+    );
 
-        setSaving(true);
-        const updated = { ...merged, updatedAt: new Date().toISOString() };
-        setRecord(updated);
-        try { await savePreAuth(updated as PreAuthRecord); } catch (e) { /**/ }
-        setSaving(false);
-        setShowVoiceMode(false);
-        // Jump straight to Documents & Generate — all data is pre-filled
-        setStep(4);
+    // Step 5: Final validation (catch any edge cases)
+    costEst = validateAndFixCostEstimate(costEst);
+
+    console.log(`[Cost Result] Total: ₹${costEst.total_estimated}, Confidence: ${costEst.calculation_confidence}`);
+
+    // Step 6: Build state objects
+    const finalLOS = costEst.los.total_days;
+    const finalWard = costEst.los.ward_days;
+    const finalICU = costEst.los.icu_days;
+
+    const calculatedCost = {
+        roomRentPerDay: Math.round(costEst.breakdown.room_rent / Math.max(1, finalWard)),
+        expectedRoomDays: finalWard,
+        totalRoomCharges: costEst.breakdown.room_rent,
+        nursingChargesPerDay: Math.round(costEst.breakdown.nursing_charges / Math.max(1, finalWard)),
+        totalNursingCharges: costEst.breakdown.nursing_charges,
+        icuChargesPerDay: finalICU > 0 ? Math.round(costEst.breakdown.icu_charges / finalICU) : 22000,
+        expectedIcuDays: finalICU,
+        totalIcuCharges: costEst.breakdown.icu_charges,
+        otCharges: costEst.breakdown.ot_charges,
+        surgeonFee: costEst.breakdown.surgeon_fee,
+        anesthetistFee: costEst.breakdown.anesthetist_fee,
+        consultantFee: costEst.breakdown.consultant_fee,
+        investigationsEstimate: costEst.breakdown.investigations,
+        medicinesEstimate: costEst.breakdown.medicines,
+        consumablesEstimate: costEst.breakdown.consumables,
+        miscCharges: costEst.breakdown.miscellaneous,
+        totalEstimatedCost: costEst.total_estimated,
+        amountClaimedFromInsurer: Math.min(costEst.claimed_amount, data.insurance?.sumInsured ?? costEst.claimed_amount),
     };
+
+    const updatedAdmission = {
+        ...data.admission,
+        expectedLengthOfStay: finalLOS,
+        expectedDaysInRoom: finalWard,
+        expectedDaysInICU: finalICU,
+    };
+    setSaving(true);
+    // Update record
+    await updateRecord({
+        patient: data.patient as any,
+        insurance: data.insurance as any,
+        clinical: data.clinical as any,
+        admission: updatedAdmission as any,
+        costEstimate: calculatedCost as any,
+    });
+    setSaving(false);
+    setShowVoiceMode(false);
+    // Jump straight to Documents & Generate — all data is pre-filled
+    setStep(4);
+};
 
     // ── Voice dictation overlay ─────────────────────────────────────────────────
     if (showVoiceMode) {

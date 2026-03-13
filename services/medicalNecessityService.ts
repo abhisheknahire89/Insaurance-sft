@@ -11,6 +11,7 @@ import {
     validateAndSuggestICD10
 } from '../data/icd10MasterDatabase';
 import { calculateTotals } from '../utils/costCalculator';
+import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from './icdUnifiedLookup';
 
 // ── BUG 5: SEVERITY RULE ENGINE ──────────────────────────────────────────────
 type SeverityLevel = 'Mild' | 'Moderate' | 'Moderate-Severe' | 'Severe' | 'Critical';
@@ -232,50 +233,56 @@ const generateComorbidityImpactStatement = (clinical: Partial<ClinicalDetails>):
  */
 function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate> {
     const cost = record.costEstimate;
-    // If costs are already populated, return as-is
+    
+    // If costs are already valid, return as-is
     if (cost && (cost.totalEstimatedCost ?? 0) > 0) {
         return cost;
     }
 
     const selectedDx = record.clinical?.diagnoses?.[record.clinical.selectedDiagnosisIndex ?? 0];
-    const icdCode = selectedDx?.icd10Code;
-    if (!icdCode) return cost ?? {};
+    let icdCode = selectedDx?.icd10Code || '';
+    const diagnosisName = selectedDx?.diagnosis || '';
+
+    // Infer ICD if missing
+    if (!icdCode && diagnosisName) {
+        icdCode = inferICDFromDiagnosis(diagnosisName);
+    }
+    if (!icdCode) icdCode = 'R69';
 
     const roomCategory = record.admission?.roomCategory ?? 'General Ward';
-    const wardType = roomCategory.toLowerCase().includes('icu') ? 'icu' : 
-                    roomCategory.toLowerCase().includes('private') ? 'privateRoom' : 'generalWard';
-    
-    const los = record.admission?.expectedLengthOfStay ?? 3;
-    const dbCost = estimateCost(icdCode, wardType as any, los);
-    const pmjay = isPMJAYEligible(icdCode);
+    const isPMJAY = (record.insurance?.policyType || '').toLowerCase().includes('pmjay');
+    const los = record.admission?.expectedLengthOfStay;
+    const icuDays = record.admission?.expectedDaysInICU;
 
-    const enriched = calculateTotals({
-        roomRentPerDay: dbCost.breakdown.roomCharges / los,
-        expectedRoomDays: los,
-        nursingChargesPerDay: dbCost.breakdown.nursing / los,
-        icuChargesPerDay: wardType === 'icu' ? (dbCost.breakdown.roomCharges / los) : 0,
-        expectedIcuDays: wardType === 'icu' ? los : 0,
-        otCharges: dbCost.breakdown.procedures * 0.5, // Ot is subset of procedures
-        surgeonFee: dbCost.breakdown.consultantFees,
-        anesthetistFee: dbCost.breakdown.consultantFees * 0.3,
-        consultantFee: dbCost.breakdown.consultantFees * 0.2,
-        investigationsEstimate: dbCost.breakdown.investigations,
-        medicinesEstimate: dbCost.breakdown.medicines,
-        consumablesEstimate: dbCost.breakdown.miscellaneous,
-        miscCharges: 1000,
-        ...(pmjay.eligible ? {
-            isPackageRate: true,
-            packageName: pmjay.hbpCode,
-            packageAmount: pmjay.packageRate,
-        } : {}),
-    }, record.insurance?.sumInsured ?? 0);
+    console.log(`[CostEnrich] ICD: ${icdCode}, Room: ${roomCategory}`);
 
-    return enriched;
+    let est = calculateGuaranteedCost(icdCode, diagnosisName, roomCategory, isPMJAY, los, icuDays);
+    est = validateAndFixCostEstimate(est);
+
+    console.log(`[CostEnrich] Result: ₹${est.total_estimated}`);
+
+    return {
+        roomRentPerDay: Math.round(est.breakdown.room_rent / Math.max(1, est.los.ward_days)),
+        expectedRoomDays: est.los.ward_days,
+        totalRoomCharges: est.breakdown.room_rent,
+        nursingChargesPerDay: Math.round(est.breakdown.nursing_charges / Math.max(1, est.los.ward_days)),
+        totalNursingCharges: est.breakdown.nursing_charges,
+        icuChargesPerDay: est.los.icu_days > 0 ? Math.round(est.breakdown.icu_charges / est.los.icu_days) : 22000,
+        expectedIcuDays: est.los.icu_days,
+        totalIcuCharges: est.breakdown.icu_charges,
+        otCharges: est.breakdown.ot_charges,
+        surgeonFee: est.breakdown.surgeon_fee,
+        anesthetistFee: est.breakdown.anesthetist_fee,
+        consultantFee: est.breakdown.consultant_fee,
+        investigationsEstimate: est.breakdown.investigations,
+        medicinesEstimate: est.breakdown.medicines,
+        consumablesEstimate: est.breakdown.consumables,
+        miscCharges: est.breakdown.miscellaneous,
+        totalEstimatedCost: est.total_estimated,
+        amountClaimedFromInsurer: est.claimed_amount,
+    };
 }
 
-/**
- * Auto-generates a medical necessity statement from collected data.
- */
 export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): MedicalNecessityStatement => {
     const clinical = record.clinical;
     const admission = record.admission;
