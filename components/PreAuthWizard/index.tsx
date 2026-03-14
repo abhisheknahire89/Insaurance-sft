@@ -155,6 +155,10 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
       symptoms
     );
 
+    console.log('[ICD Debug] Gemini raw:', icdCode);
+    console.log('[ICD Debug] Local matcher:', validatedICD.matchResult);
+    console.log('[ICD Debug] Final validated:', validatedICD);
+
     // Step 2: Lookup with 4-layer failsafe to get cost
     const icdLookup = lookupICD(validatedICD.icdCode, validatedICD.icdDescription);
     console.log(`[ICD Lookup] Source: ${icdLookup.source}, Code: ${icdLookup.icdCode}, Specialty: ${icdLookup.specialty}`);
