@@ -13,7 +13,7 @@ import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
 import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdUnifiedLookup';
-import { suggestICDCode } from '../../services/icdIntelligentLookup';
+import { validateAndFinalizeICD } from '../../services/icdValidation';
 import { logICDSelection } from '../../services/icdAuditLogger';
 import { todayISO, nowTimeString } from '../../utils/formatters';
 
@@ -142,33 +142,34 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
 
     console.log(`[ICD Input] Code: "${icdCode}", Name: "${diagnosisName}"`);
 
-    // Step 1: Intelligent Match
+    // Step 1: Validate Gemini Result against Local Engine
     const symptoms = [data.clinical?.chiefComplaints, data.clinical?.historyOfPresentIllness].filter(Boolean) as string[];
-    const intelligentMatch = suggestICDCode(diagnosisName, data.clinical?.relevantClinicalFindings ?? '', symptoms);
-
-    if (!icdCode && diagnosisName && !intelligentMatch.isFloorCode) {
-        icdCode = intelligentMatch.icdCode;
-        console.log(`[ICD Inferred (Intelligent)] ${icdCode} from "${diagnosisName}"`);
-    } else if (!icdCode && diagnosisName) {
-        icdCode = inferICDFromDiagnosis(diagnosisName);
-        console.log(`[ICD Inferred (Legacy)] ${icdCode} from "${diagnosisName}"`);
-    }
+    
+    const validatedICD = validateAndFinalizeICD(
+      {
+        icd10Code: icdCode,
+        icd10Description: voiceDx?.icd10Description || diagnosisName,
+        diagnosis: diagnosisName
+      },
+      data.clinical?.relevantClinicalFindings ?? '',
+      symptoms
+    );
 
     // Step 2: Lookup with 4-layer failsafe to get cost
-    const icdLookup = lookupICD(icdCode, diagnosisName);
+    const icdLookup = lookupICD(validatedICD.icdCode, validatedICD.icdDescription);
     console.log(`[ICD Lookup] Source: ${icdLookup.source}, Code: ${icdLookup.icdCode}, Specialty: ${icdLookup.specialty}`);
 
     // Step 3: Update diagnosis in data
     if (data.clinical?.diagnoses?.[0]) {
         data.clinical.diagnoses[0].icd10Code = icdLookup.icdCode;
         data.clinical.diagnoses[0].icd10Description = icdLookup.conditionName;
-        data.clinical.diagnoses[0].matchResult = intelligentMatch;
+        data.clinical.diagnoses[0].matchResult = validatedICD.matchResult;
         
         logICDSelection({
             originalDiagnosisTerm: diagnosisName,
             selectedICD: icdLookup.icdCode,
-            matchLayer: intelligentMatch.isFloorCode ? 'FLOOR_INFER_FALLBACK' : intelligentMatch.matchLayer,
-            confidenceScore: intelligentMatch.confidence,
+            matchLayer: validatedICD.source,
+            confidenceScore: validatedICD.confidence,
             userId: 'doctor_profile_123', // Demo user
             recordId: record.id
         });
