@@ -4,12 +4,62 @@ import {
   AdmissionDetails, DiagnosisEntry, WizardVoiceFinding
 } from '../components/PreAuthWizard/types';
 
-const PROMPT = `You are a medical AI that parses a doctor's dictated clinical notes into structured JSON for an insurance pre-authorization form.
+import { formatDatabaseForGemini } from '../data/icd10MasterDatabase';
 
-Extract ALL available information from the transcript and return a JSON object.
-If a field is not mentioned, use null. Do NOT make up values not in the transcript.
-Return ONLY valid JSON, no markdown, no code fences.
+// Build the prompt with injected database
+const buildVoiceDictationPrompt = () => {
+  const databaseSection = formatDatabaseForGemini();
+  
+  return `
+You are a medical transcription AI for Indian hospitals. Parse the doctor's voice dictation into structured clinical data.
 
+═══════════════════════════════════════════════════════════════════════════════
+ICD-10 CODE ASSIGNMENT RULES
+═══════════════════════════════════════════════════════════════════════════════
+
+SEARCH the database below to find the correct ICD-10 code. Follow these rules:
+
+1. MATCH the diagnosis from the dictation against the "Terms" listed for each code
+2. If CONFIDENT match found → Use that code
+3. If diagnosis is RARE, GENETIC, or NOT in database → Use R69
+4. If UNSURE → Use R69
+
+CRITICAL RULES:
+- ONLY use codes from this database
+- NEVER invent or guess codes
+- NEVER use a code that sounds similar but doesn't match
+- R69 is the SAFE fallback — better R69 than wrong code
+
+═══════════════════════════════════════════════════════════════════════════════
+ICD-10 DATABASE
+═══════════════════════════════════════════════════════════════════════════════
+
+${databaseSection}
+
+═══════════════════════════════════════════════════════════════════════════════
+FALLBACK CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+[R69] Illness, unspecified
+USE WHEN: Rare disease, genetic condition, unknown diagnosis, uncertain match, 
+test data, gibberish, or anything not clearly matching above codes.
+
+═══════════════════════════════════════════════════════════════════════════════
+EXAMPLES
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ "Patient has acute appendicitis" → K35.80 (matches "appendicitis" in database)
+✅ "Dil ka daura pada" → I21.9 (matches Hindi term for heart attack)
+✅ "Pneumonia with low oxygen" → J18.9 (matches "pneumonia")
+✅ "Xeroderma pigmentosum syndrome" → R69 (rare genetic, NOT in database)
+✅ "Test case xyz" → R69 (test data)
+✅ "Some rare genetic disorder" → R69 (not in database)
+
+═══════════════════════════════════════════════════════════════════════════════
+OUTPUT FORMAT
+═══════════════════════════════════════════════════════════════════════════════
+
+Return JSON only:
 {
   "patient": {
     "patientName": "string or null",
@@ -78,97 +128,11 @@ Return ONLY valid JSON, no markdown, no code fences.
     }
   }
 }
-
-═══════════════════════════════════════════════════════════════════════════════
-CRITICAL ICD-10 CODE RULES — YOU MUST FOLLOW THESE
-═══════════════════════════════════════════════════════════════════════════════
-
-1. The icd10Code field is MANDATORY. NEVER return empty, null, or blank for icd10Code.
-
-2. Use the MOST SPECIFIC ICD-10-CM code available. Format: Letter + 2 digits + optional decimal + up to 4 more characters.
-
-3. COMMON ICD-10 CODES BY SPECIALTY:
-
-RESPIRATORY:
-- J15.9 = Bacterial pneumonia, unspecified
-- J18.9 = Pneumonia, unspecified organism  
-- J44.1 = COPD with acute exacerbation
-- J45.901 = Asthma, acute exacerbation
-- J96.00 = Acute respiratory failure
-
-CARDIAC:
-- I21.9 = Acute myocardial infarction, unspecified
-- I21.3 = STEMI of unspecified site
-- I50.9 = Heart failure, unspecified
-- I48.91 = Atrial fibrillation
-- I10 = Essential hypertension
-
-INFECTIOUS:
-- A41.9 = Sepsis, unspecified organism
-- A09 = Infectious gastroenteritis
-- A41.01 = Sepsis due to MSSA
-- B34.9 = Viral infection, unspecified
-- A75.3 = Scrub typhus
-
-GASTROINTESTINAL:
-- K35.80 = Acute appendicitis, unspecified
-- K80.00 = Cholelithiasis (gallstones)
-- K85.9 = Acute pancreatitis, unspecified
-- K92.2 = GI hemorrhage, unspecified
-- K56.7 = Intestinal obstruction
-
-RENAL/UROLOGICAL:
-- N17.9 = Acute kidney injury, unspecified
-- N39.0 = Urinary tract infection
-- N20.0 = Kidney stones
-- N18.6 = End-stage renal disease
-
-NEUROLOGICAL:
-- I63.9 = Cerebral infarction (stroke), unspecified
-- I61.9 = Intracerebral hemorrhage
-- G40.909 = Epilepsy, unspecified
-- G41.9 = Status epilepticus
-
-ENDOCRINE:
-- E11.9 = Type 2 diabetes mellitus without complications
-- E10.10 = Type 1 DM with ketoacidosis
-- E11.65 = Type 2 DM with hyperglycemia
-- E05.90 = Thyrotoxicosis/hyperthyroidism
-
-TRAUMA/SURGICAL:
-- S72.90 = Fracture of femur
-- S82.90 = Fracture of leg
-- T79.4 = Traumatic shock
-- K40.90 = Inguinal hernia
-
-OBSTETRIC:
-- O80 = Normal delivery
-- O82 = Cesarean delivery
-- O14.1 = Severe pre-eclampsia
-- O72.0 = Postpartum hemorrhage
-
-PSYCHIATRIC:
-- F32.9 = Major depressive disorder
-- F31.9 = Bipolar disorder
-- F20.9 = Schizophrenia
-
-PEDIATRIC:
-- P59.9 = Neonatal jaundice
-- J21.9 = Acute bronchiolitis
-- A08.0 = Rotavirus enteritis
-
-4. THE "IF IN DOUBT" RULE:
-If the diagnosis name is mentioned but the ICD code is not, YOU MUST infer the most likely code from the lists above. 
-- If "Pneumonia" -> use J18.9
-- If "Heart Attack" -> use I21.9
-- If "Stroke" -> use I63.9
-- If "Appendicitis" -> use K35.80
-- If NO clue remains, use "R69" (Illness, unspecified), but NEVER leave it blank.
-
-5. Use the MOST SPECIFIC UNSPECIFIED variant (usually .9 or .90) if clinical specifics are missing.
-
-6. For multiple diagnoses, list PRIMARY diagnosis first. 
 `;
+};
+
+export const VOICE_DICTATION_PROMPT = buildVoiceDictationPrompt();
+
 
 export interface VoiceExtractedData {
   patient: Partial<PatientRecord>;
@@ -185,7 +149,7 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
 
   const result = await ai.models.generateContent({
     model: 'gemini-2.0-flash',
-    contents: [{ role: 'user', parts: [{ text: `${PROMPT}\n\nDoctor's transcript:\n"""\n${transcript}\n"""` }] }],
+    contents: [{ role: 'user', parts: [{ text: `${VOICE_DICTATION_PROMPT}\n\nDoctor's transcript:\n"""\n${transcript}\n"""` }] }],
     config: { temperature: 0.1, responseMimeType: 'application/json' }
   });
 
