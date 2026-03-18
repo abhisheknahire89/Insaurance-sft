@@ -171,11 +171,25 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
 
     return (
         <div className="space-y-5">
-            <h2 className="text-xl font-bold text-white">Step 3: Admission & Cost Estimation</h2>
+            {/* Step context */}
+            <div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                    <span>Step 3 of 4</span>
+                    <span>•</span>
+                    <span>Admission &amp; Cost</span>
+                </div>
+                <h2 className="text-xl font-bold text-white">Admission &amp; Cost Estimation</h2>
+            </div>
 
             {/* Admission Details */}
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
-                <h3 className="font-semibold text-blue-300 text-sm">🏥 Admission Details</h3>
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><span>🏥</span></div>
+                    <div>
+                        <h3 className="font-bold text-white text-sm">Admission Details</h3>
+                        <p className="text-xs text-gray-500">Type, dates, and room category</p>
+                    </div>
+                </div>
                 <div className="flex gap-4">
                     {['Emergency', 'Planned'].map(type => (
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
@@ -298,9 +312,19 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                 </div>
             )}
 
-            {/* Past Medical History */}
-            <div className="bg-gray-800/50 rounded-xl p-4 space-y-3">
-                <h3 className="font-semibold text-blue-300 text-sm">📋 Past Medical History</h3>
+            {/* Past Medical History — collapsed */}
+            <details className="group bg-gray-800/50 rounded-xl">
+                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-700/30 rounded-xl transition-colors list-none">
+                    <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><span className="text-sm">📋</span></div>
+                        <div>
+                            <span className="font-bold text-white text-sm">Past Medical History</span>
+                            <span className="text-xs text-gray-500 ml-2">(optional)</span>
+                        </div>
+                    </div>
+                    <span className="text-gray-500 text-xs transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3">
                 <div className="grid grid-cols-2 gap-2.5">
                     {PAST_CONDITIONS.map(([key, label]) => (
                         <div key={key} className="flex items-center gap-3">
@@ -335,15 +359,22 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                     )}
                 </div>
             </div>
+        </details>
 
             {/* Cost Estimation */}
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
                 <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-blue-300 text-sm">💰 Estimated Cost Break-up</h3>
-                    <div className="text-xs text-gray-500 flex items-center gap-2">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0"><span>💰</span></div>
+                        <div>
+                            <h3 className="font-bold text-white text-sm">Cost Estimation</h3>
+                            <p className="text-xs text-gray-500">Total and insurer claim amount</p>
+                        </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
                         {cost.isPackageRate ? (
                             <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Package Rate Applied</span>
-                        ) : 'Defaults from rate card — adjust as needed'}
+                        ) : 'Auto-calculated'}
                     </div>
                 </div>
 
@@ -374,8 +405,13 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
+                    <details className="group">
+                        <summary className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl cursor-pointer hover:bg-gray-700/50 transition-colors list-none">
+                            <span className="text-xs text-gray-400">+ Detailed cost breakdown (optional — edit if auto-fill is inaccurate)</span>
+                            <span className="text-gray-500 text-xs transition-transform group-open:rotate-180">▼</span>
+                        </summary>
+                        <div className="mt-3 overflow-x-auto">
+                    <table className="w-full text-sm">
                             <thead>
                                 <tr className="text-xs text-gray-500 border-b border-white/10">
                                     <th className="text-left py-1.5 pr-3">Cost Head</th>
@@ -406,7 +442,8 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                                 ))}
                             </tbody>
                         </table>
-                    </div>
+                        </div>
+                    </details>
                 )}
 
                 {/* Totals */}
@@ -436,12 +473,30 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-                <button onClick={onBack} className="py-3 rounded-xl font-semibold text-sm bg-gray-800 hover:bg-gray-700 text-white transition-colors">← Back</button>
-                <button onClick={onNext} disabled={!isValid}
-                    className={`py-3 rounded-xl font-semibold text-sm transition-all ${isValid ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>
-                    Continue to Documents & Generate →
-                </button>
+            <div className="space-y-3">
+                {!isValid && (
+                    <div className="flex items-start gap-2 p-3 bg-amber-900/20 border border-amber-500/30 rounded-xl">
+                        <span className="text-amber-400 mt-0.5 shrink-0">⚠️</span>
+                        <span className="text-sm text-amber-300">
+                            {!admission.admissionType && 'Admission Type, '}
+                            {!admission.dateOfAdmission && 'Date of Admission, '}
+                            {!admission.roomCategory && 'Room Category, '}
+                            {!(totals.totalEstimatedCost > 0) && 'Estimated Cost '}
+                            required to continue
+                        </span>
+                    </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                    <button onClick={onBack} className="py-3 rounded-xl font-semibold text-sm bg-gray-800 hover:bg-gray-700 text-white transition-colors">← Back</button>
+                    <button onClick={onNext} disabled={!isValid}
+                        className={`py-3 rounded-xl font-bold text-sm transition-all ${
+                            isValid
+                                ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-lg shadow-blue-500/20'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                        }`}>
+                        {isValid ? 'Continue to Documents & Generate →' : 'Fill Required Fields to Continue'}
+                    </button>
+                </div>
             </div>
         </div>
     );

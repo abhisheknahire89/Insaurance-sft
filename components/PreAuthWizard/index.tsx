@@ -86,7 +86,7 @@ const buildEmptyRecord = (): Partial<PreAuthRecord> => ({
 
 export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingRecord, prefilledData }) => {
     const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-    const [showVoiceMode, setShowVoiceMode] = useState(false);
+    const [showVoiceMode, setShowVoiceMode] = useState(() => !!(prefilledData as any)?.startWithVoice);
     const [record, setRecord] = useState<Partial<PreAuthRecord>>(() => {
         if (existingRecord) return existingRecord;
         const empty = buildEmptyRecord();
@@ -282,20 +282,15 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
                     </div>
                 </div>
 
-                {/* Voice Dictation Banner — shown on step 1 */}
-                {step === 1 && (
-                    <div className="mx-6 mt-4 bg-gradient-to-r from-red-900/20 to-rose-900/10 border border-red-500/20 rounded-xl p-3 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <span className="text-2xl">🎙️</span>
-                            <div>
-                                <div className="text-sm font-semibold text-white">Voice Dictation — Fastest</div>
-                                <div className="text-xs text-gray-400">Speak clinical notes → AI fills ALL fields instantly</div>
-                            </div>
-                        </div>
+                {/* Voice shortcut — shown on steps 1–3 */}
+                {step < 4 && (
+                    <div className="mx-6 mt-4 flex justify-end">
                         <button
                             onClick={() => setShowVoiceMode(true)}
-                            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white transition-all hover:scale-105 whitespace-nowrap">
-                            Start Dictating →
+                            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-red-600/10 border border-red-500/20 text-red-400 hover:bg-red-600/20 hover:border-red-400 transition-all"
+                        >
+                            <span>🎙️</span>
+                            Switch to Voice Dictation
                         </button>
                     </div>
                 )}

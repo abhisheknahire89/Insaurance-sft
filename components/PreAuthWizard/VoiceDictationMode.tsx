@@ -445,7 +445,7 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 const Section: React.FC<{ title: string; color: string; children: React.ReactNode }> = ({ title, color, children }) => {
-    const hasContent = React.Children.toArray(children).some(c => c !== null && c !== undefined && c !== false);
+    const hasContent = React.Children.toArray(children).some(c => Boolean(c));
     if (!hasContent) return null;
     return (
         <div className={`rounded-xl border p-3 space-y-2 ${COLOR_MAP[color] ?? ''}`}>

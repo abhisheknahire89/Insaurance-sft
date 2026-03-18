@@ -435,31 +435,77 @@ export const InsuranceModule: React.FC = () => {
                             {showWizard ? (
                                 <PreAuthWizard onClose={() => setShowWizard(false)} prefilledData={prefilledData} existingRecord={preAuthOutput?.record} />
                             ) : (
-                                <div className="p-8 w-full max-w-3xl space-y-6">
-                                    <h3 className="text-xl font-bold text-gray-200">Test Pre-Auth Flow</h3>
-                                    <p className="text-sm text-gray-400">Paste an entire clinical note below to magically extract all Pre-Authorization fields utilizing the AI model. This represents the API integration layer.</p>
+                                <div className="flex flex-col items-center justify-center w-full p-8">
+                                    {/* Header */}
+                                    <div className="text-center mb-10">
+                                        <div className="text-5xl mb-4">📋</div>
+                                        <h2 className="text-2xl font-bold text-white mb-2">New Pre-Authorization</h2>
+                                        <p className="text-gray-400 text-sm">Generate insurance-ready documents in minutes</p>
+                                    </div>
 
-                                    <textarea
-                                        className="w-full h-64 bg-gray-900 border border-gray-700 rounded-lg p-4 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500"
-                                        placeholder="E.g., Anil Kankriya, 58 year old male. Known diabetic on metformin. Presenting with high grade fever..."
-                                        value={mockClinicalNote}
-                                        onChange={(e) => setMockClinicalNote(e.target.value)}
-                                    />
+                                    {/* Two Main Cards */}
+                                    <div className="w-full max-w-md space-y-4 mb-8">
+                                        {/* Voice — Primary */}
+                                        <button
+                                            onClick={() => {
+                                                setPrefilledData({ startWithVoice: true } as any);
+                                                setShowWizard(true);
+                                            }}
+                                            className="w-full bg-gradient-to-r from-red-600/10 to-rose-600/5 border border-red-500/30 hover:border-red-400 rounded-2xl p-6 text-left transition-all hover:shadow-lg hover:shadow-red-500/10 group"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-3xl">🎙️</div>
+                                                <div className="flex-1">
+                                                    <div className="font-bold text-white text-lg">Start with Voice</div>
+                                                    <div className="text-sm text-gray-400">Speak clinical notes → AI fills everything</div>
+                                                </div>
+                                                <div className="text-gray-500 group-hover:text-white transition-colors text-lg">→</div>
+                                            </div>
+                                            <div className="mt-3 text-xs text-red-400 font-semibold tracking-wider">⚡ FASTEST</div>
+                                        </button>
 
-                                    <div className="flex justify-end gap-3 mt-4">
+                                        {/* Manual — Secondary */}
                                         <button
-                                            className="px-6 py-3 bg-gray-800 hover:bg-gray-700 font-semibold rounded-lg text-white"
-                                            onClick={() => setShowWizard(true)}
+                                            onClick={() => {
+                                                setPrefilledData(null);
+                                                setShowWizard(true);
+                                            }}
+                                            className="w-full bg-gray-800/50 border border-white/10 hover:border-white/30 rounded-2xl p-6 text-left transition-all group"
                                         >
-                                            Skip / Manual Entry
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-3xl">✏️</div>
+                                                <div className="flex-1">
+                                                    <div className="font-bold text-white text-lg">Manual Entry</div>
+                                                    <div className="text-sm text-gray-400">Fill form step by step</div>
+                                                </div>
+                                                <div className="text-gray-500 group-hover:text-white transition-colors text-lg">→</div>
+                                            </div>
                                         </button>
-                                        <button
-                                            className="px-6 py-3 bg-blue-600 hover:bg-blue-500 font-bold rounded-lg text-white disabled:opacity-50"
-                                            onClick={handleExtract}
-                                            disabled={isExtracting || !mockClinicalNote}
-                                        >
-                                            {isExtracting ? 'Extracting via AI...' : 'Generate Pre-Auth Wizard 🚀'}
-                                        </button>
+                                    </div>
+
+                                    {/* Extract from Notes — Tertiary / Collapsed */}
+                                    <div className="w-full max-w-md">
+                                        <details className="group">
+                                            <summary className="text-center text-gray-500 text-sm cursor-pointer hover:text-gray-300 transition-colors list-none select-none">
+                                                Have clinical notes to paste?{' '}
+                                                <span className="text-blue-400 underline underline-offset-2">Extract from Notes ↓</span>
+                                            </summary>
+                                            <div className="mt-4 space-y-3">
+                                                <textarea
+                                                    className="w-full h-32 bg-gray-900 border border-gray-700 rounded-xl p-4 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"
+                                                    placeholder="Paste clinical note here…"
+                                                    value={mockClinicalNote}
+                                                    onChange={(e) => setMockClinicalNote(e.target.value)}
+                                                />
+                                                <button
+                                                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 font-semibold rounded-xl text-white text-sm disabled:opacity-50 transition-colors"
+                                                    onClick={handleExtract}
+                                                    disabled={isExtracting || !mockClinicalNote}
+                                                >
+                                                    {isExtracting ? 'Extracting…' : 'Extract & Start →'}
+                                                </button>
+                                            </div>
+                                        </details>
                                     </div>
                                 </div>
                             )}
