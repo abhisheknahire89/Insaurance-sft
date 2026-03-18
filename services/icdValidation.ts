@@ -1,4 +1,4 @@
-import { ICD10_DATABASE, getR69Fallback } from '../data/icd10MasterDatabase';
+import { validateICDCode as newValidate } from './icdLookupService';
 
 /**
  * Simple validation: Verify the code exists in our database
@@ -10,37 +10,11 @@ export function validateICDCode(code: string): {
   isValid: boolean;
   source: 'DATABASE' | 'FALLBACK';
 } {
-  // Check if code exists in database
-  for (const condition of ICD10_DATABASE) {
-    if (condition.icd_codes.primary.code === code) {
-      return {
-        code: condition.icd_codes.primary.code,
-        description: condition.icd_codes.primary.description,
-        isValid: true,
-        source: 'DATABASE'
-      };
-    }
-    
-    for (const variant of condition.icd_codes.specific_variants) {
-      if (variant.code === code) {
-        return {
-          code: variant.code,
-          description: variant.description,
-          isValid: true,
-          source: 'DATABASE'
-        };
-      }
-    }
-  }
-  
-  // Code not found — return R69
-  const fallback = getR69Fallback();
-  console.warn(`[ICD Validation] Code ${code} not in database. Using R69 fallback.`);
-  
+  const result = newValidate(code);
   return {
-    code: fallback.icd_codes.primary.code,
-    description: fallback.icd_codes.primary.description,
-    isValid: false,
-    source: 'FALLBACK'
+    code: result.code,
+    description: result.description,
+    isValid: result.tier !== 'FLOOR',
+    source: result.tier !== 'FLOOR' ? 'DATABASE' : 'FALLBACK'
   };
 }

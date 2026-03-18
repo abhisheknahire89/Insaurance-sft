@@ -9,9 +9,9 @@ import {
     getSeverityMarkers,
     getSpecialNotes,
     validateAndSuggestICD10
-} from '../data/icd10MasterDatabase';
+} from '../services/icdDatabaseHelpers';
 import { calculateTotals } from '../utils/costCalculator';
-import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from './icdUnifiedLookup';
+import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../services/icdDatabaseHelpers';
 
 // ── BUG 5: SEVERITY RULE ENGINE ──────────────────────────────────────────────
 type SeverityLevel = 'Mild' | 'Moderate' | 'Moderate-Severe' | 'Severe' | 'Critical';
@@ -250,7 +250,7 @@ function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate
 
     // Step 1: Infer ICD if missing
     if (!icdCode && diagnosisName) {
-        icdCode = inferICDFromDiagnosis(diagnosisName);
+        icdCode = inferICDFromDiagnosis(diagnosisName) || undefined;
     }
     
     // Step 2: Fallback to R69 if still missing
@@ -267,7 +267,7 @@ function enrichCostFromICD(record: Partial<PreAuthRecord>): Partial<CostEstimate
 
     // Step 3: Use unified lookup and guaranteed cost calculation
     const lookup = lookupICD(icdCode, diagnosisName);
-    let est = calculateGuaranteedCost(lookup.icdCode, lookup.conditionName, roomCategory, isPMJAY, los, icuDays);
+    let est = calculateGuaranteedCost(lookup.code, lookup.description, roomCategory, isPMJAY, los, icuDays);
     est = validateAndFixCostEstimate(est);
 
     return {
@@ -332,9 +332,9 @@ export const generateMedicalNecessity = (record: Partial<PreAuthRecord>): Medica
 
     let icdEnrichment = '';
     if (icdCondition) {
-        const severityMarkers = getSeverityMarkers(icdCondition.code);
-        const specialNotes = getSpecialNotes(icdCondition.code);
-        const tpaQueries = icdCondition.commonTPAQueries;
+        const severityMarkers = getSeverityMarkers(icdCondition.icd_codes.primary.code);
+        const specialNotes = getSpecialNotes(icdCondition.icd_codes.primary.code);
+        const tpaQueries = icdCondition.tpa_query_triggers;
         
         icdEnrichment = `
 CLINICAL SEVERITY MARKERS (Condition Specific):
@@ -351,7 +351,7 @@ ${tpaQueries.map(q => `• ${q}`).join('\n')}`;
     const expectedLOS = 
         admission?.expectedLengthOfStay || 
         clinical?.severity?.expectedLOS || 
-        (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typicalLOS.average ?? 0) : 0) ||
+        (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typical_los.ward ?? 0) : 0) ||
         0;
 
     const wardDays = admission?.expectedDaysInRoom ?? Math.max(0, expectedLOS - (admission?.expectedDaysInICU || 0));
@@ -511,7 +511,7 @@ export const generateIRDAITextFromRecord = (record: Partial<PreAuthRecord>): str
     const icdNote = !icdValidation.isBillable ? ` [Auto-corrected from ${icdValidation.originalCode}]` : '';
 
     // ✅ BUG 6: LOS UNIFICATION
-    const admissionLOS = a?.expectedLengthOfStay || (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typicalLOS.average ?? 0) : 0);
+    const admissionLOS = a?.expectedLengthOfStay || (selectedDx?.icd10Code ? (getConditionByCode(selectedDx.icd10Code)?.typical_los.ward ?? 0) : 0);
     const admissionWard = a?.expectedDaysInRoom ?? Math.max(0, (admissionLOS || 0) - (a?.expectedDaysInICU || 0));
     const admissionICU = a?.expectedDaysInICU ?? 0;
 

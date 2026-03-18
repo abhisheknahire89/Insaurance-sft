@@ -7,8 +7,8 @@ import {
     getAdmissionJustificationTemplate,
     getSeverityMarkers,
     getSpecialNotes
-} from '../../data/icd10MasterDatabase';
-import { suggestICDCode } from '../../services/icdIntelligentLookup';
+} from '../../services/icdDatabaseHelpers';
+import { lookupICD as suggestICDCode } from '../../services/icdDatabaseHelpers';
 import { logICDSelection } from '../../services/icdAuditLogger';
 import { ICDSuggestionDisplay } from './ICDSuggestionDisplay';
 
@@ -62,8 +62,8 @@ export const ClinicalDetailsStep: React.FC<ClinicalDetailsStepProps> = ({
         
         logICDSelection({
             originalDiagnosisTerm: entry.commonName ?? entry.description,
-            selectedICD: intelligentMatch.isFloorCode ? entry.code : intelligentMatch.icdCode,
-            matchLayer: intelligentMatch.isFloorCode ? 'MANUAL_SEARCH_FALLBACK' : intelligentMatch.matchLayer,
+            selectedICD: intelligentMatch.tier === 'FLOOR' ? entry.code : intelligentMatch.code,
+            matchLayer: intelligentMatch.tier === 'FLOOR' ? 'MANUAL_SEARCH_FALLBACK' : String(intelligentMatch.tier),
             confidenceScore: intelligentMatch.confidence,
             userId: 'doctor_profile_123',
             recordId: 'wizard_on_the_fly'
@@ -71,8 +71,8 @@ export const ClinicalDetailsStep: React.FC<ClinicalDetailsStepProps> = ({
 
         const newEntry: DiagnosisEntry = {
             diagnosis: entry.commonName ?? entry.description,
-            icd10Code: intelligentMatch.isFloorCode ? entry.code : intelligentMatch.icdCode, // Use DB code if fallback triggers
-            icd10Description: intelligentMatch.isFloorCode ? entry.description : intelligentMatch.icdDescription,
+            icd10Code: intelligentMatch.tier === 'FLOOR' ? entry.code : intelligentMatch.code, // Use DB code if fallback triggers
+            icd10Description: intelligentMatch.tier === 'FLOOR' ? entry.description : intelligentMatch.description,
             probability: intelligentMatch.confidence / 100,
             reasoning: intelligentMatch.reasoning,
             isSelected: existing.length === 0,

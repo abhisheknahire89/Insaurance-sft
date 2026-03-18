@@ -1,6 +1,6 @@
 import { WizardDocCategory } from '../components/PreAuthWizard/types';
 import { DocumentRequirement } from '../types';
-import { getDocumentChecklist } from '../data/icd10MasterDatabase';
+import { getDocumentChecklist } from '../services/icdDatabaseHelpers';
 
 export const getRequiredDocuments = (diagnosisOrIcd10: string): DocumentRequirement[] => {
     // Attempt cashless checklist first

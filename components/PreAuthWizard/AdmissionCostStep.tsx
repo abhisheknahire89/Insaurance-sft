@@ -3,7 +3,7 @@ import { AdmissionDetails, CostEstimate, ClinicalDetails, RoomCategory, PastMedi
 import { getRateForCategory, getLOSForDiagnosis } from '../../config/rateCard';
 import { calculateTotals, formatCostDisplay } from '../../utils/costCalculator';
 import { todayISO, nowTimeString } from '../../utils/formatters';
-import { getConditionByCode, estimateCost, isPMJAYEligible } from '../../data/icd10MasterDatabase';
+import { getConditionByCode, estimateCost, isPMJAYEligible } from '../../services/icdDatabaseHelpers';
 
 interface AdmissionCostStepProps {
     admission: Partial<AdmissionDetails>;
@@ -64,7 +64,7 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
             if (pmjay.eligible) {
                 setMatchedPackage({
                     hbp_code: pmjay.hbpCode,
-                    package_name: condition?.commonName || dx.diagnosis,
+                    package_name: condition?.condition_name || dx.diagnosis,
                     package_rate_inr: pmjay.packageRate,
                 });
             }
@@ -73,8 +73,8 @@ export const AdmissionCostStep: React.FC<AdmissionCostStepProps> = ({
             if (!admission.expectedDaysInRoom) {
                 // Get LOS from master database
                 const clinicalLos = condition
-                    ? { wardDays: condition.typicalLOS.average - (condition.icuProbability === 'high' ? 2 : 0), icuDays: (condition.icuProbability === 'high' ? 2 : 0) }
-                    : null;
+                    ? { wardDays: condition.typical_los.ward, icuDays: (condition.room_category_default === 'ICU' ? 2 : 0) }
+                    : { wardDays: 3, icuDays: 0 };
                 const los = clinicalLos || getLOSForDiagnosis(dx.icd10Code || dx.diagnosis);
 
                 const defaultRoom = los.icuDays > 0 ? 'ICU' : 'General Ward';

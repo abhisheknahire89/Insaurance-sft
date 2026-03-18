@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { PreAuthRecord, WizardDocument, WizardDocCategory, MedicalNecessityStatement, DoctorDeclarationData, PatientDeclarationData, HospitalDeclarationData } from '../PreAuthWizard/types';
 import { generateMedicalNecessity, generateIRDAITextFromRecord, verifyNecessityMatchesPatient } from '../../services/medicalNecessityService';
 import { scoreNecessityStrength } from '../../utils/strengthScorer';
-import { getDocumentChecklist } from '../../data/icd10MasterDatabase';
+import { getDocumentChecklist } from '../../services/icdDatabaseHelpers';
 import { DEFAULT_DOCTORS } from '../../config/hospitalConfig';
 import { formatFileSize } from '../../utils/formatters';
 

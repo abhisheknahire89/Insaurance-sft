@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PreAuthWizard } from './PreAuthWizard';
-import { getDocumentChecklist, estimateCost, getConditionByCode } from '../data/icd10MasterDatabase';
+import { getDocumentChecklist, estimateCost, getConditionByCode } from '../services/icdDatabaseHelpers';
 import { extractInsurancePreAuthData } from '../services/geminiService';
 
 // --- TYPES ---

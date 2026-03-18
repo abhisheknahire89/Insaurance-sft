@@ -12,7 +12,7 @@ import { VoiceDictationMode } from './VoiceDictationMode';
 import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
 import { calculateTotals } from '../../utils/costCalculator';
-import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdUnifiedLookup';
+import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdDatabaseHelpers';
 import { validateICDCode } from '../../services/icdValidation';
 import { logICDSelection } from '../../services/icdAuditLogger';
 import { todayISO, nowTimeString } from '../../utils/formatters';
@@ -149,25 +149,34 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
     console.log('[ICD Debug] Final validated:', validatedICD);
 
     // Step 2: Lookup with 4-layer failsafe to get cost
-    // Step 2: Lookup with 4-layer failsafe to get cost
     const icdLookup = lookupICD(validatedICD.code, validatedICD.description);
-    console.log(`[ICD Lookup] Source: ${icdLookup.source}, Code: ${icdLookup.icdCode}, Specialty: ${icdLookup.specialty}`);
+    console.log(`[ICD Lookup] Source: ${icdLookup.tier}, Code: ${icdLookup.code}, Specialty: ${icdLookup.condition_data?.specialty || 'General'}`);
 
-    // Step 3: Update diagnosis in data
-    if (data.clinical?.diagnoses?.[0]) {
-        data.clinical.diagnoses[0].icd10Code = icdLookup.icdCode;
-        data.clinical.diagnoses[0].icd10Description = icdLookup.conditionName;
-        data.clinical.diagnoses[0].matchResult = undefined;
-        
-        logICDSelection({
-            originalDiagnosisTerm: diagnosisName,
-            selectedICD: icdLookup.icdCode,
-            matchLayer: validatedICD.source,
-            confidenceScore: validatedICD.isValid ? 100 : 0,
-            userId: 'doctor_profile_123', // Demo user
-            recordId: record.id
+    if (data.clinical.diagnoses.length > 0) {
+        // Only override if confidence is high or specific
+        if (icdLookup.tier !== 'FLOOR') {
+            data.clinical.diagnoses[0].icd10Code = icdLookup.code;
+            data.clinical.diagnoses[0].icd10Description = icdLookup.description;
+        }
+    } else {
+        data.clinical.diagnoses.push({
+            diagnosis: icdLookup.description,
+            icd10Code: icdLookup.code,
+            icd10Description: icdLookup.description,
+            isSelected: true,
+            probability: icdLookup.confidence / 100,
+            reasoning: icdLookup.reasoning
         });
     }
+        
+    logICDSelection({
+        originalDiagnosisTerm: diagnosisName,
+        selectedICD: icdLookup.code,
+        matchLayer: String(icdLookup.tier),
+        confidenceScore: validatedICD.isValid ? 100 : 0,
+        userId: 'doctor_profile_123', // Demo user
+        recordId: record.id
+    });
 
 
     // Step 4: Calculate costs (guaranteed non-zero)
@@ -179,8 +188,8 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
     const customICU = data.admission?.expectedDaysInICU || undefined;
 
     let costEst = calculateGuaranteedCost(
-        icdLookup.icdCode,
-        icdLookup.conditionName,
+        icdLookup.code,
+        icdLookup.description,
         roomCat,
         isPMJAY,
         customLOS,

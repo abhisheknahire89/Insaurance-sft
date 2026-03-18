@@ -4,11 +4,17 @@ import {
   AdmissionDetails, DiagnosisEntry, WizardVoiceFinding
 } from '../components/PreAuthWizard/types';
 
-import { formatDatabaseForGemini } from '../data/icd10MasterDatabase';
+import { ICD10_TIER1, getAllTier1SearchTerms } from '../data/icd10Tier1Enriched';
 
 // Build the prompt with injected database
 const buildVoiceDictationPrompt = () => {
-  const databaseSection = formatDatabaseForGemini();
+  const databaseSection = ICD10_TIER1
+    .filter(c => c.id !== "FLOOR-001")
+    .map(c => {
+      const terms = getAllTier1SearchTerms(c).slice(0, 10);
+      return `[\${c.icd_codes.primary.code}] \${c.condition_name}\n  Terms: \${terms.join(', ')}`;
+    })
+    .join('\n\n');
   
   return `
 You are a medical transcription AI for Indian hospitals. Parse the doctor's voice dictation into structured clinical data.
