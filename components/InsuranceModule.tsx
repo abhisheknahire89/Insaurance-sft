@@ -443,8 +443,8 @@ export const InsuranceModule: React.FC = () => {
                                         <p className="text-gray-400 text-sm">Generate insurance-ready documents in minutes</p>
                                     </div>
 
-                                    {/* Two Main Cards */}
-                                    <div className="w-full max-w-md space-y-4 mb-8">
+                                    {/* Three Entry Cards */}
+                                    <div className="w-full max-w-md space-y-4">
                                         {/* Voice — Primary */}
                                         <button
                                             onClick={() => {
@@ -464,48 +464,58 @@ export const InsuranceModule: React.FC = () => {
                                             <div className="mt-3 text-xs text-red-400 font-semibold tracking-wider">⚡ FASTEST</div>
                                         </button>
 
-                                        {/* Manual — Secondary */}
+                                        {/* Paste Clinical Notes — Secondary */}
+                                        <details className="group w-full">
+                                            <summary className="w-full bg-gradient-to-r from-blue-600/10 to-cyan-600/5 border border-blue-500/30 hover:border-blue-400 rounded-2xl p-6 cursor-pointer transition-all hover:shadow-lg hover:shadow-blue-500/10 list-none">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-3xl">📋</div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-white text-lg">Paste Clinical Note</div>
+                                                        <div className="text-sm text-gray-400">Copy-paste doctor's note → AI extracts all fields</div>
+                                                    </div>
+                                                    <div className="text-gray-500 group-open:rotate-90 transition-transform text-lg">→</div>
+                                                </div>
+                                            </summary>
+                                            <div className="mt-3 space-y-3 px-1">
+                                                <textarea
+                                                    className="w-full h-40 bg-gray-900 border border-blue-500/30 rounded-xl p-4 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none leading-relaxed"
+                                                    placeholder={`Paste the doctor's clinical note here…\n\nExample:\n"55 yr old male, diabetic, HTN. Admitted with c/o fever x 5 days, cough, SOB. On examination: febrile 102°F, SpO2 88%, bilateral crepitations. Diagnosis: CAP. Plan: IV antibiotics, oxygen support."`}
+                                                    value={mockClinicalNote}
+                                                    onChange={(e) => setMockClinicalNote(e.target.value)}
+                                                    autoFocus={false}
+                                                />
+                                                <button
+                                                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 font-semibold rounded-xl text-white text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-blue-500/20"
+                                                    onClick={handleExtract}
+                                                    disabled={isExtracting || !mockClinicalNote.trim()}
+                                                >
+                                                    {isExtracting ? (
+                                                        <span className="flex items-center justify-center gap-2">
+                                                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
+                                                            Extracting fields…
+                                                        </span>
+                                                    ) : 'Extract & Auto-fill Form →'}
+                                                </button>
+                                            </div>
+                                        </details>
+
+                                        {/* Manual — Tertiary */}
                                         <button
                                             onClick={() => {
                                                 setPrefilledData(null);
                                                 setShowWizard(true);
                                             }}
-                                            className="w-full bg-gray-800/50 border border-white/10 hover:border-white/30 rounded-2xl p-6 text-left transition-all group"
+                                            className="w-full bg-gray-800/30 border border-white/8 hover:border-white/20 rounded-2xl p-5 text-left transition-all group"
                                         >
                                             <div className="flex items-center gap-4">
-                                                <div className="text-3xl">✏️</div>
+                                                <div className="text-2xl opacity-70">✏️</div>
                                                 <div className="flex-1">
-                                                    <div className="font-bold text-white text-lg">Manual Entry</div>
-                                                    <div className="text-sm text-gray-400">Fill form step by step</div>
+                                                    <div className="font-semibold text-gray-300 text-base">Manual Entry</div>
+                                                    <div className="text-xs text-gray-500">Fill the form step by step</div>
                                                 </div>
-                                                <div className="text-gray-500 group-hover:text-white transition-colors text-lg">→</div>
+                                                <div className="text-gray-600 group-hover:text-gray-400 transition-colors">→</div>
                                             </div>
                                         </button>
-                                    </div>
-
-                                    {/* Extract from Notes — Tertiary / Collapsed */}
-                                    <div className="w-full max-w-md">
-                                        <details className="group">
-                                            <summary className="text-center text-gray-500 text-sm cursor-pointer hover:text-gray-300 transition-colors list-none select-none">
-                                                Have clinical notes to paste?{' '}
-                                                <span className="text-blue-400 underline underline-offset-2">Extract from Notes ↓</span>
-                                            </summary>
-                                            <div className="mt-4 space-y-3">
-                                                <textarea
-                                                    className="w-full h-32 bg-gray-900 border border-gray-700 rounded-xl p-4 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500 resize-none"
-                                                    placeholder="Paste clinical note here…"
-                                                    value={mockClinicalNote}
-                                                    onChange={(e) => setMockClinicalNote(e.target.value)}
-                                                />
-                                                <button
-                                                    className="w-full py-3 bg-blue-600 hover:bg-blue-500 font-semibold rounded-xl text-white text-sm disabled:opacity-50 transition-colors"
-                                                    onClick={handleExtract}
-                                                    disabled={isExtracting || !mockClinicalNote}
-                                                >
-                                                    {isExtracting ? 'Extracting…' : 'Extract & Start →'}
-                                                </button>
-                                            </div>
-                                        </details>
                                     </div>
                                 </div>
                             )}
