@@ -2,6 +2,7 @@ import { ICD10_TIER1, getAllTier1SearchTerms, getTier1ConditionByCode } from '..
 import { ICD10_TIER2, searchTier2 } from '../data/icd10Tier2Extended';
 import { ICD10_TIER3 } from '../data/icd10Tier3Full';
 import { ICDLookupResult, Tier1Condition } from '../types/icd.types';
+import { extractDiagnosis } from './diagnosisExtractor';
 
 /**
  * 3-Tier ICD-10 Lookup Service
@@ -118,10 +119,17 @@ function searchTier1(diagnosis: string, clinicalFindings: string = ''): { condit
     
     // Exact match
     for (const term of allTerms) {
-      if (normalizedDiagnosis === term || normalizedDiagnosis.includes(term) || term.includes(normalizedDiagnosis)) {
-        const confidence = normalizedDiagnosis === term ? 98 : 90;
-        if (!bestMatch || confidence > bestMatch.confidence) {
-          bestMatch = { condition, confidence };
+      if (normalizedDiagnosis === term) {
+        if (!bestMatch || 98 > bestMatch.confidence) {
+          bestMatch = { condition, confidence: 98 };
+        }
+      } else if (normalizedDiagnosis.includes(term) && term.length >= 8) {
+        if (!bestMatch || 85 > bestMatch.confidence) {
+          bestMatch = { condition, confidence: 85 };
+        }
+      } else if (term.includes(normalizedDiagnosis) && normalizedDiagnosis.length >= 8) {
+        if (!bestMatch || 80 > bestMatch.confidence) {
+          bestMatch = { condition, confidence: 80 };
         }
       }
     }
@@ -149,13 +157,23 @@ function searchTier2Conditions(diagnosis: string): { code: string; description: 
     for (const term of condition.match_terms) {
       const normalizedTerm = normalize(term);
       
-      if (normalizedDiagnosis === normalizedTerm || 
-          normalizedDiagnosis.includes(normalizedTerm) || 
-          normalizedTerm.includes(normalizedDiagnosis)) {
+      if (normalizedDiagnosis === normalizedTerm) {
         return {
           code: condition.code,
           description: condition.description,
-          confidence: normalizedDiagnosis === normalizedTerm ? 95 : 85
+          confidence: 95
+        };
+      } else if (normalizedDiagnosis.includes(normalizedTerm) && normalizedTerm.length >= 8) {
+        return {
+          code: condition.code,
+          description: condition.description,
+          confidence: 85
+        };
+      } else if (normalizedTerm.includes(normalizedDiagnosis) && normalizedDiagnosis.length >= 8) {
+        return {
+          code: condition.code,
+          description: condition.description,
+          confidence: 80
         };
       }
     }
@@ -348,6 +366,36 @@ export function validateICDCode(code: string): ICDLookupResult {
   return {
     ...R69_FALLBACK,
     reasoning: `Code "${code}" not found in any database tier. Using R69 fallback.`
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NEW: PREPROCESSING WRAPPER
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function lookupICDWithPreprocessing(
+  clinicalText: string,
+  skipPreprocessing: boolean = false
+): Promise<ICDLookupResult> {
+  
+  // If input is already a clean term (< 6 words), skip preprocessing
+  const wordCount = clinicalText.trim().split(/\s+/).length;
+  
+  if (skipPreprocessing || wordCount <= 5) {
+    return lookupICD(clinicalText);
+  }
+  
+  // Complex input: use Gemini to extract diagnosis first
+  const extracted = await extractDiagnosis(clinicalText);
+  
+  console.log(`[ICD Lookup] Extracted "${extracted.primaryDiagnosis}" from "${clinicalText.substring(0, 50)}..."`);
+  
+  const result = lookupICD(extracted.primaryDiagnosis);
+  
+  // Enhance result with extraction metadata
+  return {
+    ...result,
+    reasoning: `Extracted "${extracted.primaryDiagnosis}" (${Math.round(extracted.confidence * 100)}% confidence) from complex input. ${result.reasoning}`
   };
 }
 

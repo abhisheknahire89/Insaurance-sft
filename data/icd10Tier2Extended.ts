@@ -438,6 +438,52 @@ export const ICD10_TIER2: Tier2Condition[] = [
   // Continue adding more conditions...
   // Target: 2000+ total entries
 
+  {
+    code: "E87.5",
+    description: "Hyperkalemia",
+    match_terms: ["hyperkalemia", "high potassium"],
+    specialty: "Nephrology",
+    is_surgical: false,
+    typical_los_days: 3,
+    is_emergency: true
+  },
+  {
+    code: "T81.4",
+    description: "Infection following a procedure",
+    match_terms: ["postoperative abscess", "surgical site infection"],
+    specialty: "Surgery",
+    is_surgical: true,
+    typical_los_days: 5,
+    is_emergency: true
+  },
+  {
+    code: "T65.9",
+    description: "Toxic effect of unspecified substance",
+    match_terms: ["poisoning", "toxic effect"],
+    specialty: "Emergency Medicine",
+    is_surgical: false,
+    typical_los_days: 2,
+    is_emergency: true
+  },
+  {
+    code: "I85.0",
+    description: "Esophageal varices with bleeding",
+    match_terms: ["variceal bleeding", "bleeding varices"],
+    specialty: "Gastroenterology",
+    is_surgical: false,
+    typical_los_days: 5,
+    is_emergency: true
+  },
+  {
+    code: "P59.9",
+    description: "Neonatal jaundice, unspecified",
+    match_terms: ["neonatal jaundice", "hyperbilirubinemia of newborn"],
+    specialty: "Neonatology",
+    is_surgical: false,
+    typical_los_days: 2,
+    is_emergency: false
+  }
+
 ];
 
 // Export helper

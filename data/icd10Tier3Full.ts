@@ -516,4 +516,13 @@ export const ICD10_TIER3: Tier3Code[] = [
     "description": "Illness, unspecified",
     "category": "General"
   }
+
+  ,
+  { code: "O86.0", description: "Infection of obstetric surgical wound (Puerperal sepsis)", category: "O86" },
+  { code: "S82.0", description: "Fracture of patella/tibia", category: "S82" },
+  { code: "T81.4", description: "Infection following a procedure", category: "T81" },
+  { code: "T65.9", description: "Toxic effect of unspecified substance (Poisoning)", category: "T65" },
+  { code: "I85.0", description: "Esophageal varices with bleeding", category: "I85" },
+  { code: "P59.9", description: "Neonatal jaundice, unspecified", category: "P59" }
+
 ];
