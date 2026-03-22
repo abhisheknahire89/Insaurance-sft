@@ -104,9 +104,16 @@ const generateNecessityBullets = (clinicalData: Partial<ClinicalDetails>): strin
     );
   }
   if (vitals?.pulse && parseInt(vitals.pulse) > 100) {
-    bullets.push(
-      `Tachycardia (HR ${vitals.pulse}/min) consistent with systemic infection requiring inpatient monitoring`
-    );
+    const isCardiac = clinicalData.diagnoses?.some(d => d.icd10Code.match(/^I2[0-5]/));
+    if (isCardiac) {
+      bullets.push(
+        `Tachycardia (HR ${vitals.pulse}/min) indicating cardiac stress and potential cardiogenic shock requiring inpatient monitoring`
+      );
+    } else {
+      bullets.push(
+        `Tachycardia (HR ${vitals.pulse}/min) consistent with systemic inflammatory response requiring inpatient monitoring`
+      );
+    }
   }
 
   // Source 2: Failed prior treatment
