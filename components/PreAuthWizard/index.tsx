@@ -11,7 +11,8 @@ import { DocumentsGenerateStep } from './DocumentsGenerateStep';
 import { VoiceDictationMode } from './VoiceDictationMode';
 import { VoiceExtractedData } from '../../services/voiceDictationService';
 import { savePreAuth, savePatient, generatePreAuthId, generatePatientId } from '../../services/storageService';
-import { calculateTotals } from '../../utils/costCalculator';
+import { calculateTotals, calculateCost } from '../../utils/costCalculator';
+import { calculateOverallSeverity } from '../../services/severityService';
 import { lookupICD, calculateGuaranteedCost, inferICDFromDiagnosis, validateAndFixCostEstimate } from '../../services/icdDatabaseHelpers';
 import { validateICDCode } from '../../services/icdValidation';
 import { logICDSelection } from '../../services/icdAuditLogger';
@@ -179,7 +180,7 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
     });
 
 
-    // Step 4: Calculate costs (guaranteed non-zero)
+    // Step 4: Calculate costs (guaranteed non-zero) and overrides
     const roomCat = data.admission?.roomCategory ?? 'General Ward';
     const isPMJAY = (data.insurance?.policyType || '').toLowerCase().includes('pmjay') ||
         (data.insurance?.policyType || '').toLowerCase().includes('ayushman');
@@ -187,45 +188,26 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
     const customLOS = data.admission?.expectedLengthOfStay || undefined;
     const customICU = data.admission?.expectedDaysInICU || undefined;
 
-    let costEst = calculateGuaranteedCost(
+    // BUG #5: Use severity overrides based on actual vitals and clinical notes
+    const severity = calculateOverallSeverity(data.clinical?.vitals, icdLookup.code, data.rawTranscript);
+
+    if (data.clinical) {
+        data.clinical.severity = severity;
+    }
+
+    // BUG #3 and #4: Cost calculation using improved logic
+    const calculatedCost = calculateCost(
         icdLookup.code,
-        icdLookup.description,
         roomCat,
         isPMJAY,
         customLOS,
-        customICU
+        customICU,
+        severity
     );
 
-    // Step 5: Final validation (catch any edge cases)
-    costEst = validateAndFixCostEstimate(costEst);
-
-    console.log(`[Cost Result] Total: ₹${costEst.total_estimated}, Confidence: ${costEst.calculation_confidence}`);
-
-    // Step 6: Build state objects
-    const finalLOS = costEst.los.total_days;
-    const finalWard = costEst.los.ward_days;
-    const finalICU = costEst.los.icu_days;
-
-    const calculatedCost = {
-        roomRentPerDay: Math.round(costEst.breakdown.room_rent / Math.max(1, finalWard)),
-        expectedRoomDays: finalWard,
-        totalRoomCharges: costEst.breakdown.room_rent,
-        nursingChargesPerDay: Math.round(costEst.breakdown.nursing_charges / Math.max(1, finalWard)),
-        totalNursingCharges: costEst.breakdown.nursing_charges,
-        icuChargesPerDay: finalICU > 0 ? Math.round(costEst.breakdown.icu_charges / finalICU) : 22000,
-        expectedIcuDays: finalICU,
-        totalIcuCharges: costEst.breakdown.icu_charges,
-        otCharges: costEst.breakdown.ot_charges,
-        surgeonFee: costEst.breakdown.surgeon_fee,
-        anesthetistFee: costEst.breakdown.anesthetist_fee,
-        consultantFee: costEst.breakdown.consultant_fee,
-        investigationsEstimate: costEst.breakdown.investigations,
-        medicinesEstimate: costEst.breakdown.medicines,
-        consumablesEstimate: costEst.breakdown.consumables,
-        miscCharges: costEst.breakdown.miscellaneous,
-        totalEstimatedCost: costEst.total_estimated,
-        amountClaimedFromInsurer: Math.min(costEst.claimed_amount, data.insurance?.sumInsured ?? costEst.claimed_amount),
-    };
+    const finalLOS = calculatedCost.expectedRoomDays + calculatedCost.expectedIcuDays;
+    const finalWard = calculatedCost.expectedRoomDays;
+    const finalICU = calculatedCost.expectedIcuDays;
 
     const updatedAdmission = {
         ...data.admission,
@@ -234,12 +216,14 @@ export const PreAuthWizard: React.FC<PreAuthWizardProps> = ({ onClose, existingR
         expectedDaysInICU: finalICU,
     };
     setSaving(true);
-    // Update record — CRITICAL: Explicitly clear medicalNecessity to prevent stale data
+    const cleanObj = (obj: any) => Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null && v !== ''));
+
+    // Update record — CRITICAL: Merge extracted data, explicitly clear medicalNecessity to prevent stale data
     await updateRecord({
-        patient: data.patient as any,
-        insurance: data.insurance as any,
-        clinical: data.clinical as any,
-        admission: updatedAdmission as any,
+        patient: { ...record.patient, ...cleanObj(data.patient) } as any,
+        insurance: { ...record.insurance, ...cleanObj(data.insurance) } as any,
+        clinical: { ...record.clinical, ...cleanObj(data.clinical) } as any,
+        admission: { ...record.admission, ...cleanObj(updatedAdmission) } as any,
         costEstimate: calculatedCost as any,
         medicalNecessity: undefined, // Clear stale statement
         outputs: {}, // Clear stale generated text

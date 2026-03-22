@@ -508,12 +508,17 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({
             )}
 
             {/* Bottom Action Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-                <button onClick={onBack} className="py-3 rounded-xl font-semibold text-sm bg-gray-800 hover:bg-gray-700 text-white transition-colors">← Back</button>
-                <button onClick={handleGenerate} disabled={generating}
-                    className="py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white transition-all disabled:opacity-50">
-                    {generating ? '⏳ Generating...' : '🚀 Generate Pre-Auth Document'}
-                </button>
+            <div className="flex flex-col gap-2 pt-2">
+                <div className="grid grid-cols-2 gap-3">
+                    <button onClick={onBack} className="py-3 rounded-xl font-semibold text-sm bg-gray-800 hover:bg-gray-700 text-white transition-colors">← Back</button>
+                    <button onClick={handleGenerate} disabled={generating || !allDeclsComplete}
+                        className="py-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        {generating ? '⏳ Generating...' : '🚀 Generate Pre-Auth Document'}
+                    </button>
+                </div>
+                {!allDeclsComplete && (
+                    <p className="text-xs text-red-400 text-right pr-2">⚠️ Please complete all Patient & Doctor Declarations in the Declarations tab to generate.</p>
+                )}
             </div>
             {missingDocs.length > 0 && (
                 <p className="text-xs text-amber-400 text-center">⚠️ {missingDocs.length} required documents missing — pre-auth will be marked PENDING DOCUMENTS</p>

@@ -135,6 +135,19 @@ export function generateMedicalNecessity(
         ? `This condition is eligible for PMJAY (Ayushman Bharat) coverage.`
         : '';
 
+    const isCardiac = condition.specialty === 'Cardiology' || condition.specialty === 'Cardiovascular';
+    const isRespiratory = condition.specialty === 'Respiratory' || condition.specialty === 'Pulmonology';
+
+    const specialtySpecificFields = isCardiac ? `
+CARDIAC STATUS & HEMODYNAMICS:
+• ECG/Enzyme Changes: Documented and consistent with ${condition.condition_name}
+• Hemodynamic Stability: Requires continuous monitoring
+` : isRespiratory ? `
+RESPIRATORY STATUS:
+• Oxygenation: Requires continuous monitoring/support
+• Airway management: High risk for decompensation
+` : '';
+
     const text = `
 PRE-AUTHORIZATION — MEDICAL NECESSITY STATEMENT
 
@@ -149,11 +162,11 @@ ${clinical.treatmentTakenSoFar ? `Prior OPD Treatment: ${clinical.treatmentTaken
 
 OBJECTIVE SEVERITY INDICATORS — Clinical Severity: ${severityLabel} (Score: ${severityScore}/10):
 ${abnormalVitals.length > 0
-            ? abnormalVitals.map(v => `• ${v}`).join('\n')
+            ? abnormalVitals.map(v => '• ' + v).join('\n')
             : '• Clinical assessment indicates inpatient monitoring required'}
-
+${specialtySpecificFields}
 HOSPITALIZATION IS MEDICALLY NECESSARY BECAUSE:
-${matchedCriteria.map(c => `• ${c}`).join('\n')}
+${matchedCriteria.map(c => '• ' + c).join('\n')}
 ${clinical.reasonForHospitalisation ? `\nAdditional Justification: ${clinical.reasonForHospitalisation}` : ''}
 
 OPD MANAGEMENT IS NOT APPROPRIATE: The patient's clinical condition requires ${treatmentLines.join(', ') || 'continuous monitoring and IV therapy'}, which cannot be safely administered in an outpatient setting.

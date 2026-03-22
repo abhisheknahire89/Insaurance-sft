@@ -1,4 +1,84 @@
-import { CostEstimate } from '../components/PreAuthWizard/types';
+import { CostEstimate, RoomCategory, SeverityAssessment } from '../components/PreAuthWizard/types';
+import ICD_COSTS_DATA from '../config/icd_costs_database.json';
+export function calculateExpectedLOS(
+  icdCode: string,
+  roomCategory: RoomCategory,
+  severity: SeverityAssessment
+): { total: number; ward: number; icu: number } {
+  const condition = ICD_COSTS_DATA.conditions.find(c => c.icd_code === icdCode || icdCode.startsWith(c.icd_code)) || {
+    los: { avg: 3, icu: 0 }
+  };
+  
+  let icuDays = condition.los.icu || 0;
+  let totalDays = condition.los.avg || 3;
+
+  // Severity Overrides
+  if (severity.overallRisk === 'Critical') {
+    icuDays = Math.max(icuDays, 4); // Min 4 days ICU for critical
+    totalDays = Math.max(totalDays, 7);
+  } else if (severity.overallRisk === 'High') {
+    icuDays = Math.max(icuDays, 2);
+  }
+
+  // Cap ICU days to total days
+  icuDays = Math.min(icuDays, totalDays);
+  
+  return {
+    total: totalDays,
+    ward: totalDays - icuDays,
+    icu: icuDays
+  };
+}
+
+export function calculateCost(
+  icdCode: string,
+  roomCategory: RoomCategory,
+  isPMJAY: boolean,
+  customLOS?: number,
+  customICUDays?: number,
+  severity?: SeverityAssessment
+): CostEstimate {
+  const dbResult = ICD_COSTS_DATA.conditions.find(c => c.icd_code === icdCode || icdCode.startsWith(c.icd_code));
+  const fallbackPrices = { ward: 5000, icu: 15000, invest: 10000, med_per_day: 3000, consult: 1500, procedure: 50000 };
+  
+  const selectedLOS = customLOS || (dbResult ? dbResult.los.avg : 3);
+  let selectedICU = customICUDays || (dbResult ? dbResult.los.icu : 0);
+
+  if (!customICUDays && severity) {
+     const override = calculateExpectedLOS(icdCode, roomCategory, severity);
+     selectedICU = override.icu;
+  }
+
+  const wardDays = Math.max(0, selectedLOS - selectedICU);
+  let totalEst = 0;
+  
+  if (isPMJAY && dbResult?.pmjay.eligible) {
+     totalEst = dbResult.pmjay.rate;
+  } else {
+     const rates = dbResult?.private || fallbackPrices;
+     const roomRate = rates.ward || fallbackPrices.ward;
+     const icuRate = rates.icu || fallbackPrices.icu;
+     const procRate = rates.procedure || 0;
+     const medRate = rates.med_per_day || fallbackPrices.med_per_day;
+     const investRate = ('invest' in rates ? rates.invest : undefined) || fallbackPrices.invest;
+     
+     totalEst = (roomRate * wardDays) + (icuRate * selectedICU) + procRate + (medRate * selectedLOS) + investRate;
+  }
+
+  return calculateTotals({
+    roomRentPerDay: dbResult?.private?.ward || fallbackPrices.ward,
+    expectedRoomDays: wardDays,
+    icuChargesPerDay: dbResult?.private?.icu || fallbackPrices.icu,
+    expectedIcuDays: selectedICU,
+    otCharges: dbResult?.private?.procedure ? dbResult.private.procedure * 0.3 : 0,
+    surgeonFee: dbResult?.private?.procedure ? dbResult.private.procedure * 0.5 : 0,
+    anesthetistFee: dbResult?.private?.procedure ? dbResult.private.procedure * 0.2 : 0,
+    medicinesEstimate: (dbResult?.private?.med_per_day || fallbackPrices.med_per_day) * selectedLOS,
+    investigationsEstimate: dbResult?.private?.invest || fallbackPrices.invest,
+    consultantFee: (dbResult?.private?.consult || fallbackPrices.consult) * selectedLOS,
+    amountClaimedFromInsurer: totalEst
+  });
+}
 
 /**
  * Recalculates all derived totals in a CostEstimate object.

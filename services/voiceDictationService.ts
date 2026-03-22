@@ -36,11 +36,17 @@ CRITICAL RULES:
 - NEVER use a code that sounds similar but doesn't match
 - R69 is the SAFE fallback — better R69 than wrong code
 
-═══════════════════════════════════════════════════════════════════════════════
-ICD-10 DATABASE
-═══════════════════════════════════════════════════════════════════════════════
+DURATION EXTRACTION (CRITICAL):
+1. Extract duration from phrase like: "since X days", "X din se", "last X days", "for X days".
+2. If no explicit duration, infer from context (e.g., "came this morning" -> "Few hours").
+3. NEVER leave duration empty for emergency cases.
 
-${databaseSection}
+COMORBIDITY EXTRACTION:
+Look for these keywords and extract:
+- "diabetic" / "sugar patient" / "diabetes" -> diabetes: true
+- "hypertensive" / "BP patient" -> hypertension: true
+- "heart patient" / "cardiac history" -> heartDisease: true
+- "kidney patient" / "CKD" -> kidney: true
 
 ═══════════════════════════════════════════════════════════════════════════════
 FALLBACK CODE
@@ -183,6 +189,21 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
   const pmh = a.pastMedicalHistory ?? {};
   const defaultCond = { present: false };
 
+  function extractDurationFromText(text: string): string | null {
+    const patterns = [
+      /(\\d+)\\s*(din|days?|hours?|ghante|weeks?|hafte)/i,
+      /since\\s+(\\d+)\\s*(days?|hours?)/i,
+      /(morning|evening|yesterday|kal|aaj)/i,
+    ];
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) return match[0];
+    }
+    return null;
+  }
+
+  const duration = c.durationOfPresentAilment || extractDurationFromText(transcript) || 'Not specified';
+
   return {
     rawTranscript: transcript,
     patient: {
@@ -203,7 +224,7 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
     clinical: {
       dataSource: 'voice_scribe',
       chiefComplaints: c.chiefComplaints ?? '',
-      durationOfPresentAilment: c.durationOfPresentAilment ?? '',
+      durationOfPresentAilment: duration,
       natureOfIllness: c.natureOfIllness ?? 'Acute',
       historyOfPresentIllness: c.historyOfPresentIllness ?? '',
       relevantClinicalFindings: c.relevantClinicalFindings ?? '',
@@ -261,17 +282,17 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
       expectedDaysInICU: a.expectedDaysInICU ?? 0,
       expectedLengthOfStay: a.expectedLengthOfStay ?? 0,
       pastMedicalHistory: {
-        diabetes: pmh.diabetes ?? defaultCond,
-        hypertension: pmh.hypertension ?? defaultCond,
-        heartDisease: pmh.heartDisease ?? defaultCond,
-        asthma: pmh.asthma ?? defaultCond,
-        epilepsy: pmh.epilepsy ?? defaultCond,
-        cancer: pmh.cancer ?? defaultCond,
-        kidney: pmh.kidney ?? defaultCond,
-        liver: pmh.liver ?? defaultCond,
-        hiv: pmh.hiv ?? defaultCond,
-        alcoholism: pmh.alcoholism ?? defaultCond,
-        smoking: pmh.smoking ?? defaultCond,
+        diabetes: pmh.diabetes?.present === true || pmh.diabetes === true || transcript.toLowerCase().includes('diabet') || transcript.toLowerCase().includes('sugar') ? { present: true, duration: pmh.diabetes?.duration || null } as any : defaultCond,
+        hypertension: pmh.hypertension?.present === true || pmh.hypertension === true || transcript.toLowerCase().includes('hypertens') || transcript.toLowerCase().includes('bp') ? { present: true, duration: pmh.hypertension?.duration || null } as any : defaultCond,
+        heartDisease: pmh.heartDisease?.present === true || pmh.heartDisease === true || transcript.toLowerCase().includes('heart') || transcript.toLowerCase().includes('cardiac') ? { present: true } as any : defaultCond,
+        asthma: pmh.asthma?.present === true || pmh.asthma === true ? { present: true } as any : defaultCond,
+        epilepsy: pmh.epilepsy?.present === true || pmh.epilepsy === true ? { present: true } as any : defaultCond,
+        cancer: pmh.cancer?.present === true || pmh.cancer === true ? { present: true } as any : defaultCond,
+        kidney: pmh.kidney?.present === true || pmh.kidney === true || transcript.toLowerCase().includes('ckd') || transcript.toLowerCase().includes('kidney') ? { present: true } as any : defaultCond,
+        liver: pmh.liver?.present === true || pmh.liver === true ? { present: true } as any : defaultCond,
+        hiv: pmh.hiv?.present === true || pmh.hiv === true ? { present: true } as any : defaultCond,
+        alcoholism: pmh.alcoholism?.present === true || pmh.alcoholism === true ? { present: true } as any : defaultCond,
+        smoking: pmh.smoking?.present === true || pmh.smoking === true ? { present: true } as any : defaultCond,
         anyOther: { present: false },
       },
       previousHospitalization: { wasHospitalizedBefore: false },

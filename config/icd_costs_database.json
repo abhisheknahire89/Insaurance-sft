@@ -738,7 +738,45 @@
                 "icu": 35000,
                 "invest": 30000,
                 "med_per_day": 8000,
-                "procedure": 150000
+                "procedure": 150000,
+                "stent_des": 85000,
+                "stent_bms": 25000,
+                "cath_lab": 50000,
+                "surgeon_fee": 50000,
+                "anesthetist": 15000
+            }
+        },
+        {
+            "id": "CARD-001A",
+            "icd_code": "I21",
+            "condition": "Acute Myocardial Infarction (STEMI/NSTEMI)",
+            "specialty": "Cardiology",
+            "is_surgical": true,
+            "los": {
+                "min": 5,
+                "max": 10,
+                "avg": 7,
+                "icu": 3
+            },
+            "pmjay": {
+                "eligible": true,
+                "hbp_code": "CV001",
+                "rate": 120000
+            },
+            "private": {
+                "ward": 4000,
+                "semi": 6000,
+                "pvt": 10000,
+                "icu": 25000,
+                "invest": 35000,
+                "med_per_day": 8000,
+                "consult": 5000,
+                "procedure": 150000,
+                "stent_des": 85000,
+                "stent_bms": 25000,
+                "cath_lab": 50000,
+                "surgeon_fee": 50000,
+                "anesthetist": 15000
             }
         },
         {

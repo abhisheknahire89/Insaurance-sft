@@ -322,12 +322,42 @@ export function lookupICD(
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function validateICDCode(code: string): ICDLookupResult {
+  if (!code) {
+    return {
+      ...R69_FALLBACK,
+      reasoning: "Empty code provided. Using R69 fallback."
+    };
+  }
+  
+  const normalizedCode = code.toUpperCase().trim();
+
+  // Specific Check for Cardiac Codes
+  const CARDIAC_CODES = ['I21', 'I22', 'I23', 'I24', 'I25'];
+  const isCardiacCode = CARDIAC_CODES.some(prefix => normalizedCode.startsWith(prefix));
+  
+  if (isCardiacCode) {
+    // Map to specific STEMI/NSTEMI codes
+    if (normalizedCode.startsWith('I21.0')) return { code: 'I21.0', description: 'STEMI of anterior wall', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    if (normalizedCode.startsWith('I21.1')) return { code: 'I21.1', description: 'STEMI of inferior wall', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    if (normalizedCode.startsWith('I21.2')) return { code: 'I21.2', description: 'STEMI of other sites', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    if (normalizedCode.startsWith('I21.3')) return { code: 'I21.3', description: 'STEMI, unspecified site', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    if (normalizedCode.startsWith('I21.4')) return { code: 'I21.4', description: 'NSTEMI', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    if (normalizedCode.startsWith('I21.9')) return { code: 'I21.9', description: 'AMI, unspecified', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+    // Default cardiac
+    return { code: 'I21.9', description: 'Acute myocardial infarction, unspecified', tier: 1, confidence: 100, has_full_metadata: false, reasoning: 'Direct cardiac mapping' };
+  }
+
   // Check Tier 1
-  const tier1Match = getTier1ConditionByCode(code);
+  const tier1Match = ICD10_TIER1.find(c => 
+    c.icd_codes.primary.code === normalizedCode ||
+    c.icd_codes.primary.code.startsWith(normalizedCode) ||
+    normalizedCode.startsWith(c.icd_codes.primary.code.split('.')[0])
+  );
+
   if (tier1Match) {
     return {
       code: tier1Match.icd_codes.primary.code,
-      description: tier1Match.icd_codes.primary.description,
+      description: tier1Match.condition_name,
       tier: 1,
       confidence: 100,
       has_full_metadata: true,
@@ -337,7 +367,7 @@ export function validateICDCode(code: string): ICDLookupResult {
   }
   
   // Check Tier 2
-  const tier2Match = ICD10_TIER2.find(c => c.code === code);
+  const tier2Match = ICD10_TIER2.find(c => c.code === normalizedCode);
   if (tier2Match) {
     return {
       code: tier2Match.code,
@@ -350,7 +380,7 @@ export function validateICDCode(code: string): ICDLookupResult {
   }
   
   // Check Tier 3
-  const tier3Match = ICD10_TIER3.find(c => c.code === code);
+  const tier3Match = ICD10_TIER3.find(c => c.code === normalizedCode);
   if (tier3Match) {
     return {
       code: tier3Match.code,
