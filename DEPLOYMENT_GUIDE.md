@@ -14,7 +14,7 @@ opdv3 will be deployed to **opd.aivanahealth.com**, replacing opdv4 as the main 
 ```bash
 VITE_API_URL=https://api.aivanahealth.com
 VITE_PRODUCT_URL=https://opd.aivanahealth.com
-GEMINI_API_KEY=AIzaSyDvTMvfKsrqCj9fQ_1oiC8-BmNhyadeTTE
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### AuthModal Changes
@@ -56,7 +56,7 @@ Add for **Production**:
 ```bash
 VITE_API_URL=https://api.aivanahealth.com
 VITE_PRODUCT_URL=https://opd.aivanahealth.com
-GEMINI_API_KEY=AIzaSyDvTMvfKsrqCj9fQ_1oiC8-BmNhyadeTTE
+VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### 5. Update Backend CORS
