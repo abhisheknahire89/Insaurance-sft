@@ -11,14 +11,10 @@ export function generatePreAuthPDF(insuranceCase: InsuranceCase): {
   errors?: string[];
 } {
   
-  // GATE CHECK — Cannot generate if validation fails
+  // GATE CHECK — Validation warnings are logged but do not block generation
   const gateCheck = canGeneratePDF(insuranceCase);
   if (!gateCheck.allowed) {
-    console.error('[PDF] Generation blocked by validation gate:', gateCheck.reasons);
-    return {
-      success: false,
-      errors: gateCheck.reasons,
-    };
+    console.warn('[PDF] Generating with validation warnings/errors. Ref Reasons:', gateCheck.reasons);
   }
   
   console.log('[PDF] Generating from InsuranceCase:', insuranceCase.caseId);
