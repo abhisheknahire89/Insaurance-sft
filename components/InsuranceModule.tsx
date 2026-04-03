@@ -433,7 +433,7 @@ export const InsuranceModule: React.FC = () => {
                     {activeModule === 'preauth' && (
                         <div className="relative border border-white/10 rounded-xl overflow-hidden min-h-[500px] flex items-center justify-center bg-gray-950">
                             {showWizard ? (
-                                <PreAuthWizard onClose={() => setShowWizard(false)} prefilledData={prefilledData} existingRecord={preAuthOutput?.record} />
+                                <PreAuthWizard onClose={() => setShowWizard(false)} />
                             ) : (
                                 <div className="flex flex-col items-center justify-center w-full p-8">
                                     {/* Header */}

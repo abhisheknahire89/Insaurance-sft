@@ -1,14 +1,10 @@
-import React, { useState, useRef } from 'react';
-import { PatientRecord, InsurancePolicyDetails } from '../PreAuthWizard/types';
+import React, { useRef, useState } from 'react';
+import { useInsuranceCase } from '../../contexts/InsuranceCaseContext';
+import { val } from '../../types/InsuranceCase';
 import { INSURER_LIST, INDIAN_STATES, TPA_NAMES } from '../../config/tpaRegistry';
 import { calculateAge, isPolicyActive, isPolicyExpiringSoon } from '../../utils/formatters';
-import { extractFromDocument } from '../../services/documentExtractionService';
 
 interface PatientInsuranceStepProps {
-    patient: Partial<PatientRecord>;
-    insurance: Partial<InsurancePolicyDetails>;
-    onPatientChange: (p: Partial<PatientRecord>) => void;
-    onInsuranceChange: (ins: Partial<InsurancePolicyDetails>) => void;
     onNext: () => void;
 }
 
@@ -27,35 +23,35 @@ const SectionHeader = ({ icon, title, subtitle }: { icon: string; title: string;
     </div>
 );
 
-export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
-    patient, insurance, onPatientChange, onInsuranceChange, onNext
-}) => {
+export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({ onNext }) => {
+    const { state, setField, dispatch } = useInsuranceCase();
+    const p = state.patient;
+    const ins = state.insurance;
+
     const [isExtracting, setIsExtracting] = useState(false);
+
+    // Track policy warning locally for UI feedback
     const [policyDateWarning, setPolicyDateWarning] = useState('');
-    const [extractionException, setExtractionException] = useState('');
-    const [extractionResult, setExtractionResult] = useState<{ filled: string[]; pending: string[] } | null>(null);
 
-    const fileRef = useRef<HTMLInputElement>(null);
+    const handleFieldValue = (section: 'patient' | 'insurance', field: string, value: any) => {
+        setField(section as any, field, value);
+    };
 
-    // Smart defaults: auto-fill proposer & relationship when patient name changes
     const handlePatientNameChange = (name: string) => {
-        onPatientChange({ ...patient, patientName: name });
-        if (!insurance.proposerName) {
-            onInsuranceChange({
-                ...insurance,
-                proposerName: name,
-                insuredName: name,
-                relationshipWithProposer: insurance.relationshipWithProposer || 'Self',
-            });
+        handleFieldValue('patient', 'patientName', name);
+        if (!val(ins.proposerName)) {
+            handleFieldValue('insurance', 'proposerName', name);
+            handleFieldValue('insurance', 'insuredName', name);
         }
     };
 
     const handleDOBChange = (dob: string) => {
-        onPatientChange({ ...patient, dateOfBirth: dob, age: calculateAge(dob) });
+        handleFieldValue('patient', 'dateOfBirth', dob);
+        handleFieldValue('patient', 'age', calculateAge(dob));
     };
 
     const handlePolicyEndDate = (date: string) => {
-        onInsuranceChange({ ...insurance, policyEndDate: date });
+        handleFieldValue('insurance', 'policyEndDate', date);
         if (!isPolicyActive(date)) {
             setPolicyDateWarning('⚠️ This policy has expired. TPA will reject this pre-auth.');
         } else if (isPolicyExpiringSoon(date)) {
@@ -65,70 +61,29 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
         }
     };
 
-    const handleFileUpload = async (file: File) => {
-        setIsExtracting(true);
-        setExtractionException('');
-        setExtractionResult(null);
-        try {
-            const extracted = await extractFromDocument(file);
-            if (extracted.document_type === 'unknown' || extracted.confidence < 40) {
-                setExtractionException('Could not read document clearly. Please enter details manually.');
-                return;
-            }
-            const dob = extracted.patient?.dob || patient.dateOfBirth;
-            onPatientChange({
-                ...patient,
-                patientName: extracted.patient?.name || patient.patientName,
-                dateOfBirth: dob,
-                age: extracted.patient?.age || (dob ? calculateAge(dob) : patient.age),
-                gender: (extracted.patient?.gender as any) || patient.gender,
-                mobileNumber: extracted.patient?.phone || patient.mobileNumber,
-                city: patient.city,
-                state: patient.state,
-            });
-            const endDate = extracted.insurance?.valid_till || insurance.policyEndDate;
-            onInsuranceChange({
-                ...insurance,
-                insurerName: extracted.insurance?.insurance_company || insurance.insurerName,
-                tpaName: extracted.insurance?.tpa_name || insurance.tpaName,
-                policyNumber: extracted.insurance?.policy_number || insurance.policyNumber,
-                sumInsured: extracted.insurance?.sum_insured || insurance.sumInsured,
-                policyEndDate: endDate,
-                dataSource: 'ocr',
-                ocrConfidence: extracted.confidence,
-            });
-            if (endDate) handlePolicyEndDate(endDate);
-            setExtractionResult({ filled: extracted.extracted_fields, pending: extracted.missing_fields });
-        } catch (error: any) {
-            setExtractionException(error.message || 'Failed to parse document. Please try a clearer image.');
-        } finally {
-            setIsExtracting(false);
-        }
-    };
-
+    // Very basic check for validness to let user pass
     const isValid = !!(
-        patient.patientName && patient.age && patient.gender && patient.mobileNumber && patient.city && patient.state &&
-        insurance.insurerName && insurance.tpaName && insurance.policyNumber && insurance.sumInsured
+        val(p.patientName) && val(p.age) && val(p.gender) && val(p.mobileNumber) && val(p.city) && val(p.state) &&
+        val(ins.insurerName) && val(ins.tpaName) && val(ins.policyNumber) && val(ins.sumInsured)
     );
 
     const getMissingFields = () => {
         const missing: string[] = [];
-        if (!patient.patientName) missing.push('Patient Name');
-        if (!patient.age) missing.push('Age');
-        if (!patient.gender) missing.push('Gender');
-        if (!patient.mobileNumber) missing.push('Mobile');
-        if (!patient.city) missing.push('City');
-        if (!patient.state) missing.push('State');
-        if (!insurance.insurerName) missing.push('Insurance Company');
-        if (!insurance.tpaName) missing.push('TPA');
-        if (!insurance.policyNumber) missing.push('Policy Number');
-        if (!insurance.sumInsured) missing.push('Sum Insured');
+        if (!val(p.patientName)) missing.push('Patient Name');
+        if (!val(p.age)) missing.push('Age');
+        if (!val(p.gender)) missing.push('Gender');
+        if (!val(p.mobileNumber)) missing.push('Mobile');
+        if (!val(p.city)) missing.push('City');
+        if (!val(p.state)) missing.push('State');
+        if (!val(ins.insurerName)) missing.push('Insurance Company');
+        if (!val(ins.tpaName)) missing.push('TPA');
+        if (!val(ins.policyNumber)) missing.push('Policy Number');
+        if (!val(ins.sumInsured)) missing.push('Sum Insured');
         return missing;
     };
 
     return (
         <div className="space-y-5">
-            {/* Step context */}
             <div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                     <span>Step 1 of 4</span>
@@ -138,58 +93,23 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
                 <h2 className="text-xl font-bold text-white">Patient &amp; Insurance Details</h2>
             </div>
 
-            {/* Slim OCR helper */}
-            <div className="flex items-center justify-between p-3 bg-gray-800/30 rounded-xl border border-white/5">
-                <div className="flex items-center gap-3">
-                    <span className="text-lg">📷</span>
-                    <span className="text-sm text-gray-400">Have an insurance card? Auto-fill details</span>
-                </div>
-                <label className={`px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-colors ${isExtracting ? 'bg-gray-700 opacity-60' : 'bg-gray-700 hover:bg-gray-600'}`}>
-                    {isExtracting ? (
-                        <span className="flex items-center gap-2">
-                            <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block" />
-                            Reading…
-                        </span>
-                    ) : 'Scan Card'}
-                    <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden"
-                        onChange={e => e.target.files?.[0] && handleFileUpload(e.target.files[0])} />
-                </label>
-            </div>
-
-            {/* OCR result / error banners */}
-            {extractionException && (
-                <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-xl text-sm text-red-400">{extractionException}</div>
-            )}
-            {extractionResult && (
-                <div className="p-3 bg-emerald-900/20 border border-emerald-500/30 rounded-xl">
-                    <div className="flex items-center gap-2 text-emerald-400 text-sm font-medium">
-                        <span>✓</span>
-                        <span>Extracted {extractionResult.filled.length} fields from card
-                            {extractionResult.pending.length > 0 && (
-                                <span className="text-amber-400 ml-2">({extractionResult.pending.length} need manual input)</span>
-                            )}
-                        </span>
-                    </div>
-                </div>
-            )}
-
-            {/* Patient Demographics — required fields always visible */}
+            {/* Patient Demographics */}
             <div className="bg-gray-800/50 rounded-xl p-4 space-y-4">
                 <SectionHeader icon="👤" title="Patient Demographics" subtitle="Basic patient information" />
                 <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2">
                         <label className={labelCls}>Full Name *</label>
-                        <input value={patient.patientName ?? ''} onChange={e => handlePatientNameChange(e.target.value)}
+                        <input value={val(p.patientName) ?? ''} onChange={e => handlePatientNameChange(e.target.value)}
                             className={inputCls} placeholder="As on insurance card" />
                     </div>
                     <div>
                         <label className={labelCls}>Age *</label>
-                        <input type="number" value={patient.age ?? ''} onChange={e => onPatientChange({ ...patient, age: +e.target.value })}
+                        <input type="number" value={val(p.age) ?? ''} onChange={e => handleFieldValue('patient', 'age', +e.target.value)}
                             className={inputCls} placeholder="Years" />
                     </div>
                     <div>
                         <label className={labelCls}>Gender *</label>
-                        <select value={patient.gender ?? ''} onChange={e => onPatientChange({ ...patient, gender: e.target.value as any })}
+                        <select value={val(p.gender) ?? ''} onChange={e => handleFieldValue('patient', 'gender', e.target.value)}
                             className={inputCls}>
                             <option value="">Select</option>
                             <option>Male</option>
@@ -199,17 +119,17 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
                     </div>
                     <div>
                         <label className={labelCls}>Mobile Number *</label>
-                        <input type="tel" value={patient.mobileNumber ?? ''} onChange={e => onPatientChange({ ...patient, mobileNumber: e.target.value })}
+                        <input type="tel" value={val(p.mobileNumber) ?? ''} onChange={e => handleFieldValue('patient', 'mobileNumber', e.target.value)}
                             className={inputCls} placeholder="+91 XXXXX XXXXX" />
                     </div>
                     <div>
                         <label className={labelCls}>City *</label>
-                        <input value={patient.city ?? ''} onChange={e => onPatientChange({ ...patient, city: e.target.value })}
+                        <input value={val(p.city) ?? ''} onChange={e => handleFieldValue('patient', 'city', e.target.value)}
                             className={inputCls} />
                     </div>
                     <div className="col-span-2">
                         <label className={labelCls}>State *</label>
-                        <select value={patient.state ?? ''} onChange={e => onPatientChange({ ...patient, state: e.target.value })}
+                        <select value={val(p.state) ?? ''} onChange={e => handleFieldValue('patient', 'state', e.target.value)}
                             className={inputCls}>
                             <option value="">Select State</option>
                             {INDIAN_STATES.map(s => <option key={s}>{s}</option>)}
@@ -226,42 +146,7 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
                     <div className="mt-3 grid grid-cols-2 gap-4 pl-2 border-l-2 border-gray-700">
                         <div>
                             <label className={labelCls}>Date of Birth</label>
-                            <input type="date" value={patient.dateOfBirth ?? ''} onChange={e => handleDOBChange(e.target.value)} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Marital Status</label>
-                            <select value={patient.maritalStatus ?? ''} onChange={e => onPatientChange({ ...patient, maritalStatus: e.target.value as any })} className={inputCls}>
-                                <option value="">Select</option>
-                                <option>Single</option><option>Married</option><option>Widowed</option><option>Divorced</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelCls}>Email</label>
-                            <input type="email" value={patient.email ?? ''} onChange={e => onPatientChange({ ...patient, email: e.target.value })} className={inputCls} placeholder="optional" />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Occupation</label>
-                            <input value={patient.occupation ?? ''} onChange={e => onPatientChange({ ...patient, occupation: e.target.value })} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Pincode</label>
-                            <input value={patient.pincode ?? ''} onChange={e => onPatientChange({ ...patient, pincode: e.target.value })} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>UHID (Hospital ID)</label>
-                            <input value={patient.uhid ?? ''} onChange={e => onPatientChange({ ...patient, uhid: e.target.value })} className={inputCls} placeholder="optional" />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Aadhaar Number</label>
-                            <input value={patient.aadhaarNumber ?? ''} onChange={e => onPatientChange({ ...patient, aadhaarNumber: e.target.value })} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>ABHA ID</label>
-                            <input value={patient.abhaId ?? ''} onChange={e => onPatientChange({ ...patient, abhaId: e.target.value })} className={inputCls} />
-                        </div>
-                        <div className="col-span-2">
-                            <label className={labelCls}>Address</label>
-                            <input value={patient.address ?? ''} onChange={e => onPatientChange({ ...patient, address: e.target.value })} className={inputCls} />
+                            <input type="date" value={val(p.dateOfBirth) ?? ''} onChange={e => handleDOBChange(e.target.value)} className={inputCls} />
                         </div>
                     </div>
                 </details>
@@ -274,66 +159,31 @@ export const PatientInsuranceStep: React.FC<PatientInsuranceStepProps> = ({
                     <div>
                         <label className={labelCls}>Insurance Company *</label>
                         <datalist id="insurer-list">{INSURER_LIST.map(i => <option key={i} value={i} />)}</datalist>
-                        <input list="insurer-list" value={insurance.insurerName ?? ''} onChange={e => onInsuranceChange({ ...insurance, insurerName: e.target.value })}
+                        <input list="insurer-list" value={val(ins.insurerName) ?? ''} onChange={e => handleFieldValue('insurance', 'insurerName', e.target.value)}
                             className={inputCls} placeholder="Start typing insurer…" />
                     </div>
                     <div>
                         <label className={labelCls}>TPA Name *</label>
-                        <select value={insurance.tpaName ?? ''} onChange={e => onInsuranceChange({ ...insurance, tpaName: e.target.value })} className={inputCls}>
+                        <select value={val(ins.tpaName) ?? ''} onChange={e => handleFieldValue('insurance', 'tpaName', e.target.value)} className={inputCls}>
                             <option value="">Select TPA</option>
                             {TPA_NAMES.map(t => <option key={t}>{t}</option>)}
                         </select>
                     </div>
                     <div>
                         <label className={labelCls}>Policy Number *</label>
-                        <input value={insurance.policyNumber ?? ''} onChange={e => onInsuranceChange({ ...insurance, policyNumber: e.target.value })} className={inputCls} />
+                        <input value={val(ins.policyNumber) ?? ''} onChange={e => handleFieldValue('insurance', 'policyNumber', e.target.value)} className={inputCls} />
                     </div>
                     <div>
                         <label className={labelCls}>Sum Insured (₹) *</label>
-                        <input type="number" value={insurance.sumInsured ?? ''} onChange={e => onInsuranceChange({ ...insurance, sumInsured: +e.target.value })}
+                        <input type="number" value={val(ins.sumInsured) ?? ''} onChange={e => handleFieldValue('insurance', 'sumInsured', +e.target.value)}
                             className={inputCls} placeholder="e.g. 500000" />
                     </div>
-                </div>
-
-                {/* Optional insurance fields */}
-                <details className="group">
-                    <summary className="flex items-center justify-between p-3 bg-gray-700/30 rounded-xl cursor-pointer hover:bg-gray-700/50 transition-colors list-none">
-                        <span className="text-xs text-gray-400">+ More policy details (optional)</span>
-                        <span className="text-gray-500 text-xs transition-transform group-open:rotate-180">▼</span>
-                    </summary>
-                    <div className="mt-3 grid grid-cols-2 gap-4 pl-2 border-l-2 border-gray-700">
-                        <div>
-                            <label className={labelCls}>TPA ID Card Number</label>
-                            <input value={insurance.tpaIdCardNumber ?? ''} onChange={e => onInsuranceChange({ ...insurance, tpaIdCardNumber: e.target.value })} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Policy Type</label>
-                            <select value={insurance.policyType ?? 'Individual'} onChange={e => onInsuranceChange({ ...insurance, policyType: e.target.value as any })} className={inputCls}>
-                                <option>Individual</option><option>Floater</option><option>Corporate</option><option>Group</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className={labelCls}>Policy Start Date</label>
-                            <input type="date" value={insurance.policyStartDate ?? ''} onChange={e => onInsuranceChange({ ...insurance, policyStartDate: e.target.value })} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Policy End Date</label>
-                            <input type="date" value={insurance.policyEndDate ?? ''} onChange={e => handlePolicyEndDate(e.target.value)} className={inputCls} />
-                            {policyDateWarning && <p className="text-amber-400 text-xs mt-1">{policyDateWarning}</p>}
-                        </div>
-                        <div>
-                            <label className={labelCls}>Proposer Name</label>
-                            <input value={insurance.proposerName ?? ''} onChange={e => onInsuranceChange({ ...insurance, proposerName: e.target.value })}
-                                className={inputCls} placeholder="Defaults to patient name" />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Relationship with Proposer</label>
-                            <select value={insurance.relationshipWithProposer ?? 'Self'} onChange={e => onInsuranceChange({ ...insurance, relationshipWithProposer: e.target.value })} className={inputCls}>
-                                <option>Self</option><option>Spouse</option><option>Son</option><option>Daughter</option><option>Father</option><option>Mother</option><option>Other</option>
-                            </select>
-                        </div>
+                    <div>
+                         <label className={labelCls}>Policy End Date</label>
+                         <input type="date" value={val(ins.policyEndDate) ?? ''} onChange={e => handlePolicyEndDate(e.target.value)} className={inputCls} />
+                         {policyDateWarning && <p className="text-amber-400 text-xs mt-1">{policyDateWarning}</p>}
                     </div>
-                </details>
+                </div>
             </div>
 
             {/* Missing fields + Continue button */}

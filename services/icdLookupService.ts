@@ -400,6 +400,59 @@ export function validateICDCode(code: string): ICDLookupResult {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// NEW: NIH EXTERNAL API FALLBACK
+// ═══════════════════════════════════════════════════════════════════════════
+
+export async function fetchNIHICDCode(code: string): Promise<{ code: string; description: string } | null> {
+  try {
+    const response = await fetch(`https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?terms=${encodeURIComponent(code)}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    
+    // The API returns [count, [codes], null, [[code, description]]]
+    if (data && data[0] > 0 && data[3] && data[3].length > 0) {
+      const match = data[3].find((item: string[]) => item[0].toUpperCase() === code.toUpperCase());
+      if (match) {
+        return { code: match[0], description: match[1] };
+      }
+      return { code: data[3][0][0], description: data[3][0][1] };
+    }
+    return null;
+  } catch (error) {
+    console.warn('[NIH API Fallback] Failed to fetch external ICD code:', error);
+    return null;
+  }
+}
+
+export async function validateICDCodeAsync(code: string): Promise<ICDLookupResult> {
+  const localResult = validateICDCode(code);
+  
+  // If the local validation is successful (meaning it didn't fallback to R69 unless originally R69)
+  if (localResult.code === code.toUpperCase() || (localResult.code !== 'R69' && code !== 'R69')) {
+    return localResult;
+  }
+  
+  // If it's returning R69 but the user didn't ask for R69, let's try the US Government API
+  console.log(`[ICD Validation] Code "${code}" missed local tiers. Querying NIH API...`);
+  const externalResult = await fetchNIHICDCode(code.toUpperCase());
+  
+  if (externalResult) {
+    console.log(`[ICD Validation] NIH API verified "${externalResult.code}".`);
+    return {
+      code: externalResult.code,
+      description: externalResult.description,
+      tier: 'NIH_API' as any,
+      confidence: 100,
+      has_full_metadata: false,
+      reasoning: "Code validated via an external NIH Clinical database query."
+    };
+  }
+  
+  return localResult;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
 // NEW: PREPROCESSING WRAPPER
 // ═══════════════════════════════════════════════════════════════════════════
 

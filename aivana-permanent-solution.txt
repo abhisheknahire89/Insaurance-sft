@@ -1,0 +1,400 @@
+
+AIVANA INSURANCE MODULE
+PERMANENT SOLUTION ARCHITECTURE
+From Product Development Head & AI/ML + Full Stack Engineering Lead
+March 22, 2026  |  Version 2.0 Architectural Redesign
+Classification: Internal — Engineering & Product
+
+
+PART 1: ROOT CAUSE DIAGNOSIS
+After analyzing the entire codebase across InsuranceModule.tsx, PreAuthWizard components, medicalNecessityService.ts, insuranceService.ts, icdDatabaseHelpers.ts, and all related services, the 8 out of 9 bugs that keep recurring share a single architectural root cause: there is no single source of truth for the pre-auth record.
+The Core Problem
+The current system has data flowing through 4 separate channels that never synchronize:
+Channel
+What It Holds
+Where It Breaks
+PatientInsuranceStep state
+Patient name, age, gender, policy, TPA
+State is overwritten (not merged) when other steps update. By the time DocumentsGenerateStep runs, patient/policy fields are gone.
+ClinicalDetailsStep state
+Diagnoses, vitals, severity, ICD-10, treatment plan
+Severity is calculated locally but never written back to the parent record.
+CostEstimationStep state
+Room rates, LOS days, ICU days, total cost
+LOS is calculated independently from medicalNecessityService, creating contradictory values.
+medicalNecessityService.ts
+Medical necessity text, severity, LOS
+Reads from record.clinical and record.admission, but these are stale copies, not live state.
+
+This is why Bug 1 (N/A fields) and Bug 6 (LOS mismatch) keep coming back no matter how many patches you apply. You are patching symptoms of a structural disease.
+Why Patches Keep Failing
+Every bug fix so far has been a point-to-point wire: 'If field X is undefined, check field Y.' This creates a combinatorial explosion. With 40+ fields across 4 steps, you would need 160+ fallback checks, and every new field or step multiplies the problem. The current medicalNecessityService.ts already has 15+ null-coalescing chains like:
+const policyStart = rawPolicy.policyStartDate ?? (rawPolicy as any).policyFrom ?? 'N/A'
+Each of these is a confession that the system does not know where data lives. The 'as any' casts confirm the types are wrong. This is not fixable with more patches.
+
+PART 2: THE 9 BUGS — MAPPED TO ROOT CAUSES
+Bug #
+Bug Description
+Root Cause
+Why Patches Failed
+1
+Patient/Policy/Doctor fields show N/A
+State overwrite: setRecord(clinicalData) replaces entire object instead of merging.
+Fallback chains add more ?? 'N/A' but never fix the overwrite.
+2
+Medical necessity bullets incomplete (only 1 of 4)
+generateNecessityBullets() only reads vitals-based severity. Misses failed OPD treatment, comorbidities, scoring systems.
+Added bullets from one more source, but bullet generator still does not systematically scan all clinical evidence.
+3
+ICD-10 code incomplete (J15 instead of J15.9)
+No validation that code is billable (4+ chars). Category codes pass through silently.
+validateAndSuggestICD10 was added but the UI auto-correct button does not trigger reliably.
+4
+Treatment plan shows 'Medical management' only
+proposedLineOfTreatment reads boolean flags but ignores structured details (antibiotics, procedures, supportive care).
+generateTreatmentPlanText was added but not wired to the final document template.
+5
+Severity says 'Moderate' when vitals indicate 'Severe'
+classifySeverity() receives default vitals (98.6, 72, 120/80) because actual vitals are not parsed from strings correctly.
+Score thresholds adjusted, but input parsing still fails on edge cases.
+6
+LOS shows 0 days in Medical Necessity, correct in Section 5
+Two independent LOS calculations: one in CostEstimationStep, one in medicalNecessityService. They read different state.
+Added 'LOS unification' fallback chain, but still two sources.
+7
+Cost breakdown missing consumables, investigations
+enrichCostFromICD() only returns room + procedure costs. No mapping for diagnostics, medications, consumables.
+Individual cost items were added to the enrichment function, but the ICD database does not have granular cost data for most conditions.
+8
+Comorbidities not factored into medical necessity
+Past medical history (diabetes, hypertension) is captured in AdmissionDetails but never read by the necessity generator.
+PMH list generation was added but only generates the list. Does not incorporate comorbidity-specific necessity language.
+9
+Document checklist not synced with diagnosis
+getDocumentChecklist() uses hardcoded mapping. When diagnosis or ICD changes mid-wizard, checklist does not refresh.
+This is the only bug that was partially fixed by adding a useEffect dependency.
+
+PART 3: THE PERMANENT SOLUTION
+The fix is not code patches. It is an architectural pattern change. Here is the exact implementation.
+Solution Architecture: Single Record Store
+Replace the 4 separate state channels with a single PreAuthRecord object that every component reads from and writes to. This is the React equivalent of a database schema — one table, one truth.
+Step 1: The Canonical Record Type (types/preAuthRecord.ts)
+This is the single type definition that every component, service, and generator must use. No more 'as any' casts, no more ?? chains.
+// types/preAuthRecord.ts
+export interface PreAuthRecord {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+
+  // Section 1: Hospital (set once in Settings)
+  hospital: HospitalDetails;
+
+  // Section 2: Patient Identity
+  patient: PatientDetails;
+
+  // Section 3: Insurance & Policy
+  insurance: InsuranceDetails;
+
+  // Section 4: Clinical
+  clinical: ClinicalDetails;
+
+  // Section 5: Admission
+  admission: AdmissionDetails;
+
+  // Section 6: Cost (DERIVED, not manually entered)
+  cost: CostEstimate;
+
+  // Section 7: Declarations
+  doctor: DoctorDeclaration;
+
+  // Generated outputs (DERIVED from above)
+  medicalNecessity: MedicalNecessityStatement;
+  documents: UploadedDocument[];
+  auditTrail: AuditEntry[];
+}
+
+The key insight: cost and medicalNecessity are DERIVED fields. They are computed from clinical + admission data, never entered directly. Every time clinical or admission changes, they auto-recompute.
+Step 2: The Record Store Hook (hooks/usePreAuthRecord.ts)
+This custom hook replaces all scattered useState calls across wizard steps. Every step reads from and writes to the same record.
+// hooks/usePreAuthRecord.ts
+export function usePreAuthRecord(initialRecord?: Partial<PreAuthRecord>) {
+  const [record, setRecord] = useState<PreAuthRecord>(createEmptyRecord(initialRecord));
+
+  // MERGE updater — never overwrites, always merges
+  const updateSection = useCallback(<K extends keyof PreAuthRecord>(
+    section: K,
+    data: Partial<PreAuthRecord[K]>
+  ) => {
+    setRecord(prev => {
+      const next = {
+        ...prev,
+        [section]: { ...prev[section], ...data },
+        updatedAt: new Date().toISOString()
+      };
+
+      // AUTO-RECOMPUTE derived fields
+      if (section === 'clinical' || section === 'admission') {
+        next.cost = recomputeCost(next);
+        next.medicalNecessity = recomputeNecessity(next);
+      }
+
+      return next;
+    });
+  }, []);
+
+  return { record, updateSection };
+}
+
+This single change kills Bugs 1, 5, 6, and 8 permanently. Patient data can never be overwritten because updateSection MERGES. LOS can never be inconsistent because cost is recomputed from the same admission.expectedLengthOfStay field that necessity reads.
+Step 3: Wizard Wiring (PreAuthWizard.tsx)
+The parent wizard component creates the record and passes section-specific updaters to each step:
+// PreAuthWizard.tsx
+export function PreAuthWizard() {
+  const { record, updateSection } = usePreAuthRecord();
+
+  return (
+    <WizardSteps
+      step1={<PatientInsuranceStep
+        patient={record.patient}
+        insurance={record.insurance}
+        onPatientChange={(data) => updateSection('patient', data)}
+        onInsuranceChange={(data) => updateSection('insurance', data)}
+      />}
+      step2={<ClinicalDetailsStep
+        clinical={record.clinical}
+        onChange={(data) => updateSection('clinical', data)}
+      />}
+      step3={<CostEstimationStep
+        cost={record.cost}  // READ-ONLY derived data
+        admission={record.admission}
+        onAdmissionChange={(data) => updateSection('admission', data)}
+      />}
+      step4={<DocumentsGenerateStep
+        record={record}  // FULL record — this is why N/A disappears
+      />}
+    />
+  );
+}
+
+PART 4: BUG-BY-BUG PERMANENT FIX MAP
+Bug 1: N/A Fields — KILLED
+Before: PatientInsuranceStep called setInsuranceCase(patientData) which overwrote the entire state.
+After: updateSection('patient', data) MERGES into the canonical record. DocumentsGenerateStep receives the full record object. Field mapping is eliminated because the PDF generator reads record.patient.name, record.insurance.policyNumber directly from the single source.
+Verification: Add a single assertion at the top of generateIRDAITextFromRecord():
+if (!record.patient?.patientName || record.patient.patientName === 'N/A') {
+  console.error('[ASSERTION FAILED] Patient name missing at PDF generation');
+  throw new Error('Cannot generate PDF without patient name');
+}
+Bug 2: Incomplete Medical Necessity Bullets — KILLED
+Before: generateNecessityBullets() only checked vitals.spo2, vitals.rr, vitals.pulse, and treatmentTakenSoFar. Missed comorbidities, scoring systems, IV requirements from clinical notes.
+After: recomputeNecessity() in the hook scans ALL clinical evidence systematically:
+function recomputeNecessity(record: PreAuthRecord): MedicalNecessityStatement {
+  const bullets: string[] = [];
+  const { clinical, admission } = record;
+
+  // 1. Vitals-based (existing)
+  addVitalsBullets(bullets, clinical.vitals);
+
+  // 2. Failed outpatient treatment
+  addFailedOPDBullets(bullets, clinical.treatmentTakenSoFar);
+
+  // 3. Comorbidity impact (Bug 8 fix)
+  addComorbidityBullets(bullets, admission.pastMedicalHistory, clinical);
+
+  // 4. Severity scoring systems (CURB-65, qSOFA, etc.)
+  addScoringSystemBullets(bullets, clinical);
+
+  // 5. IV/parenteral medication requirement
+  addIVRequirementBullets(bullets, clinical.proposedTreatmentDetails);
+
+  // 6. Monitoring requirements
+  addMonitoringBullets(bullets, clinical);
+
+  return { generatedText: formatBullets(bullets), bullets, score: scoreBullets(bullets) };
+}
+Bug 3: ICD-10 Incomplete — KILLED
+Before: J15 passed validation silently. validateAndSuggestICD10 existed but the UI auto-correct was unreliable.
+After: ICD-10 validation is enforced at the record level, not the UI level. You cannot proceed past ClinicalDetailsStep with a non-billable code:
+// In updateSection('clinical', data), after merge:
+if (data.diagnoses) {
+  next.clinical.diagnoses = data.diagnoses.map(dx => {
+    const v = validateAndSuggestICD10(dx.icd10Code);
+    if (!v.isBillable && v.suggestedCode) {
+      return { ...dx, icd10Code: v.suggestedCode, icd10Note: v.warningMessage };
+    }
+    return dx;
+  });
+}
+The UI still shows the warning and the 'Correct to X (Billable)' button, but even if the user ignores it, the record auto-corrects on save.
+Bug 4: Treatment Plan Incomplete — KILLED
+Before: Only read boolean flags (medical: true, surgical: false). Ignored structured details.
+After: Treatment plan rendering reads from clinical.proposedTreatmentDetails and generates structured output:
+function renderTreatmentPlan(clinical: ClinicalDetails): string {
+  const lines: string[] = [];
+  const plt = clinical.proposedLineOfTreatment;
+  const details = clinical.proposedTreatmentDetails;
+
+  if (plt?.medical) {
+    lines.push('Medical management:');
+    if (details?.antibiotics) lines.push(`  - Antibiotics: ${details.antibiotics}`);
+    if (details?.otherTreatments) lines.push(`  - Other: ${details.otherTreatments}`);
+  }
+  if (plt?.surgical) lines.push(`Surgical: ${details?.surgeryName || 'As planned'}`);
+  if (plt?.intensiveCare) lines.push('ICU monitoring with ventilator support if needed');
+  if (plt?.investigation) lines.push(`Investigations: ${details?.investigations || 'As indicated'}`);
+
+  return lines.join('\n');
+}
+Bug 5: Severity Miscalculation — KILLED
+Before: classifySeverity() received default vitals because parseInt on undefined returns NaN, which falls through all conditions.
+After: Vitals parsing is done at the point of entry (ClinicalDetailsStep), not at the point of consumption. The record stores parsed numbers, not strings:
+// In ClinicalDetailsStep, when vitals change:
+const parseVitals = (raw: RawVitals): ParsedVitals => ({
+  spo2: parseFloat(raw.spo2) || null,  // null, not default 98
+  rr: parseFloat(raw.rr) || null,
+  pulse: parseFloat(raw.pulse) || null,
+  temp: parseFloat(raw.temp) || null,
+  systolic: parseInt(raw.bp?.split('/')[0]) || null,
+  diastolic: parseInt(raw.bp?.split('/')[1]) || null,
+});
+
+classifySeverity() now operates on typed numbers (or null). If a value is null, it is excluded from scoring rather than defaulting to normal.
+Bug 6: LOS Mismatch — KILLED
+Before: Two independent calculations — one in CostEstimationStep, one in medicalNecessityService.
+After: LOS lives in ONE place: record.admission.expectedLengthOfStay. Cost and necessity both read from it. There is no second calculation. The recomputeCost and recomputeNecessity functions in the hook both use:
+const los = record.admission.expectedLengthOfStay;
+const wardDays = record.admission.expectedDaysInRoom;
+const icuDays = record.admission.expectedDaysInICU;
+If any of these change, both cost and necessity auto-update because they are derived fields.
+Bug 7: Missing Cost Items — KILLED
+Before: enrichCostFromICD() only had room + procedure costs for a few conditions.
+After: Cost estimation uses a tiered approach: ICD database provides typical ranges, then the rate card (hospitalConfig) provides hospital-specific rates, then the user can override. Each tier fills gaps from the tier above:
+function recomputeCost(record: PreAuthRecord): CostEstimate {
+  const base = getICDBaseCost(record.clinical.diagnoses[0]?.icd10Code);
+  const rates = record.hospital.rateCard;
+  const admission = record.admission;
+
+  return {
+    roomRentPerDay: rates.roomRent[admission.roomCategory] || base.roomRent,
+    totalRoomCharges: (rates.roomRent[admission.roomCategory] || base.roomRent) * admission.expectedDaysInRoom,
+    icuChargesPerDay: rates.icuRate || base.icuRate,
+    totalIcuCharges: (rates.icuRate || base.icuRate) * admission.expectedDaysInICU,
+    investigationsEstimate: base.investigations || rates.defaultInvestigations,
+    medicinesEstimate: base.medicines || rates.defaultMedicines,
+    consumablesEstimate: base.consumables || rates.defaultConsumables,
+    // ... all fields populated
+  };
+}
+Bug 8: Comorbidities Missing — KILLED
+Before: PMH was captured but never read by the necessity generator.
+After: addComorbidityBullets() generates condition-specific necessity language:
+function addComorbidityBullets(bullets: string[], pmh: PastMedicalHistory, clinical: ClinicalDetails) {
+  if (pmh.diabetes.present) {
+    bullets.push(`Pre-existing diabetes (${pmh.diabetes.duration}) complicates management — ` +
+      `requires blood glucose monitoring q6h, insulin dose titration, and dietary supervision ` +
+      `not feasible in outpatient setting during acute illness`);
+  }
+  if (pmh.hypertension.present) {
+    bullets.push(`Concurrent hypertension (${pmh.hypertension.duration}) increases risk of ` +
+      `end-organ damage during acute episode — continuous BP monitoring indicated`);
+  }
+  // ... heart disease, asthma/COPD, kidney disease
+}
+Bug 9: Document Checklist Stale — KILLED
+Before: Checklist was generated once and not refreshed when diagnosis changed.
+After: Document checklist is a derived field, recomputed whenever clinical.diagnoses changes:
+// In the hook, when clinical changes:
+if (section === 'clinical' && data.diagnoses) {
+  next.documentChecklist = getDocumentChecklist(
+    next.clinical.diagnoses[next.clinical.selectedDiagnosisIndex || 0]?.icd10Code
+  );
+}
+
+PART 5: IMPLEMENTATION PLAN
+This is a 5-day refactor, not a rebuild. You keep every UI component. You only change how data flows.
+Day
+Task
+Files Changed
+Bugs Killed
+1
+Create PreAuthRecord type + usePreAuthRecord hook
+types/preAuthRecord.ts, hooks/usePreAuthRecord.ts
+Foundation for all
+2
+Rewire PreAuthWizard.tsx to use hook. Remove all local useState for record data.
+PreAuthWizard.tsx, PreAuthWizard/index.tsx
+Bug 1 (N/A fields)
+3
+Rewire ClinicalDetailsStep to use updateSection. Move vitals parsing to entry point.
+ClinicalDetailsStep.tsx, types/preAuthRecord.ts
+Bug 3 (ICD), Bug 5 (Severity)
+4
+Implement recomputeNecessity + recomputeCost in hook. Kill all duplicate LOS calculations.
+hooks/usePreAuthRecord.ts, medicalNecessityService.ts
+Bug 2, 4, 6, 7, 8
+5
+Wire DocumentsGenerateStep to read full record. Add assertion guards. Run all 7 test cases.
+DocumentsGenerateStep.tsx, insuranceService.ts
+Bug 9 + Validation
+PART 6: VALIDATION PROTOCOL
+After the refactor, run all 7 clinical test cases. For each case, the PDF must pass this checklist:
+Check
+Pass Criteria
+Bug It Validates
+Patient name in Section 1
+Not 'N/A', matches input
+Bug 1
+Policy number in Section 2
+Not 'N/A', matches input
+Bug 1
+Doctor name in Section 7
+Not 'N/A', matches input
+Bug 1
+Medical necessity has 3+ bullets
+All clinical evidence reflected
+Bug 2
+ICD-10 code is 4+ characters
+Billable code (not category)
+Bug 3
+Treatment plan has specific details
+Antibiotics named, not just 'Medical management'
+Bug 4
+Severity matches vitals
+SpO2 91% = Moderate-Severe or higher
+Bug 5
+LOS identical in Section 5 and Necessity
+Same number, no contradiction
+Bug 6
+Cost includes investigations + medicines
+Non-zero values for all categories
+Bug 7
+Comorbidities appear in necessity
+Diabetes/HTN mentioned if present
+Bug 8
+Document checklist matches diagnosis
+Correct docs listed for ICD code
+Bug 9
+
+PART 7: PREVENTING THIS CLASS OF BUGS FOREVER
+The architectural pattern (single record store + derived fields) eliminates state desynchronization bugs. But to prevent NEW classes of bugs, implement these engineering practices:
+1. Schema Validation at Boundaries
+Add Zod validation at two points: when data enters the record (from form input) and when data exits the record (to PDF generator). If schema validation fails, the operation throws — not silently defaults to N/A.
+2. Derived Field Pattern
+Any field that can be computed from other fields MUST be computed, never entered. Cost, medical necessity, document checklist, severity score, ICD validation — all derived. If you need to add a new derived field in the future, add it to the recompute functions in the hook.
+3. Assertion Guards in Generators
+Every document generator function should assert its required inputs before producing output. If record.patient.patientName is empty, throw an error. Never produce a document with N/A fields — crash instead. N/A in production is worse than a crash in development.
+4. Test Case Automation
+Convert the 7 clinical test cases into automated integration tests. Each test creates a PreAuthRecord, runs it through the full pipeline, and asserts the PDF output contains expected values. Run on every commit.
+
+FINAL ASSESSMENT
+Your product pipeline (Voice → SOAP → NEXUS → ICD → Pre-Auth PDF) is technically complete. The clinical reasoning quality is strong — the NEXUS engine, the severity scoring, the medical necessity language are all genuinely useful to hospitals.
+The bugs are not evidence of a bad product. They are evidence of a codebase that grew faster than its architecture. That is normal for an early-stage startup. The fix is not to keep patching — it is to spend 5 focused days implementing the pattern described in this document.
+After the refactor:
+	•	All 9 bugs are structurally impossible to recur
+	•	Adding new fields/sections becomes trivial (extend the type, add to updateSection)
+	•	The codebase is demo-ready and pilot-ready
+	•	Every future developer who touches this code will understand the data flow in 5 minutes
+
+Stop patching. Refactor the foundation. 5 days to a product you can sell.
+
+Aivana Health — Insurance Intelligence Module v2.0 Architecture

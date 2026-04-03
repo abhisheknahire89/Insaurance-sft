@@ -173,14 +173,31 @@ export async function parseTranscriptWithGemini(transcript: string): Promise<Voi
   const a = parsed.admission ?? {};
   const p = parsed.patient ?? {};
   const ins = parsed.insurance ?? {};
+  
+  // Need to import validateICDCodeAsync dynamically or have it injected to prevent loops, 
+  // but let's assume it's available via a dynamic import since this is a service file.
+  const { validateICDCodeAsync } = await import('./icdLookupService');
 
-  const diagnoses: DiagnosisEntry[] = (c.diagnoses ?? []).map((d: any, i: number) => ({
-    diagnosis: d.diagnosis ?? '',
-    icd10Code: d.icd10Code ?? '',
-    icd10Description: d.icd10Description ?? '',
-    probability: 0.9,
-    reasoning: '',
-    isSelected: i === 0,
+  const diagnoses: DiagnosisEntry[] = await Promise.all((c.diagnoses ?? []).map(async (d: any, i: number) => {
+    let finalCode = d.icd10Code ?? '';
+    let finalDesc = d.icd10Description ?? '';
+    
+    if (finalCode) {
+      const validated = await validateICDCodeAsync(finalCode);
+      if (validated.code && validated.code !== 'R69') {
+        finalCode = validated.code;
+        finalDesc = validated.description;
+      }
+    }
+    
+    return {
+      diagnosis: d.diagnosis ?? '',
+      icd10Code: finalCode,
+      icd10Description: finalDesc,
+      probability: 0.9,
+      reasoning: '',
+      isSelected: i === 0,
+    };
   }));
 
   // voiceCapturedFindings is WizardVoiceFinding[] — leave empty, transcript goes to additionalClinicalNotes

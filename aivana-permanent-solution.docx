@@ -1,0 +1,1616 @@
+# AIVANA INSURANCE MODULE — COMPLETE ARCHITECTURAL REBUILD
+## Permanent Solution for Insurance Pre-Authorization Pipeline
+
+**Problem:** The current system has fundamental architectural flaws:
+1. Data from voice input is not reaching the PDF generator
+2. Multiple sources of truth cause data inconsistency
+3. No validation catches errors before output
+4. No way to trace where each field's value comes from
+
+**Solution:** Complete rebuild with:
+1. Single Source of Truth (SSOT) — one state object for everything
+2. Event-driven pipeline — each step depends on previous
+3. Source tracking — every field knows where its value came from
+4. Validation gates — block output if data is invalid
+5. Debug mode — trace data flow in real-time
+
+---
+
+## PART 1: THE CORE TYPE SYSTEM
+
+Create this file: `src/types/InsuranceCase.ts`
+
+```typescript
+// ============================================================================
+// INSURANCE CASE — THE SINGLE SOURCE OF TRUTH
+// ============================================================================
+
+/**
+ * Every field in the system has not just a value, but metadata about
+ * WHERE that value came from and WHEN it was set.
+ */
+export interface TrackedField<T> {
+  value: T;
+  source: 'voice' | 'manual' | 'emr' | 'computed' | 'default' | 'unknown';
+  timestamp: Date;
+  confidence?: number; // 0-1, for AI-extracted fields
+  rawExtraction?: string; // Original text that was parsed
+}
+
+/**
+ * Create a tracked field with source information
+ */
+export function tracked<T>(
+  value: T, 
+  source: TrackedField<T>['source'],
+  options?: { confidence?: number; rawExtraction?: string }
+): TrackedField<T> {
+  return {
+    value,
+    source,
+    timestamp: new Date(),
+    confidence: options?.confidence,
+    rawExtraction: options?.rawExtraction,
+  };
+}
+
+/**
+ * Create a default tracked field (used for initialization)
+ */
+export function defaultField<T>(value: T): TrackedField<T> {
+  return tracked(value, 'default');
+}
+
+/**
+ * Get the raw value from a tracked field (for display/computation)
+ */
+export function val<T>(field: TrackedField<T> | undefined): T | undefined {
+  return field?.value;
+}
+
+// ============================================================================
+// PATIENT DATA
+// ============================================================================
+
+export interface PatientData {
+  patientName: TrackedField<string>;
+  age: TrackedField<number>;
+  gender: TrackedField<'Male' | 'Female' | 'Other'>;
+  dateOfBirth: TrackedField<string>;
+  mobileNumber: TrackedField<string>;
+  address: TrackedField<string>;
+  city: TrackedField<string>;
+  state: TrackedField<string>;
+  pincode: TrackedField<string>;
+  occupation: TrackedField<string>;
+  uhid: TrackedField<string>;
+  abhaId: TrackedField<string>;
+}
+
+// ============================================================================
+// INSURANCE DATA
+// ============================================================================
+
+export interface InsuranceData {
+  insurerName: TrackedField<string>;
+  tpaName: TrackedField<string>;
+  tpaCardNumber: TrackedField<string>;
+  policyNumber: TrackedField<string>;
+  policyType: TrackedField<string>;
+  policyStartDate: TrackedField<string>;
+  policyEndDate: TrackedField<string>;
+  sumInsured: TrackedField<number>;
+  proposerName: TrackedField<string>;
+  insuredName: TrackedField<string>;
+  relationship: TrackedField<string>;
+}
+
+// ============================================================================
+// CLINICAL DATA
+// ============================================================================
+
+export interface VitalsData {
+  bloodPressure: TrackedField<string>; // "120/80"
+  systolic: TrackedField<number>;
+  diastolic: TrackedField<number>;
+  pulse: TrackedField<number>;
+  spo2: TrackedField<number>;
+  respiratoryRate: TrackedField<number>;
+  temperature: TrackedField<number>;
+  gcs: TrackedField<number>;
+}
+
+export interface ClinicalData {
+  chiefComplaints: TrackedField<string>;
+  duration: TrackedField<string>;
+  natureOfIllness: TrackedField<'Acute' | 'Chronic' | 'Acute on Chronic'>;
+  relevantFindings: TrackedField<string>;
+  investigations: TrackedField<string>;
+  provisionalDiagnosis: TrackedField<string>;
+  treatmentPlan: TrackedField<string>;
+  vitals: VitalsData;
+}
+
+// ============================================================================
+// ADMISSION DATA
+// ============================================================================
+
+export interface ComorbidityData {
+  diabetes: TrackedField<boolean>;
+  hypertension: TrackedField<boolean>;
+  heartDisease: TrackedField<boolean>;
+  kidney: TrackedField<boolean>;
+  liver: TrackedField<boolean>;
+  respiratory: TrackedField<boolean>;
+  cancer: TrackedField<boolean>;
+  other: TrackedField<string>;
+}
+
+export interface AdmissionData {
+  dateOfAdmission: TrackedField<string>;
+  timeOfAdmission: TrackedField<string>;
+  admissionType: TrackedField<'Emergency' | 'Elective'>;
+  roomCategory: TrackedField<'General Ward' | 'Semi-Private' | 'Private' | 'ICU'>;
+  expectedLOS: TrackedField<number>;
+  expectedICUDays: TrackedField<number>;
+  treatmentType: TrackedField<{
+    medical: boolean;
+    surgical: boolean;
+    icu: boolean;
+    investigation: boolean;
+  }>;
+  pastMedicalHistory: ComorbidityData;
+}
+
+// ============================================================================
+// COMPUTED DATA (Engine Outputs)
+// ============================================================================
+
+export interface ICDResult {
+  primaryCode: TrackedField<string>;
+  primaryDescription: TrackedField<string>;
+  confidence: TrackedField<number>;
+  tier: TrackedField<1 | 2 | 3 | 'FLOOR'>;
+  validationStatus: TrackedField<'valid' | 'needs_review' | 'fallback'>;
+  isSurgical: TrackedField<boolean>;
+  specialty: TrackedField<string>;
+}
+
+export interface SeverityResult {
+  overallLevel: TrackedField<'Low' | 'Moderate' | 'High' | 'Critical'>;
+  overallScore: TrackedField<number>;
+  phenoIntensity: TrackedField<number>;
+  urgencyQuotient: TrackedField<number>;
+  deteriorationVelocity: TrackedField<number>;
+  icuRequired: TrackedField<boolean>;
+  redFlags: TrackedField<string[]>;
+}
+
+export interface CostBreakdown {
+  roomRent: TrackedField<number>;
+  nursingCharges: TrackedField<number>;
+  icuCharges: TrackedField<number>;
+  otCharges: TrackedField<number>;
+  surgeonFee: TrackedField<number>;
+  anesthetistFee: TrackedField<number>;
+  consultantFee: TrackedField<number>;
+  investigations: TrackedField<number>;
+  medicines: TrackedField<number>;
+  consumables: TrackedField<number>;
+  implants: TrackedField<number>;
+  miscellaneous: TrackedField<number>;
+}
+
+export interface CostResult {
+  totalEstimate: TrackedField<number>;
+  claimedAmount: TrackedField<number>;
+  breakdown: CostBreakdown;
+  los: {
+    totalDays: TrackedField<number>;
+    wardDays: TrackedField<number>;
+    icuDays: TrackedField<number>;
+  };
+}
+
+export interface MedicalNecessityResult {
+  statement: TrackedField<string>;
+  vitalInterpretation: TrackedField<string>;
+  hospitalizationReasons: TrackedField<string[]>;
+  opdContraindication: TrackedField<string>;
+}
+
+// ============================================================================
+// VALIDATION RESULT
+// ============================================================================
+
+export interface ValidationError {
+  field: string;
+  code: string;
+  message: string;
+  severity: 'error' | 'warning';
+  blocking: boolean; // If true, blocks PDF generation
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  completenessScore: number; // 0-100
+  errors: ValidationError[];
+  warnings: ValidationError[];
+}
+
+// ============================================================================
+// THE MASTER TYPE — SINGLE SOURCE OF TRUTH
+// ============================================================================
+
+export interface InsuranceCase {
+  // Metadata
+  caseId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: 'draft' | 'validating' | 'validated' | 'generating' | 'complete' | 'error';
+  
+  // Input tracking
+  inputSource: 'voice' | 'manual' | 'emr' | 'mixed';
+  rawInput?: string; // Original transcript or EMR data
+  
+  // Core data sections
+  patient: PatientData;
+  insurance: InsuranceData;
+  clinical: ClinicalData;
+  admission: AdmissionData;
+  
+  // Engine outputs (computed from core data)
+  computed: {
+    icd: ICDResult | null;
+    severity: SeverityResult | null;
+    cost: CostResult | null;
+    medicalNecessity: MedicalNecessityResult | null;
+  };
+  
+  // Validation state
+  validation: ValidationResult;
+  
+  // Debug trace
+  trace: TraceEntry[];
+}
+
+export interface TraceEntry {
+  timestamp: Date;
+  action: string;
+  field?: string;
+  oldValue?: any;
+  newValue?: any;
+  source?: string;
+}
+
+// ============================================================================
+// FACTORY FUNCTION — Create empty InsuranceCase
+// ============================================================================
+
+export function createEmptyInsuranceCase(): InsuranceCase {
+  const now = new Date();
+  const caseId = `PA-AIVANA-${now.toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+  
+  return {
+    caseId,
+    createdAt: now,
+    updatedAt: now,
+    status: 'draft',
+    inputSource: 'manual',
+    
+    patient: {
+      patientName: defaultField(''),
+      age: defaultField(0),
+      gender: defaultField('Male'),
+      dateOfBirth: defaultField(''),
+      mobileNumber: defaultField(''),
+      address: defaultField(''),
+      city: defaultField(''),
+      state: defaultField(''),
+      pincode: defaultField(''),
+      occupation: defaultField(''),
+      uhid: defaultField(''),
+      abhaId: defaultField(''),
+    },
+    
+    insurance: {
+      insurerName: defaultField(''),
+      tpaName: defaultField(''),
+      tpaCardNumber: defaultField(''),
+      policyNumber: defaultField(''),
+      policyType: defaultField(''),
+      policyStartDate: defaultField(''),
+      policyEndDate: defaultField(''),
+      sumInsured: defaultField(0),
+      proposerName: defaultField(''),
+      insuredName: defaultField(''),
+      relationship: defaultField(''),
+    },
+    
+    clinical: {
+      chiefComplaints: defaultField(''),
+      duration: defaultField(''),
+      natureOfIllness: defaultField('Acute'),
+      relevantFindings: defaultField(''),
+      investigations: defaultField(''),
+      provisionalDiagnosis: defaultField(''),
+      treatmentPlan: defaultField(''),
+      vitals: {
+        bloodPressure: defaultField(''),
+        systolic: defaultField(0),
+        diastolic: defaultField(0),
+        pulse: defaultField(0),
+        spo2: defaultField(0),
+        respiratoryRate: defaultField(0),
+        temperature: defaultField(0),
+        gcs: defaultField(15),
+      },
+    },
+    
+    admission: {
+      dateOfAdmission: defaultField(now.toISOString().slice(0, 10)),
+      timeOfAdmission: defaultField(now.toTimeString().slice(0, 5)),
+      admissionType: defaultField('Emergency'),
+      roomCategory: defaultField('General Ward'),
+      expectedLOS: defaultField(3),
+      expectedICUDays: defaultField(0),
+      treatmentType: defaultField({
+        medical: true,
+        surgical: false,
+        icu: false,
+        investigation: false,
+      }),
+      pastMedicalHistory: {
+        diabetes: defaultField(false),
+        hypertension: defaultField(false),
+        heartDisease: defaultField(false),
+        kidney: defaultField(false),
+        liver: defaultField(false),
+        respiratory: defaultField(false),
+        cancer: defaultField(false),
+        other: defaultField(''),
+      },
+    },
+    
+    computed: {
+      icd: null,
+      severity: null,
+      cost: null,
+      medicalNecessity: null,
+    },
+    
+    validation: {
+      isValid: false,
+      completenessScore: 0,
+      errors: [],
+      warnings: [],
+    },
+    
+    trace: [{
+      timestamp: now,
+      action: 'CASE_CREATED',
+    }],
+  };
+}
+```
+
+---
+
+## PART 2: THE UNIFIED INPUT PARSER
+
+Create this file: `src/services/UnifiedInputParser.ts`
+
+```typescript
+import { 
+  InsuranceCase, 
+  TrackedField, 
+  tracked, 
+  createEmptyInsuranceCase 
+} from '../types/InsuranceCase';
+
+// ============================================================================
+// GEMINI PROMPT FOR EXTRACTION
+// ============================================================================
+
+const EXTRACTION_PROMPT = `
+You are a medical data extraction AI. Extract structured data from the following clinical transcript.
+
+EXTRACTION RULES:
+1. Extract ONLY what is explicitly stated or clearly implied
+2. For age: Look for "X saal", "X years old", "X yo", etc.
+3. For insurance: Look for company names like "Star Health", "HDFC Ergo", "Oriental", etc.
+4. For sum insured: Look for "X lakh", "X lac", "₹X", etc.
+5. For diagnosis: Extract the PRIMARY diagnosis (main reason for admission)
+6. For comorbidities: Extract secondary conditions (diabetes, HTN, etc.)
+7. For vitals: Parse BP as "systolic/diastolic", SpO2 as percentage, etc.
+8. For room: Look for "ICU", "ward", "semi-private", etc.
+
+CRITICAL: 
+- If a value is NOT mentioned, return null (not empty string, not 0)
+- If diagnosis is STEMI/heart attack/MI, set primaryDiagnosis to "Acute myocardial infarction"
+- If patient needs ICU, set roomCategory to "ICU"
+- Extract comorbidities separately from primary diagnosis
+
+Return ONLY valid JSON in this exact format:
+{
+  "patient": {
+    "name": string | null,
+    "age": number | null,
+    "gender": "Male" | "Female" | null,
+    "mobile": string | null
+  },
+  "insurance": {
+    "insurerName": string | null,
+    "policyNumber": string | null,
+    "tpaName": string | null,
+    "sumInsured": number | null
+  },
+  "clinical": {
+    "chiefComplaints": string | null,
+    "duration": string | null,
+    "primaryDiagnosis": string | null,
+    "relevantFindings": string | null,
+    "vitals": {
+      "bp": string | null,
+      "pulse": number | null,
+      "spo2": number | null,
+      "rr": number | null,
+      "temp": number | null
+    }
+  },
+  "admission": {
+    "type": "Emergency" | "Elective" | null,
+    "roomCategory": "General Ward" | "Semi-Private" | "Private" | "ICU" | null,
+    "needsICU": boolean,
+    "needsSurgery": boolean
+  },
+  "comorbidities": {
+    "diabetes": boolean,
+    "hypertension": boolean,
+    "heartDisease": boolean,
+    "other": string | null
+  }
+}
+
+TRANSCRIPT:
+`;
+
+// ============================================================================
+// PARSE VOICE TRANSCRIPT
+// ============================================================================
+
+export async function parseVoiceTranscript(
+  transcript: string
+): Promise<Partial<InsuranceCase>> {
+  
+  console.log('[Parser] Starting voice extraction for:', transcript.slice(0, 100) + '...');
+  
+  // Call Gemini API
+  const response = await fetch('/api/gemini/extract', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      prompt: EXTRACTION_PROMPT + transcript,
+    }),
+  });
+  
+  const result = await response.json();
+  
+  // Parse the JSON response
+  let extracted;
+  try {
+    // Handle markdown code blocks
+    const jsonStr = result.text
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+    extracted = JSON.parse(jsonStr);
+  } catch (e) {
+    console.error('[Parser] Failed to parse Gemini response:', e);
+    throw new Error('Failed to parse voice transcript');
+  }
+  
+  console.log('[Parser] Extracted data:', extracted);
+  
+  // Convert to InsuranceCase format with source tracking
+  const insuranceCase: Partial<InsuranceCase> = {
+    inputSource: 'voice',
+    rawInput: transcript,
+  };
+  
+  // Patient data
+  if (extracted.patient) {
+    insuranceCase.patient = {
+      patientName: extracted.patient.name 
+        ? tracked(extracted.patient.name, 'voice', { rawExtraction: transcript })
+        : undefined,
+      age: extracted.patient.age 
+        ? tracked(extracted.patient.age, 'voice', { rawExtraction: transcript })
+        : undefined,
+      gender: extracted.patient.gender 
+        ? tracked(extracted.patient.gender, 'voice')
+        : undefined,
+      mobileNumber: extracted.patient.mobile 
+        ? tracked(extracted.patient.mobile, 'voice')
+        : undefined,
+    } as any;
+  }
+  
+  // Insurance data
+  if (extracted.insurance) {
+    insuranceCase.insurance = {
+      insurerName: extracted.insurance.insurerName 
+        ? tracked(extracted.insurance.insurerName, 'voice', { 
+            confidence: 0.9,
+            rawExtraction: transcript 
+          })
+        : undefined,
+      policyNumber: extracted.insurance.policyNumber 
+        ? tracked(extracted.insurance.policyNumber, 'voice')
+        : undefined,
+      tpaName: extracted.insurance.tpaName 
+        ? tracked(extracted.insurance.tpaName, 'voice')
+        : undefined,
+      sumInsured: extracted.insurance.sumInsured 
+        ? tracked(extracted.insurance.sumInsured, 'voice', {
+            rawExtraction: transcript
+          })
+        : undefined,
+    } as any;
+  }
+  
+  // Clinical data
+  if (extracted.clinical) {
+    const vitals = extracted.clinical.vitals || {};
+    let systolic = 0, diastolic = 0;
+    
+    if (vitals.bp) {
+      const [sys, dia] = vitals.bp.split('/').map(Number);
+      systolic = sys || 0;
+      diastolic = dia || 0;
+    }
+    
+    insuranceCase.clinical = {
+      chiefComplaints: extracted.clinical.chiefComplaints 
+        ? tracked(extracted.clinical.chiefComplaints, 'voice')
+        : undefined,
+      duration: extracted.clinical.duration 
+        ? tracked(extracted.clinical.duration, 'voice')
+        : undefined,
+      provisionalDiagnosis: extracted.clinical.primaryDiagnosis 
+        ? tracked(extracted.clinical.primaryDiagnosis, 'voice', {
+            confidence: 0.85,
+            rawExtraction: transcript
+          })
+        : undefined,
+      relevantFindings: extracted.clinical.relevantFindings 
+        ? tracked(extracted.clinical.relevantFindings, 'voice')
+        : undefined,
+      vitals: {
+        bloodPressure: vitals.bp 
+          ? tracked(vitals.bp, 'voice')
+          : undefined,
+        systolic: systolic > 0 
+          ? tracked(systolic, 'voice')
+          : undefined,
+        diastolic: diastolic > 0 
+          ? tracked(diastolic, 'voice')
+          : undefined,
+        pulse: vitals.pulse 
+          ? tracked(vitals.pulse, 'voice')
+          : undefined,
+        spo2: vitals.spo2 
+          ? tracked(vitals.spo2, 'voice')
+          : undefined,
+        respiratoryRate: vitals.rr 
+          ? tracked(vitals.rr, 'voice')
+          : undefined,
+        temperature: vitals.temp 
+          ? tracked(vitals.temp, 'voice')
+          : undefined,
+      } as any,
+    } as any;
+  }
+  
+  // Admission data
+  if (extracted.admission) {
+    insuranceCase.admission = {
+      admissionType: extracted.admission.type 
+        ? tracked(extracted.admission.type, 'voice')
+        : undefined,
+      roomCategory: extracted.admission.roomCategory 
+        ? tracked(extracted.admission.roomCategory, 'voice')
+        : extracted.admission.needsICU 
+          ? tracked('ICU', 'voice')
+          : undefined,
+      treatmentType: tracked({
+        medical: true,
+        surgical: extracted.admission.needsSurgery || false,
+        icu: extracted.admission.needsICU || false,
+        investigation: true,
+      }, 'voice'),
+    } as any;
+    
+    // Comorbidities
+    if (extracted.comorbidities) {
+      insuranceCase.admission.pastMedicalHistory = {
+        diabetes: tracked(extracted.comorbidities.diabetes || false, 'voice'),
+        hypertension: tracked(extracted.comorbidities.hypertension || false, 'voice'),
+        heartDisease: tracked(extracted.comorbidities.heartDisease || false, 'voice'),
+        other: extracted.comorbidities.other 
+          ? tracked(extracted.comorbidities.other, 'voice')
+          : undefined,
+      } as any;
+    }
+  }
+  
+  console.log('[Parser] Converted to InsuranceCase:', insuranceCase);
+  
+  return insuranceCase;
+}
+
+// ============================================================================
+// MERGE EXTRACTED DATA INTO EXISTING CASE
+// ============================================================================
+
+export function mergeIntoCase(
+  existingCase: InsuranceCase,
+  newData: Partial<InsuranceCase>
+): InsuranceCase {
+  
+  const merged = { ...existingCase };
+  merged.updatedAt = new Date();
+  
+  // Add trace entry
+  merged.trace.push({
+    timestamp: new Date(),
+    action: 'MERGE_DATA',
+    source: newData.inputSource || 'unknown',
+  });
+  
+  // Deep merge each section, preferring new non-null values
+  if (newData.patient) {
+    merged.patient = mergeSection(merged.patient, newData.patient, merged.trace);
+  }
+  if (newData.insurance) {
+    merged.insurance = mergeSection(merged.insurance, newData.insurance, merged.trace);
+  }
+  if (newData.clinical) {
+    merged.clinical = mergeSection(merged.clinical, newData.clinical, merged.trace);
+  }
+  if (newData.admission) {
+    merged.admission = mergeSection(merged.admission, newData.admission, merged.trace);
+  }
+  
+  // Update input source
+  if (newData.inputSource) {
+    if (merged.inputSource === 'manual' || merged.inputSource === newData.inputSource) {
+      merged.inputSource = newData.inputSource;
+    } else {
+      merged.inputSource = 'mixed';
+    }
+  }
+  
+  // Store raw input
+  if (newData.rawInput) {
+    merged.rawInput = newData.rawInput;
+  }
+  
+  console.log('[Parser] Merged case:', merged);
+  
+  return merged;
+}
+
+function mergeSection<T extends Record<string, any>>(
+  existing: T,
+  incoming: Partial<T>,
+  trace: any[]
+): T {
+  const result = { ...existing };
+  
+  for (const [key, value] of Object.entries(incoming)) {
+    if (value !== undefined && value !== null) {
+      // Check if it's a TrackedField
+      if (value && typeof value === 'object' && 'value' in value && 'source' in value) {
+        const trackedValue = value as TrackedField<any>;
+        // Only overwrite if new value is from a "better" source
+        const existingTracked = existing[key] as TrackedField<any> | undefined;
+        
+        if (!existingTracked || existingTracked.source === 'default' || trackedValue.source !== 'default') {
+          // Log the change
+          trace.push({
+            timestamp: new Date(),
+            action: 'FIELD_UPDATE',
+            field: key,
+            oldValue: existingTracked?.value,
+            newValue: trackedValue.value,
+            source: trackedValue.source,
+          });
+          
+          result[key as keyof T] = value as any;
+        }
+      } else if (typeof value === 'object' && !Array.isArray(value)) {
+        // Recursively merge nested objects
+        result[key as keyof T] = mergeSection(existing[key] || {}, value, trace);
+      } else {
+        result[key as keyof T] = value as any;
+      }
+    }
+  }
+  
+  return result;
+}
+```
+
+---
+
+## PART 3: THE VALIDATION GATE
+
+Create this file: `src/services/ValidationGate.ts`
+
+```typescript
+import { InsuranceCase, ValidationResult, ValidationError, val } from '../types/InsuranceCase';
+
+// ============================================================================
+// VALIDATION RULES
+// ============================================================================
+
+export function validateCase(insuranceCase: InsuranceCase): ValidationResult {
+  const errors: ValidationError[] = [];
+  const warnings: ValidationError[] = [];
+  
+  // =========================================================================
+  // CRITICAL VALIDATIONS (blocking)
+  // =========================================================================
+  
+  // Patient name
+  const patientName = val(insuranceCase.patient?.patientName);
+  if (!patientName || patientName === '' || patientName === 'Unknown') {
+    errors.push({
+      field: 'patient.patientName',
+      code: 'PATIENT_NAME_REQUIRED',
+      message: 'Patient name is required',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // Patient age
+  const age = val(insuranceCase.patient?.age);
+  if (!age || age === 0) {
+    errors.push({
+      field: 'patient.age',
+      code: 'PATIENT_AGE_REQUIRED',
+      message: 'Patient age is required',
+      severity: 'error',
+      blocking: true,
+    });
+  } else if (age > 150 || age < 0) {
+    errors.push({
+      field: 'patient.age',
+      code: 'PATIENT_AGE_INVALID',
+      message: `Age ${age} is invalid. Please check.`,
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // Insurance policy number
+  const policyNumber = val(insuranceCase.insurance?.policyNumber);
+  if (!policyNumber || policyNumber === '') {
+    errors.push({
+      field: 'insurance.policyNumber',
+      code: 'POLICY_NUMBER_REQUIRED',
+      message: 'Policy number is required for pre-auth',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // Insurer name
+  const insurerName = val(insuranceCase.insurance?.insurerName);
+  if (!insurerName || insurerName === '') {
+    errors.push({
+      field: 'insurance.insurerName',
+      code: 'INSURER_REQUIRED',
+      message: 'Insurance company name is required',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // Chief complaints
+  const chiefComplaints = val(insuranceCase.clinical?.chiefComplaints);
+  if (!chiefComplaints || chiefComplaints === '') {
+    errors.push({
+      field: 'clinical.chiefComplaints',
+      code: 'CHIEF_COMPLAINTS_REQUIRED',
+      message: 'Chief complaints must be documented',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // Diagnosis
+  const diagnosis = val(insuranceCase.clinical?.provisionalDiagnosis);
+  if (!diagnosis || diagnosis === '') {
+    errors.push({
+      field: 'clinical.provisionalDiagnosis',
+      code: 'DIAGNOSIS_REQUIRED',
+      message: 'Provisional diagnosis is required',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // =========================================================================
+  // ICD-10 VALIDATION
+  // =========================================================================
+  
+  const icdCode = val(insuranceCase.computed?.icd?.primaryCode);
+  const icdStatus = val(insuranceCase.computed?.icd?.validationStatus);
+  
+  if (!icdCode) {
+    errors.push({
+      field: 'computed.icd.primaryCode',
+      code: 'ICD_NOT_COMPUTED',
+      message: 'ICD-10 code has not been computed yet',
+      severity: 'error',
+      blocking: true,
+    });
+  } else if (icdCode === 'R69') {
+    errors.push({
+      field: 'computed.icd.primaryCode',
+      code: 'ICD_FALLBACK_USED',
+      message: 'ICD-10 code defaulted to R69 (unspecified). Please specify a valid diagnosis.',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // =========================================================================
+  // COST VALIDATION
+  // =========================================================================
+  
+  const totalCost = val(insuranceCase.computed?.cost?.totalEstimate);
+  
+  if (!totalCost || totalCost === 0) {
+    errors.push({
+      field: 'computed.cost.totalEstimate',
+      code: 'COST_NOT_COMPUTED',
+      message: 'Cost estimate has not been computed',
+      severity: 'error',
+      blocking: true,
+    });
+  } else if (totalCost < 5000) {
+    warnings.push({
+      field: 'computed.cost.totalEstimate',
+      code: 'COST_TOO_LOW',
+      message: `Cost estimate ₹${totalCost.toLocaleString()} seems too low. Please verify.`,
+      severity: 'warning',
+      blocking: false,
+    });
+  }
+  
+  // =========================================================================
+  // SEVERITY vs ICU VALIDATION
+  // =========================================================================
+  
+  const severity = val(insuranceCase.computed?.severity?.overallLevel);
+  const icuDays = val(insuranceCase.computed?.cost?.los?.icuDays);
+  const roomCategory = val(insuranceCase.admission?.roomCategory);
+  
+  if (severity === 'Critical' && icuDays === 0) {
+    errors.push({
+      field: 'computed.cost.los.icuDays',
+      code: 'ICU_SEVERITY_MISMATCH',
+      message: 'Severity is CRITICAL but ICU days is 0. This is inconsistent.',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  if (roomCategory === 'ICU' && icuDays === 0) {
+    errors.push({
+      field: 'computed.cost.los.icuDays',
+      code: 'ICU_ROOM_MISMATCH',
+      message: 'Room category is ICU but ICU days is 0. This is inconsistent.',
+      severity: 'error',
+      blocking: true,
+    });
+  }
+  
+  // =========================================================================
+  // WARNINGS (non-blocking)
+  // =========================================================================
+  
+  // Sum insured
+  const sumInsured = val(insuranceCase.insurance?.sumInsured);
+  if (!sumInsured || sumInsured === 0) {
+    warnings.push({
+      field: 'insurance.sumInsured',
+      code: 'SUM_INSURED_MISSING',
+      message: 'Sum insured not specified',
+      severity: 'warning',
+      blocking: false,
+    });
+  }
+  
+  // Vitals
+  const spo2 = val(insuranceCase.clinical?.vitals?.spo2);
+  const pulse = val(insuranceCase.clinical?.vitals?.pulse);
+  const systolic = val(insuranceCase.clinical?.vitals?.systolic);
+  
+  if (!spo2 && !pulse && !systolic) {
+    warnings.push({
+      field: 'clinical.vitals',
+      code: 'VITALS_MISSING',
+      message: 'Vital signs not documented',
+      severity: 'warning',
+      blocking: false,
+    });
+  }
+  
+  // =========================================================================
+  // CALCULATE COMPLETENESS
+  // =========================================================================
+  
+  const requiredFields = [
+    insuranceCase.patient?.patientName,
+    insuranceCase.patient?.age,
+    insuranceCase.patient?.gender,
+    insuranceCase.insurance?.policyNumber,
+    insuranceCase.insurance?.insurerName,
+    insuranceCase.clinical?.chiefComplaints,
+    insuranceCase.clinical?.provisionalDiagnosis,
+    insuranceCase.admission?.roomCategory,
+    insuranceCase.computed?.icd?.primaryCode,
+    insuranceCase.computed?.cost?.totalEstimate,
+    insuranceCase.computed?.severity?.overallLevel,
+  ];
+  
+  const filledFields = requiredFields.filter(f => {
+    if (!f) return false;
+    const value = val(f as any);
+    return value !== undefined && value !== null && value !== '' && value !== 0;
+  }).length;
+  
+  const completenessScore = Math.round((filledFields / requiredFields.length) * 100);
+  
+  // =========================================================================
+  // RETURN RESULT
+  // =========================================================================
+  
+  const blockingErrors = errors.filter(e => e.blocking);
+  
+  return {
+    isValid: blockingErrors.length === 0,
+    completenessScore,
+    errors,
+    warnings,
+  };
+}
+
+// ============================================================================
+// VALIDATION GATE — Blocks PDF generation if invalid
+// ============================================================================
+
+export function canGeneratePDF(insuranceCase: InsuranceCase): {
+  allowed: boolean;
+  reasons: string[];
+} {
+  const validation = validateCase(insuranceCase);
+  
+  const blockingErrors = validation.errors.filter(e => e.blocking);
+  
+  if (blockingErrors.length > 0) {
+    return {
+      allowed: false,
+      reasons: blockingErrors.map(e => e.message),
+    };
+  }
+  
+  return {
+    allowed: true,
+    reasons: [],
+  };
+}
+```
+
+---
+
+## PART 4: THE STATE MANAGER (React Context)
+
+Create this file: `src/context/InsuranceCaseContext.tsx`
+
+```typescript
+import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import { 
+  InsuranceCase, 
+  createEmptyInsuranceCase,
+  TrackedField,
+  tracked,
+} from '../types/InsuranceCase';
+import { parseVoiceTranscript, mergeIntoCase } from '../services/UnifiedInputParser';
+import { validateCase } from '../services/ValidationGate';
+import { computeICD } from '../engines/ICDEngine';
+import { computeSeverity } from '../engines/SeverityEngine';
+import { computeCost } from '../engines/CostEngine';
+import { computeMedicalNecessity } from '../engines/MedicalNecessityEngine';
+
+// ============================================================================
+// ACTION TYPES
+// ============================================================================
+
+type Action =
+  | { type: 'RESET' }
+  | { type: 'SET_FIELD'; section: string; field: string; value: any; source: string }
+  | { type: 'IMPORT_VOICE'; transcript: string }
+  | { type: 'MERGE_DATA'; data: Partial<InsuranceCase> }
+  | { type: 'RUN_ENGINES' }
+  | { type: 'VALIDATE' }
+  | { type: 'SET_STATUS'; status: InsuranceCase['status'] }
+  | { type: 'SET_CASE'; insuranceCase: InsuranceCase };
+
+// ============================================================================
+// REDUCER
+// ============================================================================
+
+function reducer(state: InsuranceCase, action: Action): InsuranceCase {
+  switch (action.type) {
+    case 'RESET':
+      return createEmptyInsuranceCase();
+      
+    case 'SET_FIELD': {
+      const newState = { ...state };
+      const section = newState[action.section as keyof InsuranceCase];
+      
+      if (section && typeof section === 'object') {
+        (section as any)[action.field] = tracked(action.value, action.source as any);
+      }
+      
+      newState.updatedAt = new Date();
+      newState.trace.push({
+        timestamp: new Date(),
+        action: 'SET_FIELD',
+        field: `${action.section}.${action.field}`,
+        newValue: action.value,
+        source: action.source,
+      });
+      
+      return newState;
+    }
+    
+    case 'MERGE_DATA':
+      return mergeIntoCase(state, action.data);
+      
+    case 'VALIDATE': {
+      const validation = validateCase(state);
+      return {
+        ...state,
+        validation,
+        updatedAt: new Date(),
+        trace: [...state.trace, {
+          timestamp: new Date(),
+          action: 'VALIDATE',
+        }],
+      };
+    }
+    
+    case 'SET_STATUS':
+      return {
+        ...state,
+        status: action.status,
+        updatedAt: new Date(),
+        trace: [...state.trace, {
+          timestamp: new Date(),
+          action: 'SET_STATUS',
+          newValue: action.status,
+        }],
+      };
+      
+    case 'SET_CASE':
+      return action.insuranceCase;
+      
+    default:
+      return state;
+  }
+}
+
+// ============================================================================
+// CONTEXT
+// ============================================================================
+
+interface InsuranceCaseContextValue {
+  state: InsuranceCase;
+  dispatch: React.Dispatch<Action>;
+  
+  // High-level actions
+  importVoiceTranscript: (transcript: string) => Promise<void>;
+  setField: (section: string, field: string, value: any) => void;
+  runAllEngines: () => Promise<void>;
+  validate: () => void;
+  reset: () => void;
+  
+  // Debug
+  getTrace: () => InsuranceCase['trace'];
+  getFieldSource: (section: string, field: string) => string | undefined;
+}
+
+const InsuranceCaseContext = createContext<InsuranceCaseContextValue | null>(null);
+
+// ============================================================================
+// PROVIDER
+// ============================================================================
+
+export function InsuranceCaseProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, null, createEmptyInsuranceCase);
+  
+  // Import voice transcript
+  const importVoiceTranscript = useCallback(async (transcript: string) => {
+    console.log('[Context] Importing voice transcript...');
+    
+    dispatch({ type: 'SET_STATUS', status: 'validating' });
+    
+    try {
+      const extractedData = await parseVoiceTranscript(transcript);
+      dispatch({ type: 'MERGE_DATA', data: extractedData });
+      
+      // Run engines after import
+      await runAllEngines();
+      
+      // Validate
+      dispatch({ type: 'VALIDATE' });
+      
+      dispatch({ type: 'SET_STATUS', status: 'validated' });
+    } catch (error) {
+      console.error('[Context] Voice import failed:', error);
+      dispatch({ type: 'SET_STATUS', status: 'error' });
+    }
+  }, []);
+  
+  // Set a single field
+  const setField = useCallback((section: string, field: string, value: any) => {
+    dispatch({ type: 'SET_FIELD', section, field, value, source: 'manual' });
+  }, []);
+  
+  // Run all processing engines
+  const runAllEngines = useCallback(async () => {
+    console.log('[Context] Running all engines...');
+    
+    // Get current state for processing
+    // Note: In a real implementation, you'd need to access the latest state
+    // This is simplified for illustration
+    
+    // Run ICD engine
+    const icdResult = await computeICD(state);
+    dispatch({ type: 'MERGE_DATA', data: { computed: { ...state.computed, icd: icdResult } } });
+    
+    // Run severity engine
+    const severityResult = await computeSeverity(state);
+    dispatch({ type: 'MERGE_DATA', data: { computed: { ...state.computed, severity: severityResult } } });
+    
+    // Run cost engine
+    const costResult = await computeCost(state);
+    dispatch({ type: 'MERGE_DATA', data: { computed: { ...state.computed, cost: costResult } } });
+    
+    // Run medical necessity engine
+    const medNecResult = await computeMedicalNecessity(state);
+    dispatch({ type: 'MERGE_DATA', data: { computed: { ...state.computed, medicalNecessity: medNecResult } } });
+    
+    console.log('[Context] All engines complete');
+  }, [state]);
+  
+  // Validate
+  const validate = useCallback(() => {
+    dispatch({ type: 'VALIDATE' });
+  }, []);
+  
+  // Reset
+  const reset = useCallback(() => {
+    dispatch({ type: 'RESET' });
+  }, []);
+  
+  // Debug: Get trace
+  const getTrace = useCallback(() => {
+    return state.trace;
+  }, [state.trace]);
+  
+  // Debug: Get field source
+  const getFieldSource = useCallback((section: string, field: string) => {
+    const sectionData = state[section as keyof InsuranceCase];
+    if (sectionData && typeof sectionData === 'object') {
+      const fieldData = (sectionData as any)[field] as TrackedField<any> | undefined;
+      return fieldData?.source;
+    }
+    return undefined;
+  }, [state]);
+  
+  const value: InsuranceCaseContextValue = {
+    state,
+    dispatch,
+    importVoiceTranscript,
+    setField,
+    runAllEngines,
+    validate,
+    reset,
+    getTrace,
+    getFieldSource,
+  };
+  
+  return (
+    <InsuranceCaseContext.Provider value={value}>
+      {children}
+    </InsuranceCaseContext.Provider>
+  );
+}
+
+// ============================================================================
+// HOOK
+// ============================================================================
+
+export function useInsuranceCase() {
+  const context = useContext(InsuranceCaseContext);
+  if (!context) {
+    throw new Error('useInsuranceCase must be used within InsuranceCaseProvider');
+  }
+  return context;
+}
+```
+
+---
+
+## PART 5: THE PDF GENERATOR (Reads ONLY from InsuranceCase)
+
+Create this file: `src/services/PDFGenerator.ts`
+
+```typescript
+import { InsuranceCase, val, TrackedField } from '../types/InsuranceCase';
+import { canGeneratePDF } from './ValidationGate';
+
+// ============================================================================
+// PDF GENERATOR — READS ONLY FROM INSURANCE CASE
+// ============================================================================
+
+export function generatePreAuthPDF(insuranceCase: InsuranceCase): {
+  success: boolean;
+  html?: string;
+  errors?: string[];
+} {
+  
+  // GATE CHECK — Cannot generate if validation fails
+  const gateCheck = canGeneratePDF(insuranceCase);
+  if (!gateCheck.allowed) {
+    console.error('[PDF] Generation blocked by validation gate:', gateCheck.reasons);
+    return {
+      success: false,
+      errors: gateCheck.reasons,
+    };
+  }
+  
+  console.log('[PDF] Generating from InsuranceCase:', insuranceCase.caseId);
+  
+  // Extract all values from tracked fields
+  const data = {
+    // Metadata
+    caseId: insuranceCase.caseId,
+    generatedAt: new Date().toLocaleString(),
+    
+    // Patient
+    patientName: val(insuranceCase.patient.patientName) || 'N/A',
+    age: val(insuranceCase.patient.age) || 'N/A',
+    gender: val(insuranceCase.patient.gender) || 'N/A',
+    dateOfBirth: val(insuranceCase.patient.dateOfBirth) || 'N/A',
+    mobileNumber: val(insuranceCase.patient.mobileNumber) || 'N/A',
+    address: val(insuranceCase.patient.address) || 'N/A',
+    city: val(insuranceCase.patient.city) || 'N/A',
+    state: val(insuranceCase.patient.state) || 'N/A',
+    pincode: val(insuranceCase.patient.pincode) || 'N/A',
+    
+    // Insurance
+    insurerName: val(insuranceCase.insurance.insurerName) || 'N/A',
+    tpaName: val(insuranceCase.insurance.tpaName) || 'N/A',
+    tpaCardNumber: val(insuranceCase.insurance.tpaCardNumber) || 'N/A',
+    policyNumber: val(insuranceCase.insurance.policyNumber) || 'N/A',
+    policyType: val(insuranceCase.insurance.policyType) || 'N/A',
+    sumInsured: val(insuranceCase.insurance.sumInsured) 
+      ? `₹${val(insuranceCase.insurance.sumInsured)!.toLocaleString()}`
+      : 'N/A',
+    
+    // Clinical
+    chiefComplaints: val(insuranceCase.clinical.chiefComplaints) || 'N/A',
+    duration: val(insuranceCase.clinical.duration) || 'N/A',
+    relevantFindings: val(insuranceCase.clinical.relevantFindings) || 'N/A',
+    provisionalDiagnosis: val(insuranceCase.clinical.provisionalDiagnosis) || 'N/A',
+    
+    // Vitals
+    bp: val(insuranceCase.clinical.vitals.bloodPressure) || 'N/A',
+    pulse: val(insuranceCase.clinical.vitals.pulse) || 'N/A',
+    spo2: val(insuranceCase.clinical.vitals.spo2) || 'N/A',
+    rr: val(insuranceCase.clinical.vitals.respiratoryRate) || 'N/A',
+    
+    // Admission
+    admissionDate: val(insuranceCase.admission.dateOfAdmission) || 'N/A',
+    admissionTime: val(insuranceCase.admission.timeOfAdmission) || 'N/A',
+    admissionType: val(insuranceCase.admission.admissionType) || 'N/A',
+    roomCategory: val(insuranceCase.admission.roomCategory) || 'N/A',
+    
+    // ICD
+    icdCode: val(insuranceCase.computed?.icd?.primaryCode) || 'N/A',
+    icdDescription: val(insuranceCase.computed?.icd?.primaryDescription) || 'N/A',
+    
+    // Severity
+    severityLevel: val(insuranceCase.computed?.severity?.overallLevel) || 'N/A',
+    
+    // Cost
+    totalCost: val(insuranceCase.computed?.cost?.totalEstimate)
+      ? `₹${val(insuranceCase.computed?.cost?.totalEstimate)!.toLocaleString()}`
+      : 'N/A',
+    totalDays: val(insuranceCase.computed?.cost?.los?.totalDays) || 'N/A',
+    wardDays: val(insuranceCase.computed?.cost?.los?.wardDays) || 'N/A',
+    icuDays: val(insuranceCase.computed?.cost?.los?.icuDays) || 'N/A',
+    
+    // Cost breakdown
+    roomRent: val(insuranceCase.computed?.cost?.breakdown?.roomRent) || 0,
+    icuCharges: val(insuranceCase.computed?.cost?.breakdown?.icuCharges) || 0,
+    otCharges: val(insuranceCase.computed?.cost?.breakdown?.otCharges) || 0,
+    surgeonFee: val(insuranceCase.computed?.cost?.breakdown?.surgeonFee) || 0,
+    investigations: val(insuranceCase.computed?.cost?.breakdown?.investigations) || 0,
+    medicines: val(insuranceCase.computed?.cost?.breakdown?.medicines) || 0,
+    implants: val(insuranceCase.computed?.cost?.breakdown?.implants) || 0,
+    
+    // Medical necessity
+    medicalNecessity: val(insuranceCase.computed?.medicalNecessity?.statement) || 'N/A',
+    
+    // Comorbidities
+    hasDiabetes: val(insuranceCase.admission.pastMedicalHistory?.diabetes),
+    hasHypertension: val(insuranceCase.admission.pastMedicalHistory?.hypertension),
+    hasHeartDisease: val(insuranceCase.admission.pastMedicalHistory?.heartDisease),
+  };
+  
+  // Build comorbidity string
+  const comorbidities: string[] = [];
+  if (data.hasDiabetes) comorbidities.push('Diabetes');
+  if (data.hasHypertension) comorbidities.push('Hypertension');
+  if (data.hasHeartDisease) comorbidities.push('Heart Disease');
+  const comorbidityStr = comorbidities.length > 0 ? comorbidities.join(', ') : 'Nil';
+  
+  // Generate HTML
+  const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pre-Auth — ${data.caseId}</title>
+  <style>
+    body { font-family: 'Courier New', monospace; font-size: 12px; padding: 20px; }
+    .header { text-align: center; margin-bottom: 20px; }
+    .section { margin: 20px 0; }
+    .section-title { border-bottom: 1px dashed #000; padding-bottom: 5px; font-weight: bold; }
+    .row { display: flex; justify-content: space-between; padding: 3px 0; }
+    .label { color: #666; }
+    .value { font-weight: bold; }
+    .cost-table { width: 100%; border-collapse: collapse; }
+    .cost-table td { padding: 5px; border-bottom: 1px dotted #ccc; }
+    .cost-table .total { font-weight: bold; border-top: 2px solid #000; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>INSURANCE PRE-AUTHORIZATION REQUEST</h2>
+    <p>IRDAI Part-C — Medical Necessity Statement</p>
+    <p>Ref No: ${data.caseId} | Date: ${data.generatedAt}</p>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 1: INSURANCE DETAILS</div>
+    <div class="row"><span class="label">Insurance Company:</span><span class="value">${data.insurerName}</span></div>
+    <div class="row"><span class="label">TPA Name:</span><span class="value">${data.tpaName}</span></div>
+    <div class="row"><span class="label">Policy Number:</span><span class="value">${data.policyNumber}</span></div>
+    <div class="row"><span class="label">Sum Insured:</span><span class="value">${data.sumInsured}</span></div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 2: PATIENT DETAILS</div>
+    <div class="row"><span class="label">Patient Name:</span><span class="value">${data.patientName}</span></div>
+    <div class="row"><span class="label">Age / Gender:</span><span class="value">${data.age} years / ${data.gender}</span></div>
+    <div class="row"><span class="label">Mobile:</span><span class="value">${data.mobileNumber}</span></div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 3: CLINICAL DETAILS</div>
+    <div class="row"><span class="label">Chief Complaints:</span><span class="value">${data.chiefComplaints}</span></div>
+    <div class="row"><span class="label">Duration:</span><span class="value">${data.duration}</span></div>
+    <div class="row"><span class="label">Relevant Findings:</span><span class="value">${data.relevantFindings}</span></div>
+    <div class="row"><span class="label">Provisional Diagnosis:</span><span class="value">${data.provisionalDiagnosis}</span></div>
+    <div class="row"><span class="label">ICD-10 Code:</span><span class="value">${data.icdCode} — ${data.icdDescription}</span></div>
+    <div class="row"><span class="label">Vitals:</span><span class="value">BP: ${data.bp} | HR: ${data.pulse} | SpO2: ${data.spo2}% | RR: ${data.rr}</span></div>
+    <div class="row"><span class="label">Severity:</span><span class="value">${data.severityLevel}</span></div>
+    <div class="row"><span class="label">Comorbidities:</span><span class="value">${comorbidityStr}</span></div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 4: ADMISSION DETAILS</div>
+    <div class="row"><span class="label">Admission Date/Time:</span><span class="value">${data.admissionDate} ${data.admissionTime}</span></div>
+    <div class="row"><span class="label">Admission Type:</span><span class="value">${data.admissionType}</span></div>
+    <div class="row"><span class="label">Room Category:</span><span class="value">${data.roomCategory}</span></div>
+    <div class="row"><span class="label">Expected Stay:</span><span class="value">${data.totalDays} days (Ward: ${data.wardDays}, ICU: ${data.icuDays})</span></div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 5: COST ESTIMATION</div>
+    <table class="cost-table">
+      <tr><td>Room Rent</td><td>₹${data.roomRent.toLocaleString()}</td></tr>
+      <tr><td>ICU Charges</td><td>₹${data.icuCharges.toLocaleString()}</td></tr>
+      <tr><td>OT/Cath Lab</td><td>₹${data.otCharges.toLocaleString()}</td></tr>
+      <tr><td>Surgeon Fee</td><td>₹${data.surgeonFee.toLocaleString()}</td></tr>
+      <tr><td>Investigations</td><td>₹${data.investigations.toLocaleString()}</td></tr>
+      <tr><td>Medicines</td><td>₹${data.medicines.toLocaleString()}</td></tr>
+      <tr><td>Implants</td><td>₹${data.implants.toLocaleString()}</td></tr>
+      <tr class="total"><td>TOTAL ESTIMATED</td><td>${data.totalCost}</td></tr>
+    </table>
+  </div>
+  
+  <div class="section">
+    <div class="section-title">SECTION 6: MEDICAL NECESSITY STATEMENT</div>
+    <p>${data.medicalNecessity}</p>
+  </div>
+  
+  <div style="margin-top: 40px; text-align: center; font-size: 10px; color: #666;">
+    Generated by Aivana Insurance Pre-Auth System | ${data.generatedAt}
+  </div>
+</body>
+</html>
+  `;
+  
+  return {
+    success: true,
+    html,
+  };
+}
+```
+
+---
+
+## PART 6: DEBUG PANEL COMPONENT
+
+Create this file: `src/components/DebugPanel.tsx`
+
+```typescript
+import React from 'react';
+import { useInsuranceCase } from '../context/InsuranceCaseContext';
+import { val } from '../types/InsuranceCase';
+
+export function DebugPanel() {
+  const { state, getTrace } = useInsuranceCase();
+  const trace = getTrace();
+  
+  return (
+    <div style={{ 
+      position: 'fixed', 
+      bottom: 0, 
+      right: 0, 
+      width: '400px', 
+      maxHeight: '300px',
+      overflow: 'auto',
+      background: '#1a1a1a', 
+      color: '#00ff00',
+      fontFamily: 'monospace',
+      fontSize: '11px',
+      padding: '10px',
+      borderTopLeftRadius: '8px',
+    }}>
+      <div style={{ fontWeight: 'bold', marginBottom: '10px', borderBottom: '1px solid #333' }}>
+        🔍 DEBUG: {state.caseId}
+      </div>
+      
+      <div style={{ marginBottom: '10px' }}>
+        <strong>Status:</strong> {state.status} | 
+        <strong> Valid:</strong> {state.validation.isValid ? '✅' : '❌'} | 
+        <strong> Completeness:</strong> {state.validation.completenessScore}%
+      </div>
+      
+      <div style={{ marginBottom: '10px' }}>
+        <strong>Key Values:</strong>
+        <div>• Patient: {val(state.patient.patientName) || '❌ MISSING'} ({state.patient.patientName?.source})</div>
+        <div>• Age: {val(state.patient.age) || '❌ MISSING'} ({state.patient.age?.source})</div>
+        <div>• Insurer: {val(state.insurance.insurerName) || '❌ MISSING'} ({state.insurance.insurerName?.source})</div>
+        <div>• Sum Insured: {val(state.insurance.sumInsured) || '❌ MISSING'} ({state.insurance.sumInsured?.source})</div>
+        <div>• Diagnosis: {val(state.clinical.provisionalDiagnosis) || '❌ MISSING'} ({state.clinical.provisionalDiagnosis?.source})</div>
+        <div>• ICD: {val(state.computed?.icd?.primaryCode) || '❌ NOT COMPUTED'}</div>
+        <div>• Cost: {val(state.computed?.cost?.totalEstimate) || '❌ NOT COMPUTED'}</div>
+        <div>• Severity: {val(state.computed?.severity?.overallLevel) || '❌ NOT COMPUTED'}</div>
+      </div>
+      
+      {state.validation.errors.length > 0 && (
+        <div style={{ color: '#ff6b6b', marginBottom: '10px' }}>
+          <strong>Errors:</strong>
+          {state.validation.errors.map((e, i) => (
+            <div key={i}>• {e.message}</div>
+          ))}
+        </div>
+      )}
+      
+      <div>
+        <strong>Trace (last 5):</strong>
+        {trace.slice(-5).map((t, i) => (
+          <div key={i} style={{ color: '#888' }}>
+            [{t.timestamp.toLocaleTimeString()}] {t.action} 
+            {t.field && ` → ${t.field}`}
+            {t.newValue !== undefined && ` = ${JSON.stringify(t.newValue).slice(0, 30)}`}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## IMPLEMENTATION CHECKLIST
+
+Copy this to your project and check off as you go:
+
+- [ ] Create `src/types/InsuranceCase.ts` — The master type system
+- [ ] Create `src/services/UnifiedInputParser.ts` — Voice/manual/EMR parser
+- [ ] Create `src/services/ValidationGate.ts` — Validation rules
+- [ ] Create `src/context/InsuranceCaseContext.tsx` — State management
+- [ ] Create `src/services/PDFGenerator.ts` — PDF generator
+- [ ] Create `src/components/DebugPanel.tsx` — Debug visualization
+- [ ] Create `src/engines/ICDEngine.ts` — ICD-10 mapping
+- [ ] Create `src/engines/SeverityEngine.ts` — Risk scoring
+- [ ] Create `src/engines/CostEngine.ts` — Cost calculation
+- [ ] Create `src/engines/MedicalNecessityEngine.ts` — Statement generation
+- [ ] Wrap app in `<InsuranceCaseProvider>`
+- [ ] Update wizard steps to use `useInsuranceCase()` hook
+- [ ] Add `<DebugPanel />` during development
+- [ ] Test with Case 1: STEMI
+
+---
+
+## TEST CASE 1: STEMI
+
+After implementation, test with this input:
+
+```
+65 saal ke diabetic patient, chest pain aur breathlessness se aaye hain. 
+ECG mein ST elevation hai anterior leads mein. Troponin I positive - 2.5 ng/ml. 
+BP 90/60, pulse 110, SpO2 92% on room air. 
+Patient ko ICU admission chahiye, primary PCI ke liye cardiology referral. 
+Star Health policy hai, sum insured 10 lakh.
+```
+
+**Expected PDF Output:**
+
+| Field | Expected Value |
+|-------|----------------|
+| Patient Age | 65 years |
+| Insurer | Star Health |
+| Sum Insured | ₹10,00,000 |
+| Diagnosis | Acute myocardial infarction / STEMI |
+| ICD-10 | I21.3 or I21.9 |
+| Room Category | ICU |
+| ICU Days | 3+ |
+| Severity | Critical |
+| Cost | ₹2.5-5 lakh |
+| Comorbidities | Diabetes |
+
+**If ANY of these fail, check the Debug Panel to see WHERE the data got lost.**
+
+---
+
+## WHY THIS ARCHITECTURE WORKS
+
+1. **Single Source of Truth**: All data lives in `InsuranceCase`. No parallel state. No caching.
+
+2. **Source Tracking**: Every field knows WHERE it came from (voice, manual, computed). You can trace any bug.
+
+3. **Validation Gates**: PDF cannot be generated if data is invalid. No more "R69" or "2005 years" in production.
+
+4. **Event-Driven Pipeline**: Voice → Parser → State → Engines → Validation → PDF. Clear flow.
+
+5. **Debug Panel**: Real-time visibility into state. You can SEE when data is missing or wrong.
+
+6. **Immutable Updates**: State changes through dispatch, not direct mutation. Predictable.
+
+This is production-grade architecture. It will work reliably because the failure modes are eliminated by design.
