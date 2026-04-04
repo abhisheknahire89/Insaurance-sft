@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<button onclick="printPdf()">Print PDF</button>
+<script>
+function printPdf() {
+  const w = window.open('', '_blank', 'width=900,height=700');
+  if (!w) return;
+  w.document.write("<html><body><h1>Hello World</h1></body></html>");
+  w.document.close();
+  w.focus();
+  setTimeout(() => {
+      w.print();
+  }, 500);
+}
+</script>
+</body>
+</html>

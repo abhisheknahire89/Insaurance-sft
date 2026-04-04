@@ -3,6 +3,8 @@ import { useInsuranceCase } from '../../contexts/InsuranceCaseContext';
 import { val } from '../../types/InsuranceCase';
 import { generatePreAuthPDF } from '../../services/PDFGenerator';
 
+
+
 interface DocGenerateStepProps {
     onBack: () => void;
     onGenerate: (irdaiText: string) => void;
@@ -59,6 +61,7 @@ export const DocumentsGenerateStep: React.FC<DocGenerateStepProps> = ({ onBack, 
         w.focus();
         setTimeout(() => w.print(), 400);
     };
+
 
     if (generated) {
         return (

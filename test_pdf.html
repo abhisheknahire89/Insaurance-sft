@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test PDF</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <button onclick="downloadPDF()">Download PDF</button>
+  <script>
+    function downloadPDF() {
+      const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Pre-Auth</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Times New Roman', serif; font-size: 11pt; color: #000; background: #fff; padding: 20mm 18mm; }
+    .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 14px; }
+    .header h1 { font-size: 14pt; font-weight: bold; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>INSURANCE PRE-AUTHORIZATION REQUEST</h1>
+  </div>
+  <p>Test Content</p>
+</body>
+</html>`;
+
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'absolute';
+      iframe.style.width = '210mm';
+      iframe.style.height = '1000px'; 
+      iframe.style.left = '-9999px';
+      document.body.appendChild(iframe);
+
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(html);
+      doc.close();
+
+      setTimeout(async () => {
+        try {
+          const body = iframe.contentWindow.document.body;
+          const canvas = await html2canvas(body, { scale: 2 });
+          const imgData = canvas.toDataURL('image/png');
+          const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+          
+          let heightLeft = pdfHeight;
+          let position = 0;
+          const pageHeight = pdf.internal.pageSize.getHeight();
+          
+          pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+          heightLeft -= pageHeight;
+          
+          while (heightLeft >= 0) {
+              position = heightLeft - pdfHeight;
+              pdf.addPage();
+              pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+              heightLeft -= pageHeight;
+          }
+          pdf.save('test.pdf');
+        } catch(e) {
+          console.error(e);
+        } finally {
+          document.body.removeChild(iframe);
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
