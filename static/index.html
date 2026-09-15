@@ -837,14 +837,23 @@ async function handleWantSlipUpload() {
     try {
       data = JSON.parse(bodyText);
     } catch {
-      throw new Error(`Invalid server response (${response.status})`);
+      let err = new Error(`Invalid server response (${response.status})`);
+      err.isApiError = true;
+      throw err;
     }
 
     if (!response.ok) {
-      throw new Error(data.detail || data.error || `Want-slip processing failed (${response.status})`);
+      let err = new Error(data.detail || data.error || `Want-slip processing failed (${response.status})`);
+      err.isApiError = true;
+      throw err;
     }
 
-    processRequirementResult(data);
+    try {
+      processRequirementResult(data);
+    } catch (e) {
+      e.isRenderError = true;
+      throw e;
+    }
 
   } catch (error) {
     console.error('Want-slip processing failed', error);
@@ -863,9 +872,13 @@ async function handleWantSlipUpload() {
       document.getElementById('center-workspace').appendChild(errDiv);
     }
     
+    let errorTitle = error.isRenderError 
+      ? "The requirement was processed, but we couldn't display the results." 
+      : "We couldn't read this want slip.";
+      
     errDiv.innerHTML = `
-      <h2 style="color:var(--red);">We couldn't process this want slip.</h2>
-      <p>${esc(error.message || "Something went wrong during OCR extraction.")}</p>
+      <h2 style="color:var(--red);">${esc(errorTitle)}</h2>
+      <p>${esc(error.message || "Something went wrong during extraction.")}</p>
       <div class="mt-4 flex-gap">
         <button class="btn-primary" onclick="location.reload()">Try again</button>
       </div>
@@ -897,6 +910,43 @@ async function handleTextRequirement(e) {
     hideOverlay();
   }
 }
+// --- Readiness Contract ---
+
+function isReady(item) {
+  if (!item || !item.input || !item.resolution) return false;
+
+  const decision = item.resolution.decision;
+  const masterProductId = item.resolution.master_product_id;
+  const quantity = Number(item.input.quantity);
+
+  const validDecision =
+    decision === 'AUTO_ACCEPT' ||
+    decision === 'USER_CONFIRMED';
+
+  const validProduct =
+    masterProductId !== null &&
+    masterProductId !== undefined &&
+    String(masterProductId).trim() !== '';
+
+  const validQuantity =
+    Number.isFinite(quantity) &&
+    quantity > 0;
+
+  return validDecision && validProduct && validQuantity;
+}
+
+function isExcluded(item) {
+  const decision = item?.resolution?.decision;
+
+  return (
+    decision === 'EXCLUDED' ||
+    decision === 'NO_MATCH'
+  );
+}
+
+function isNeedsReview(item) {
+  return !isReady(item) && !isExcluded(item);
+}
 
 function processRequirementResult(data) {
   currentItems = data.items || [];
@@ -915,27 +965,28 @@ function processRequirementResult(data) {
   let safeSuggestionsCount = 0;
   
   currentItems.forEach((item, idx) => {
-    let dec = item.resolution.decision;
-    let qty = parseInt(item.input.quantity);
-    let missingQty = isNaN(qty) || qty < 1;
-    
-    if (dec !== 'AUTO_ACCEPT' && dec !== 'USER_CONFIRMED' && dec !== 'EXCLUDED') {
-      item.review_reason = 'MEDICINE_REVIEW';
+    if (isNeedsReview(item)) {
       exceptionList.push(idx);
       
-      let cands = item.resolution.candidates || [];
-      if (cands.length === 1 && !missingQty && dec !== 'NO_MATCH') {
-        item.is_safe_suggestion = true;
-        safeSuggestionsCount++;
-      } else {
+      let dec = item?.resolution?.decision;
+      let cands = item?.resolution?.candidates || [];
+      let qty = parseInt(item?.input?.quantity);
+      let missingQty = isNaN(qty) || qty < 1;
+
+      if (dec === 'AUTO_ACCEPT' && missingQty) {
+        item.resolution.reason = "Quantity wasn't clear.";
+        item.input.quantity = ''; 
+        item.review_reason = 'QUANTITY_REVIEW';
         item.is_safe_suggestion = false;
+      } else {
+        item.review_reason = 'MEDICINE_REVIEW';
+        if (cands.length === 1 && !missingQty && dec !== 'NO_MATCH') {
+          item.is_safe_suggestion = true;
+          safeSuggestionsCount++;
+        } else {
+          item.is_safe_suggestion = false;
+        }
       }
-    } else if (dec === 'AUTO_ACCEPT' && missingQty) {
-      item.resolution.reason = "Quantity wasn't clear.";
-      item.input.quantity = ''; 
-      item.review_reason = 'QUANTITY_REVIEW';
-      item.is_safe_suggestion = false;
-      exceptionList.push(idx);
     } else {
       item.is_safe_suggestion = false;
     }
@@ -958,27 +1009,25 @@ function processRequirementResult(data) {
 }
 
 function renderRequirementTable() {
-  let readyCount = 0;
-  let notFoundCount = 0;
+  let readyCount = currentItems.filter(isReady).length;
+  let notFoundCount = currentItems.filter(isExcluded).length;
+  let reviewCount = currentItems.filter(isNeedsReview).length;
   
   let searchQ = ($('#table-search') ? $('#table-search').value.toLowerCase() : '');
   
   let html = currentItems.map((item, idx) => {
-    let dec = item.resolution.decision;
     let statusHtml = '';
     let rowClass = '';
     
     let isReadyItem = isReady(item);
-    let isNotFoundItem = (dec === 'EXCLUDED' || dec === 'NO_MATCH');
+    let isNotFoundItem = isExcluded(item);
     
     if (isReadyItem) {
       statusHtml = '<span class="badge badge-ok">✓ Ready</span>';
       rowClass = 'row-status-ready';
-      readyCount++;
     } else if (isNotFoundItem) {
       statusHtml = '<span class="badge badge-err">Not found</span>';
       rowClass = 'row-status-notfound';
-      notFoundCount++;
     } else {
       statusHtml = '<span class="badge badge-warn">Needs check</span>';
       rowClass = 'row-status-check';
@@ -1018,8 +1067,6 @@ function renderRequirementTable() {
   
   $('#requirement-tbody').innerHTML = html;
   
-  let reviewCount = currentItems.length - readyCount - notFoundCount;
-  
   $('#st-detected').textContent = `${currentItems.length} lines detected`;
   $('#st-classified').textContent = `${readyCount} ready, ${reviewCount} need review`;
   
@@ -1033,18 +1080,21 @@ function renderRequirementTable() {
   $('#tab-check').textContent = reviewCount;
   $('#tab-notfound').textContent = notFoundCount;
   
-  if (reviewCount > 0) {
-    $('#requirement-actions').innerHTML = `
-      <button class="btn-primary" id="btn-review-issues" style="margin-bottom:0;">Review ${reviewCount} issues →</button>
-      <button class="btn-outline" id="btn-view-all" style="margin-bottom:0;">View all ${currentItems.length} items</button>
-    `;
-    document.getElementById('btn-review-issues').addEventListener('click', () => toggleBatchWorkspace(true));
-    document.getElementById('btn-view-all').addEventListener('click', () => toggleBatchWorkspace(false));
-  } else {
+  if (reviewCount === 0 && readyCount > 0) {
     $('#requirement-actions').innerHTML = `
       <button class="btn-primary" id="btn-find-suppliers" style="margin-bottom:0;">Find Suppliers →</button>
     `;
     document.getElementById('btn-find-suppliers').addEventListener('click', showSuppliers);
+  } else {
+    $('#requirement-actions').innerHTML = `
+      <div style="color:var(--amber); font-size:12px; font-weight:600; margin-bottom:12px;">Review ${reviewCount} issues to continue.</div>
+      <div style="display:flex; gap:12px;">
+        <button class="btn-primary" id="btn-review-issues" style="margin-bottom:0;">Review ${reviewCount} issues →</button>
+        <button class="btn-outline" id="btn-view-all" style="margin-bottom:0;">View all ${currentItems.length} items</button>
+      </div>
+    `;
+    document.getElementById('btn-review-issues').addEventListener('click', () => toggleBatchWorkspace(true));
+    document.getElementById('btn-view-all').addEventListener('click', () => toggleBatchWorkspace(false));
   }
 }
 
@@ -1055,7 +1105,7 @@ function toggleBatchWorkspace(show) {
 }
 
 function renderBatchReview() {
-  let pendingExceptions = exceptionList.filter(idx => !isReady(currentItems[idx]) && currentItems[idx].resolution.decision !== 'EXCLUDED');
+  let pendingExceptions = exceptionList.filter(idx => isNeedsReview(currentItems[idx]));
   $('#batch-count').textContent = pendingExceptions.length;
   
   if (pendingExceptions.length === 0) {
@@ -1147,16 +1197,19 @@ async function fetchSuppliersForItem(item) {
 }
 
 async function bulkAcceptSafeSuggestions() {
-  let pendingExceptions = exceptionList.filter(idx => !isReady(currentItems[idx]) && currentItems[idx].resolution.decision !== 'EXCLUDED');
+  let pendingExceptions = exceptionList.filter(idx => isNeedsReview(currentItems[idx]));
   for (let idx of pendingExceptions) {
     let item = currentItems[idx];
     if (item.is_safe_suggestion) {
-      let cands = item.resolution.candidates;
-      item.resolution.decision = 'USER_CONFIRMED';
-      item.resolution.master_product_id = cands[0].master_product_id;
-      item.resolution.product_name = cands[0].product_name;
-      item.resolution.dosage_form = cands[0].dosage_form;
-      await fetchSuppliersForItem(item);
+      let qty = Number(item.input.quantity);
+      if (Number.isFinite(qty) && qty > 0) {
+        let cands = item.resolution.candidates;
+        item.resolution.decision = 'USER_CONFIRMED';
+        item.resolution.master_product_id = cands[0].master_product_id;
+        item.resolution.product_name = cands[0].product_name;
+        item.resolution.dosage_form = cands[0].dosage_form;
+        await fetchSuppliersForItem(item);
+      }
     }
   }
   renderBatchReview();
