@@ -21,44 +21,54 @@ BASE=Path(__file__).resolve().parents[1]; load_dotenv(BASE/'.env')
 import tempfile
 DATA=BASE/'data'; RUNTIME=Path(tempfile.gettempdir())/'.runtime'; RUNTIME.mkdir(exist_ok=True)
 
+import asyncio
+
+async def load_catalog_bg(app: FastAPI, cat_path: Path):
+    try:
+        start_time = time.time()
+        catalog = await asyncio.to_thread(load_catalog, str(cat_path))
+        idx = await asyncio.to_thread(CatalogIndex, catalog)
+        build_time = int((time.time() - start_time) * 1000)
+        
+        active = sum(1 for c in catalog if not c.is_discontinued)
+        discontinued = len(catalog) - active
+        
+        app.state.catalog = catalog
+        app.state.catalog_index = idx
+        app.state.catalog_status = {
+            'loaded': True,
+            'loading': False,
+            'source': f'data/medicine_master.csv',
+            'rows': len(catalog),
+            'active': active,
+            'discontinued': discontinued,
+            'index_ready': True,
+            'build_time_ms': build_time,
+            'catalog_version': hashlib.md5(cat_path.read_bytes()).hexdigest()[:8],
+            'last_loaded_at': time.time()
+        }
+        
+        print("Medicine master loaded")
+        print(f"Rows: {len(catalog)}")
+        print("Resolver: READY")
+    except Exception as e:
+        app.state.catalog_status = {'loaded': False, 'loading': False, 'error': str(e)}
+        print(f"Failed to load catalog: {e}")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.catalog_status = {'loaded': False}
+    app.state.catalog_status = {'loaded': False, 'loading': True}
     app.state.catalog = []
     app.state.catalog_index = None
     
     cat_path = DATA/'medicine_master.csv'
     if not cat_path.exists():
+        app.state.catalog_status = {'loaded': False, 'loading': False, 'error': 'NOT_FOUND'}
         print("MEDICINE MASTER NOT FOUND. Starting anyway.")
         yield
         return
         
-    start_time = time.time()
-    catalog = load_catalog(str(cat_path))
-    idx = CatalogIndex(catalog)
-    build_time = int((time.time() - start_time) * 1000)
-    
-    active = sum(1 for c in catalog if not c.is_discontinued)
-    discontinued = len(catalog) - active
-    
-    app.state.catalog = catalog
-    app.state.catalog_index = idx
-    app.state.catalog_status = {
-        'loaded': True,
-        'source': f'data/medicine_master.csv',
-        'rows': len(catalog),
-        'active': active,
-        'discontinued': discontinued,
-        'index_ready': True,
-        'build_time_ms': build_time,
-        'catalog_version': hashlib.md5(cat_path.read_bytes()).hexdigest()[:8],
-        'last_loaded_at': time.time()
-    }
-    
-    print("Medicine master loaded")
-    print(f"Rows: {len(catalog)}")
-    print("Resolver: READY")
-    
+    asyncio.create_task(load_catalog_bg(app, cat_path))
     yield
 
 app=FastAPI(title='PharmaFlow AI Demo',version='1.0.0',lifespan=lifespan)
@@ -82,6 +92,14 @@ def health():
 @app.get('/api/catalog/status')
 def catalog_status():
     return app.state.catalog_status
+
+@app.get('/api/warmup')
+async def warmup():
+    while app.state.catalog_status.get('loading'):
+        await asyncio.sleep(0.5)
+    if app.state.catalog_status.get('loaded'):
+        return {'ready': True, 'rows': app.state.catalog_status['rows']}
+    raise HTTPException(503, "Failed to load catalog")
 
 @app.post('/api/wantslip')
 async def wantslip(file:UploadFile=File(...),language:str=Form('en-IN'),accuracy_mode:str=Form('maximum')):

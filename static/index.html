@@ -527,6 +527,21 @@ function resetDemo() {
 
 // --- Pharmacy Workflow ---
 
+async function ensureCatalogReady() {
+  while (true) {
+    let r = await fetch('/api/catalog/status');
+    let j = await r.json();
+    if (j.loaded) return true;
+    if (!j.loading) throw new Error(j.error || "Catalogue failed to load.");
+    
+    // update overlay text if visible
+    let t = $('#overlayText');
+    if (t) t.textContent = "Preparing medicine catalogue (loading ~253K rows)...";
+    
+    await new Promise(res => setTimeout(res, 1000));
+  }
+}
+
 $('#form-upload-slip').onsubmit = async e => {
   e.preventDefault();
   let file = $('#slipFile').files[0];
@@ -539,6 +554,8 @@ $('#form-upload-slip').onsubmit = async e => {
     
     let fd = new FormData(e.target);
     fd.set('file', compressedFile);
+    
+    await ensureCatalogReady();
     
     let r = await fetch('/api/wantslip', { method: 'POST', body: fd });
     let j = await r.json();
@@ -556,7 +573,10 @@ $('#form-type-req').onsubmit = async e => {
   currentImageSrc = null;
   showOverlay(['Resolving requirement...', 'Matching medicines...', 'Checking availability...']);
   try {
-    let r = await fetch('/api/text-requirement', { method: 'POST', body: new FormData(e.target) });
+    await ensureCatalogReady();
+    
+    let fd = new FormData(e.target);
+    let r = await fetch('/api/text-requirement', { method: 'POST', body: fd });
     let j = await r.json();
     if(!r.ok) throw new Error(j.detail || 'Failed');
     processRequirementResult(j);
