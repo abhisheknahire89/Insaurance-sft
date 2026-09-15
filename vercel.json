@@ -1,11 +1,26 @@
 {
-    "buildCommand": "cd opdv3 && npm install && npm run build",
-    "outputDirectory": "opdv3/dist",
-    "installCommand": "echo 'skip root install'",
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "builds": [
+    {
+      "src": "app/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "app/main.py"
+    },
+    {
+      "src": "/samples/(.*)",
+      "dest": "samples/$1"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "static/index.html"
+    }
+  ]
 }

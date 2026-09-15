@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PharmaFlow AI - Procurement Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F9FAFB;
+  --card: #FFFFFF;
+  --ink: #111827;
+  --muted: #6B7280;
+  --line: #E5E7EB;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --green: #059669;
+  --green-bg: #D1FAE5;
+  --amber: #D97706;
+  --amber-bg: #FEF3C7;
+  --red: #DC2626;
+  --red-bg: #FEE2E2;
+  --radius: 8px;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+/* Header */
+header { background: var(--card); border-bottom: 1px solid var(--line); padding: 12px 24px; position: sticky; top: 0; z-index: 10; }
+.head { max-width: 1000px; margin: auto; display: flex; align-items: center; justify-content: space-between; }
+.brand { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; }
+.demo-role { display: flex; align-items: center; gap: 8px; background: #F3F4F6; padding: 4px 6px; border-radius: 99px; font-size: 13px; font-weight: 500;}
+.role-btn { padding: 4px 12px; border-radius: 99px; cursor: pointer; border: none; background: transparent; color: var(--muted); font-family: 'Inter'; font-weight: 500; }
+.role-btn.active { background: #FFFFFF; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+/* Layout */
+.wrap { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Typography */
+h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.5px; }
+h2 { font-size: 18px; font-weight: 600; margin: 0 0 16px 0; }
+h3 { font-size: 15px; font-weight: 600; margin: 0 0 8px 0; }
+p { margin: 0 0 16px 0; line-height: 1.5; color: var(--muted); }
+.tiny { font-size: 12px; color: var(--muted); }
+
+/* Components */
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+.card-flush { padding: 0; }
+.card-header { padding: 16px 24px; border-bottom: 1px solid var(--line); background: #F9FAFB; border-radius: var(--radius) var(--radius) 0 0; }
+.card-body { padding: 24px; }
+
+/* Buttons */
+button { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+button:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+.btn-outline { background: white; color: var(--ink); border-color: var(--line); }
+.btn-outline:hover:not(:disabled) { background: #F9FAFB; }
+.btn-large { padding: 12px 24px; font-size: 15px; width: 100%; display: block; text-align: center; margin-bottom: 12px; }
+
+/* Inputs */
+input[type="file"], input[type="text"], input[type="number"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #D1D5DB; border-radius: 6px; font-family: inherit; font-size: 14px; margin-bottom: 16px; }
+textarea { min-height: 100px; resize: vertical; }
+label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; color: #374151; }
+
+/* Med Cards */
+.med-card { border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: flex-start; }
+.med-info { flex: 1; }
+.med-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.med-meta { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.med-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+/* Quantity Editor */
+.qty-editor { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: white;}
+.qty-btn { padding: 4px 10px; background: #F3F4F6; border: none; font-size: 16px; font-weight: bold; color: var(--muted); cursor: pointer; }
+.qty-btn:hover { background: #E5E7EB; }
+.qty-input { width: 40px; text-align: center; border: none; padding: 4px 0; margin: 0; font-weight: 600; -moz-appearance: textfield; font-size: 14px; }
+.qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+.badge-ok { background: var(--green-bg); color: var(--green); }
+.badge-warn { background: var(--amber-bg); color: var(--amber); }
+.badge-err { background: var(--red-bg); color: var(--red); }
+.badge-neutral { background: #F3F4F6; color: var(--muted); }
+
+/* Progress Overlay */
+.overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; display: none; }
+.overlay.active { display: flex; }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--line); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.overlay-text { font-size: 18px; font-weight: 500; color: var(--ink); }
+
+/* Details Accordion */
+.details-summary { font-size: 12px; color: var(--primary); cursor: pointer; user-select: none; margin-top: 12px; display: inline-block; font-weight: 500;}
+.details-content { display: none; margin-top: 12px; padding: 12px; background: #F9FAFB; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); white-space: pre-wrap; overflow-x: auto; }
+.details-content.active { display: block; }
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+/* Candidate Select */
+.candidate-box { border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.2s; }
+.candidate-box:hover { border-color: var(--primary); }
+.candidate-box.selected { border-color: var(--primary); background: #EFF6FF; }
+
+/* Exception Review Container */
+.exception-container { max-width: 500px; margin: 0 auto; }
+.crop-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); margin-bottom: 16px; background: #E5E7EB; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px;}
+
+/* Table */
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+th { background: #F9FAFB; color: var(--muted); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top;}
+tr:last-child td { border-bottom: none; }
+
+/* Tracker */
+.tracker { display: flex; justify-content: space-between; position: relative; margin: 32px 0; }
+.tracker::before { content: ''; position: absolute; top: 12px; left: 20px; right: 20px; height: 2px; background: var(--line); z-index: 1; }
+.tracker-step { display: flex; flex-direction: column; align-items: center; z-index: 2; width: 80px;}
+.tracker-dot { width: 24px; height: 24px; border-radius: 50%; background: white; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: var(--muted); margin-bottom: 8px;}
+.tracker-step.done .tracker-dot { background: var(--primary); border-color: var(--primary); color: white; }
+.tracker-step.active .tracker-dot { border-color: var(--primary); color: var(--primary); }
+.tracker-label { font-size: 12px; font-weight: 500; color: var(--muted); text-align: center;}
+.tracker-step.done .tracker-label, .tracker-step.active .tracker-label { color: var(--ink); }
+
+/* Utility */
+.hidden { display: none !important; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.flex-gap { display: flex; gap: 12px; align-items: center;}
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head">
+    <div class="brand">PharmaFlow AI</div>
+    <div class="demo-role">
+      <span>Demo role:</span>
+      <button class="role-btn active" onclick="setRole('pharmacy')">Pharmacy</button>
+      <button class="role-btn" onclick="setRole('supplier')">Supplier</button>
+      <button class="role-btn" style="color:var(--red);" onclick="resetDemo()">Reset Demo</button>
+    </div>
+  </div>
+</header>
+
+<div class="overlay" id="overlay">
+  <div class="spinner"></div>
+  <div class="overlay-text" id="overlayText">Processing...</div>
+</div>
+
+<div class="wrap">
+  <!-- ========================================== -->
+  <!-- PHARMACY VIEWS                             -->
+  <!-- ========================================== -->
+  <section id="role-pharmacy" class="panel active">
+    
+    <!-- Pharmacy Home -->
+    <div id="pharmacy-home">
+      <h1>Good morning</h1>
+      <p>What do you need today?</p>
+      
+      <div class="grid-2">
+        <div class="card">
+          <h2>Upload Want Slip</h2>
+          <form id="form-upload-slip">
+            <label>Photo of handwritten requirement</label>
+            <input type="file" name="file" id="slipFile" accept="image/png,image/jpeg" required>
+            <button class="btn-primary btn-large">Read want slip</button>
+          </form>
+          <div class="tiny">For best results: Keep the whole slip visible and avoid shadows.</div>
+        </div>
+        
+        <div class="card">
+          <h2>Type Requirement</h2>
+          <form id="form-type-req">
+            <label>Free-text requirement</label>
+            <textarea name="text" placeholder="Dolo 650 10 strips&#10;Pan 40 5 boxes" required></textarea>
+            <button class="btn-outline btn-large">Resolve requirement</button>
+          </form>
+        </div>
+      </div>
+      
+      <h3>Recent Orders</h3>
+      <div id="pharmacy-orders-list">
+        <div class="tiny">Loading orders...</div>
+      </div>
+    </div>
+
+    <!-- Pharmacy Review Exceptions -->
+    <div id="pharmacy-review" class="hidden">
+      <div class="text-center mb-4">
+        <h1>Requirement Processed</h1>
+        <div id="review-summary" class="badge badge-warn" style="font-size: 14px; padding: 6px 12px; margin-bottom: 16px;"></div>
+      </div>
+      
+      <div id="exception-container" class="exception-container card hidden">
+        <div class="flex-between mb-4">
+          <h3 id="exception-counter">1 of 2</h3>
+          <span class="badge badge-warn">Needs your check</span>
+        </div>
+        
+        <div class="crop-preview">
+          (Original image crop will appear here)
+        </div>
+        
+        <p class="tiny" id="exception-reason">The handwriting could match two different medicines.</p>
+        <h2 id="exception-raw" style="margin-bottom: 24px;">Raw text</h2>
+        
+        <div id="exception-candidates"></div>
+        
+        <div class="mt-4">
+          <label>Quantity</label>
+          <div class="qty-editor" style="width: 120px;">
+            <button class="qty-btn" onclick="adjQty('ex-qty', -1)">-</button>
+            <input type="number" id="ex-qty" class="qty-input" value="1" min="1">
+            <button class="qty-btn" onclick="adjQty('ex-qty', 1)">+</button>
+          </div>
+        </div>
+        
+        <div class="flex-between mt-8">
+          <button class="btn-outline" onclick="markNotFound()">Not found</button>
+          <button class="btn-primary" onclick="confirmException()">Confirm & Next</button>
+        </div>
+      </div>
+      
+      <!-- List view of ready items -->
+      <div id="ready-items-container" class="mt-8">
+        <h3>Ready Medicines</h3>
+        <div id="ready-items-list"></div>
+        <div class="text-right mt-4 hidden" id="find-suppliers-wrap">
+          <button class="btn-primary btn-large" style="width: auto; display: inline-block;" onclick="showSuppliers()">Find Suppliers →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pharmacy Supplier Discovery -->
+    <div id="pharmacy-suppliers" class="hidden">
+      <h1>Find Suppliers</h1>
+      <p>Select who should fulfill this requirement.</p>
+      
+      <div class="card">
+        <span class="badge badge-ok mb-2">Recommended</span>
+        <h2 id="rec-supp-name">Supplier Name</h2>
+        <p class="tiny" id="rec-supp-reason">Why recommended? Complete order · earliest delivery</p>
+        
+        <div class="grid-2 mb-4">
+          <div>
+            <div class="tiny">Availability</div>
+            <strong id="rec-supp-avail">18 / 18 medicines</strong>
+          </div>
+          <div>
+            <div class="tiny">Expected delivery</div>
+            <strong id="rec-supp-eta">Tomorrow</strong>
+          </div>
+        </div>
+        
+        <button class="btn-primary" id="btn-select-rec" onclick="placeOrder(null)">Select and Place Order</button>
+      </div>
+      
+      <h3>Compare other suppliers</h3>
+      <div id="other-suppliers-list" class="mt-4"></div>
+      
+      <button class="btn-outline mt-4" onclick="document.getElementById('pharmacy-suppliers').classList.add('hidden'); document.getElementById('pharmacy-review').classList.remove('hidden');">← Back to requirement</button>
+    </div>
+
+    <!-- Pharmacy Order Confirmed -->
+    <div id="pharmacy-confirmed" class="hidden text-center">
+      <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+      <h1>ORDER CONFIRMED</h1>
+      <p id="conf-order-id">Order #PF-000</p>
+      
+      <div class="card" style="max-width: 400px; margin: 0 auto; text-align: left;">
+        <h3 id="conf-supp">Supplier</h3>
+        <p id="conf-lines">18 medicines</p>
+        <p class="tiny" id="conf-eta">Expected delivery: Tomorrow</p>
+      </div>
+      
+      <div class="tracker" style="max-width: 400px; margin: 32px auto;">
+        <div class="tracker-step done"><div class="tracker-dot">✓</div><div class="tracker-label">Placed</div></div>
+        <div class="tracker-step"><div class="tracker-dot">2</div><div class="tracker-label">Confirmed</div></div>
+        <div class="tracker-step"><div class="tracker-dot">3</div><div class="tracker-label">Dispatched</div></div>
+        <div class="tracker-step"><div class="tracker-dot">4</div><div class="tracker-label">Checked</div></div>
+      </div>
+      
+      <button class="btn-outline" onclick="goHomePharmacy()">Return to Home</button>
+    </div>
+    
+    <!-- Pharmacy Order Reconciled View -->
+    <div id="pharmacy-reconciled" class="hidden">
+      <h1>Invoice Checked</h1>
+      <div id="rec-order-id-label" class="tiny mb-4">Order #PF-000</div>
+      
+      <div class="card card-flush">
+        <div class="card-header flex-between">
+          <div id="rec-summary-badge" class="badge badge-ok">17 matched · 0 needs attention</div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Medicine</th>
+                <th>Ordered</th>
+                <th>Invoiced</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rec-lines-table">
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <button class="btn-outline" onclick="goHomePharmacy()">← Back</button>
+    </div>
+
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SUPPLIER VIEWS                             -->
+  <!-- ========================================== -->
+  <section id="role-supplier" class="panel">
+    
+    <div id="supplier-home">
+      <h1>Orders requiring attention</h1>
+      <div id="supplier-orders-list">
+        <div class="tiny">Loading orders...</div>
+      </div>
+    </div>
+    
+    <div id="supplier-order-detail" class="hidden">
+      <div class="flex-between mb-4">
+        <div>
+          <h1 id="so-id">Order #PF-000</h1>
+          <p id="so-pharmacy">Pharmacy Name</p>
+        </div>
+        <button class="btn-outline" onclick="goHomeSupplier()">← Back</button>
+      </div>
+      
+      <div class="card card-flush">
+        <div class="card-header flex-between">
+          <h3>Fulfillment Check</h3>
+          <div id="so-actions"></div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Product Requested</th>
+                <th>Qty</th>
+                <th>Fulfilled Qty</th>
+              </tr>
+            </thead>
+            <tbody id="so-lines"></tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="card hidden" id="so-invoice-section">
+        <h2>Generated Invoice</h2>
+        <div class="card-body" id="so-invoice-preview"></div>
+      </div>
+      
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+// --- State ---
+let currentRole = 'pharmacy';
+let currentItems = [];
+let currentSummary = {};
+let currentImageSrc = null;
+let currentExceptionIndex = 0;
+let exceptionList = [];
+let currentRecData = null;
+let selectedSupplierName = null;
+
+// --- DOM Utils ---
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toggle(id, show) {
+  if (show) $(id).classList.remove('hidden');
+  else $(id).classList.add('hidden');
+}
+
+// --- Image Compression ---
+async function getCompressedFile(file) {
+  const MAX_SIZE = 3.2 * 1024 * 1024; // 3.2 MB target
+  if (file.size <= MAX_SIZE) return file;
+  if (!file.type.match(/image\/(jpeg|png)/)) return file;
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width = img.width;
+        let height = img.height;
+        const MAX_DIM = 2500;
+        if (width > height && width > MAX_DIM) {
+          height *= MAX_DIM / width;
+          width = MAX_DIM;
+        } else if (height > MAX_DIM) {
+          width *= MAX_DIM / height;
+          height = MAX_DIM;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        let quality = 0.9;
+        const compress = () => {
+          canvas.toBlob((blob) => {
+            if (blob.size <= MAX_SIZE || quality <= 0.4) {
+              const newFile = new File([blob], file.name, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
+              });
+              resolve(newFile);
+            } else {
+              quality -= 0.1;
+              compress();
+            }
+          }, 'image/jpeg', quality);
+        };
+        compress();
+      };
+    };
+  });
+}
+
+function showOverlay(steps) {
+  const o = $('#overlay');
+  const t = $('#overlayText');
+  o.classList.add('active');
+  let i = 0;
+  t.textContent = steps[0];
+  if(steps.length > 1) {
+    o.dataset.iv = setInterval(() => {
+      i = Math.min(i + 1, steps.length - 1);
+      t.textContent = steps[i];
+    }, 1200);
+  }
+}
+
+function hideOverlay() {
+  const o = $('#overlay');
+  o.classList.remove('active');
+  clearInterval(o.dataset.iv);
+}
+
+function adjQty(id, delta) {
+  let el = $('#' + id);
+  let v = parseInt(el.value) || 0;
+  v += delta;
+  if (v < 1) v = 1;
+  el.value = v;
+}
+
+function toggleDetails(el) {
+  const content = el.nextElementSibling;
+  content.classList.toggle('active');
+  el.textContent = content.classList.contains('active') ? 'Hide details' : 'View details';
+}
+
+// --- Navigation ---
+function setRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  $(`button[onclick="setRole('${role}')"]`).classList.add('active');
+  
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  $(`#role-${role}`).classList.add('active');
+  
+  if(role === 'pharmacy') goHomePharmacy();
+  if(role === 'supplier') goHomeSupplier();
+}
+
+function goHomePharmacy() {
+  toggle('#pharmacy-home', true);
+  toggle('#pharmacy-review', false);
+  toggle('#pharmacy-suppliers', false);
+  toggle('#pharmacy-confirmed', false);
+  toggle('#pharmacy-reconciled', false);
+  loadPharmacyOrders();
+}
+
+function goHomeSupplier() {
+  toggle('#supplier-home', true);
+  toggle('#supplier-order-detail', false);
+  loadSupplierOrders();
+}
+
+// --- LocalStorage State ---
+function getDemoState() {
+  let s = localStorage.getItem('pharmaflow_demo_state_v1');
+  return s ? JSON.parse(s) : { orders: [] };
+}
+function saveDemoState(state) {
+  localStorage.setItem('pharmaflow_demo_state_v1', JSON.stringify(state));
+}
+function resetDemo() {
+  if(confirm("Reset the current demo? This will delete all orders and state.")) {
+    localStorage.removeItem('pharmaflow_demo_state_v1');
+    location.reload();
+  }
+}
+
+// --- Pharmacy Workflow ---
+
+$('#form-upload-slip').onsubmit = async e => {
+  e.preventDefault();
+  let file = $('#slipFile').files[0];
+  if(!file) return;
+  
+  showOverlay(['Preparing image...', 'Reading your slip...', 'Matching medicines...', 'Checking quantities...']);
+  try {
+    let compressedFile = await getCompressedFile(file);
+    currentImageSrc = URL.createObjectURL(compressedFile);
+    
+    let fd = new FormData(e.target);
+    fd.set('file', compressedFile);
+    
+    let r = await fetch('/api/wantslip', { method: 'POST', body: fd });
+    let j = await r.json();
+    if(!r.ok) throw new Error(j.detail || 'Upload failed');
+    processRequirementResult(j);
+  } catch (err) {
+    alert("We couldn't reliably read this slip. " + err.message);
+  } finally {
+    hideOverlay();
+  }
+};
+
+$('#form-type-req').onsubmit = async e => {
+  e.preventDefault();
+  currentImageSrc = null;
+  showOverlay(['Resolving requirement...', 'Matching medicines...', 'Checking availability...']);
+  try {
+    let r = await fetch('/api/text-requirement', { method: 'POST', body: new FormData(e.target) });
+    let j = await r.json();
+    if(!r.ok) throw new Error(j.detail || 'Failed');
+    processRequirementResult(j);
+  } catch (err) {
+    alert("Error: " + err.message);
+  } finally {
+    hideOverlay();
+  }
+};
+
+function processRequirementResult(data) {
+  currentItems = data.items || [];
+  currentSummary = data.summary || {};
+  
+  exceptionList = [];
+  currentItems.forEach((item, idx) => {
+    let dec = item.resolution.decision;
+    let qty = parseInt(item.input.quantity);
+    let missingQty = isNaN(qty) || qty < 1;
+    
+    if (dec !== 'AUTO_ACCEPT') {
+      item.review_reason = 'MEDICINE_REVIEW';
+      exceptionList.push(idx);
+    } else if (missingQty) {
+      item.resolution.reason = "Quantity wasn't clear.";
+      item.input.quantity = ''; 
+      item.review_reason = 'QUANTITY_REVIEW';
+      exceptionList.push(idx);
+    }
+  });
+  
+  toggle('#pharmacy-home', false);
+  toggle('#pharmacy-review', true);
+  
+  let readyCount = currentItems.length - exceptionList.length;
+  if(exceptionList.length > 0) {
+    $('#review-summary').textContent = `${readyCount} ready · ${exceptionList.length} need your check`;
+    $('#review-summary').className = 'badge badge-warn';
+    startExceptions();
+  } else {
+    $('#review-summary').textContent = `All ${readyCount} medicines ready`;
+    $('#review-summary').className = 'badge badge-ok';
+    toggle('#exception-container', false);
+    renderReadyItems();
+  }
+}
+
+function startExceptions() {
+  currentExceptionIndex = 0;
+  toggle('#exception-container', true);
+  toggle('#find-suppliers-wrap', false);
+  renderReadyItems();
+  renderCurrentException();
+}
+
+function isReady(item) {
+  return (item.resolution.decision === 'AUTO_ACCEPT' || item.resolution.decision === 'USER_CONFIRMED') && item.resolution.master_product_id && parseInt(item.input.quantity) > 0;
+}
+
+function renderCurrentException() {
+  if (currentExceptionIndex >= exceptionList.length) {
+    toggle('#exception-container', false);
+    let ready = currentItems.filter(i => isReady(i));
+    let excludedCount = currentItems.filter(i=>i.resolution.decision==='NO_MATCH' || i.resolution.decision==='EXCLUDED').length;
+    
+    if (excludedCount > 0) {
+      $('#review-summary').textContent = `${ready.length} medicines ready · ${excludedCount} items excluded`;
+      $('#review-summary').className = 'badge badge-warn';
+    } else {
+      $('#review-summary').textContent = `All ${ready.length} medicines ready`;
+      $('#review-summary').className = 'badge badge-ok';
+    }
+    renderReadyItems();
+    return;
+  }
+  
+  let itemIdx = exceptionList[currentExceptionIndex];
+  let item = currentItems[itemIdx];
+  
+  $('#exception-counter').textContent = `${currentExceptionIndex + 1} of ${exceptionList.length}`;
+  $('#exception-reason').textContent = item.resolution.reason || 'Please confirm this medicine';
+  $('#exception-raw').textContent = item.input.raw_text || item.input.medicine_name;
+  $('#ex-qty').value = item.input.quantity || '';
+  
+  let html = '';
+  let actionsHtml = '';
+  
+  if (item.review_reason === 'QUANTITY_REVIEW' && item.resolution.master_product_id) {
+    html = `<p class="tiny" style="color:var(--green);">✓ Medicine identified: <b>${esc(item.resolution.product_name)}</b></p>`;
+    actionsHtml = `
+      <div class="flex-between mt-4">
+        <button class="btn-outline" onclick="markNotFound()">Not found / Exclude</button>
+        <button class="btn-primary" onclick="confirmQuantityOnly()">Confirm Quantity</button>
+      </div>
+    `;
+  } else {
+    let cands = item.resolution.candidates || [];
+    if (cands.length > 0) {
+      html = cands.slice(0,3).map(c => `
+        <div class="candidate-box" onclick="selectCandidate(this, '${esc(c.master_product_id)}', '${esc(c.product_name)}')">
+          <div style="font-weight:600">${esc(c.product_name)}</div>
+          <div class="tiny">${esc(c.manufacturer)} · ${Math.round(c.score*100)}% match</div>
+        </div>
+      `).join('');
+      
+      actionsHtml = `
+        <div class="flex-between mt-4">
+          <button class="btn-outline" onclick="markNotFound()">Not found / Exclude</button>
+          <button class="btn-primary" onclick="confirmException()">Confirm Match</button>
+        </div>
+      `;
+    } else {
+      html = '<p class="tiny" style="color:var(--red);">We couldn\'t confidently match this medicine.</p>';
+      actionsHtml = `
+        <div class="flex-between mt-4">
+          <button class="btn-primary" onclick="markNotFound()">Not found / Exclude from this order</button>
+        </div>
+      `;
+    }
+  }
+  
+  $('#exception-candidates').innerHTML = html;
+  $('#exception-candidates').dataset.selectedId = '';
+  $('#exception-candidates').dataset.selectedName = '';
+  
+  let actionsContainer = document.getElementById('ex-actions');
+  if(!actionsContainer) {
+    actionsContainer = document.createElement('div');
+    actionsContainer.id = 'ex-actions';
+    $('#exception-candidates').parentElement.appendChild(actionsContainer);
+  }
+  actionsContainer.innerHTML = actionsHtml;
+  
+  let oldBtn = document.querySelector('#exception-container > .flex-between.mt-4');
+  if(oldBtn && oldBtn.id !== 'ex-actions') oldBtn.style.display = 'none';
+}
+
+function selectCandidate(el, id, name) {
+  document.querySelectorAll('.candidate-box').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  $('#exception-candidates').dataset.selectedId = id;
+  $('#exception-candidates').dataset.selectedName = name;
+}
+
+function markNotFound() {
+  if(!confirm("We couldn't match this item. Exclude it from this order?")) return;
+  
+  let itemIdx = exceptionList[currentExceptionIndex];
+  let item = currentItems[itemIdx];
+  item.resolution.decision = 'EXCLUDED';
+  item.resolution.reason = 'Manually excluded';
+  
+  currentExceptionIndex++;
+  renderCurrentException();
+}
+
+async function confirmQuantityOnly() {
+  let itemIdx = exceptionList[currentExceptionIndex];
+  let item = currentItems[itemIdx];
+  
+  let qtyVal = $('#ex-qty').value.trim();
+  let qty = parseInt(qtyVal, 10);
+  if(!qtyVal || isNaN(qty) || qty < 1) {
+    alert("Please enter a valid positive quantity.");
+    return;
+  }
+  
+  item.input.quantity = qty;
+  
+  if(item.resolution.master_product_id) {
+    try {
+      let r = await fetch(`/api/suppliers?master_product_id=${encodeURIComponent(item.resolution.master_product_id)}&quantity=${qty}`);
+      let j = await r.json();
+      item.suppliers = j.options || [];
+      item.best_supplier = item.suppliers.find(s => s.can_fulfil) || item.suppliers[0];
+    } catch(e) {}
+  }
+  
+  currentExceptionIndex++;
+  renderReadyItems();
+  renderCurrentException();
+}
+
+async function confirmException() {
+  let itemIdx = exceptionList[currentExceptionIndex];
+  let item = currentItems[itemIdx];
+  
+  let id = $('#exception-candidates').dataset.selectedId;
+  let name = $('#exception-candidates').dataset.selectedName;
+  
+  if(!id) {
+    alert("Please select a candidate or click Not Found.");
+    return;
+  }
+  
+  let qtyVal = $('#ex-qty').value.trim();
+  let qty = parseInt(qtyVal, 10);
+  if(!qtyVal || isNaN(qty) || qty < 1) {
+    alert("Please enter a valid positive quantity.");
+    return;
+  }
+  
+  item.resolution.decision = 'USER_CONFIRMED';
+  item.resolution.master_product_id = id;
+  item.resolution.product_name = name;
+  item.input.quantity = qty;
+  
+  if(item.resolution.master_product_id) {
+    try {
+      let r = await fetch(`/api/suppliers?master_product_id=${encodeURIComponent(item.resolution.master_product_id)}&quantity=${qty}`);
+      let j = await r.json();
+      item.suppliers = j.options || [];
+      item.best_supplier = item.suppliers.find(s => s.can_fulfil) || item.suppliers[0];
+    } catch(e) {}
+  }
+  
+  currentExceptionIndex++;
+  renderReadyItems();
+  renderCurrentException();
+}
+
+function renderReadyItems() {
+  let ready = currentItems.filter(i => isReady(i));
+  let excluded = currentItems.filter(i => i.resolution.decision === 'NO_MATCH' || i.resolution.decision === 'EXCLUDED');
+  
+  let html = '';
+  
+  if(ready.length > 0 || excluded.length > 0) {
+    html += '<h3 class="mt-4">Requirement Summary</h3>';
+    if(ready.length > 0) {
+      html += `<div class="mb-2"><span class="badge badge-ok">${ready.length} medicines ready</span></div>`;
+    }
+    if(excluded.length > 0) {
+      html += `<div class="mb-4"><span class="badge badge-warn">${excluded.length} items excluded</span> <span class="details-summary" onclick="toggleDetails(this)">View excluded items</span><div class="details-content"><ul>`;
+      html += excluded.map(e => `<li>${esc(e.input.raw_text)} (${esc(e.resolution.reason)})</li>`).join('');
+      html += `</ul></div></div>`;
+    }
+  }
+  
+  html += ready.map(item => `
+    <div class="med-card">
+      <div class="med-info">
+        <div class="med-title">${esc(item.resolution.product_name)}</div>
+        <div class="med-meta">Quantity: <b>${item.input.quantity}</b> ${esc(item.input.unit||'')}</div>
+        <div class="details-summary" onclick="toggleDetails(this)">View details</div>
+        <div class="details-content">Raw: ${esc(item.input.raw_text)}
+ID: ${esc(item.resolution.master_product_id)}
+Score: ${Math.round((item.resolution.confidence||1)*100)}%</div>
+      </div>
+      <div class="med-actions">
+        <span class="badge badge-ok">✓ Ready</span>
+      </div>
+    </div>
+  `).join('');
+  
+  $('#ready-items-list').innerHTML = html || '<div class="tiny">No items ready yet.</div>';
+  
+  if (currentExceptionIndex >= exceptionList.length && ready.length > 0) {
+    toggle('#find-suppliers-wrap', true);
+  } else {
+    toggle('#find-suppliers-wrap', false);
+  }
+}
+
+function showSuppliers() {
+  toggle('#pharmacy-review', false);
+  toggle('#pharmacy-suppliers', true);
+  
+  let ready = currentItems.filter(i => isReady(i));
+  
+  let suppMap = {};
+  ready.forEach(item => {
+    (item.suppliers || []).forEach(opt => {
+      let sId = opt.supplier_id || opt.supplier_name;
+      if(!suppMap[sId]) {
+        suppMap[sId] = { 
+          supplier_id: sId,
+          supplier_name: opt.supplier_name, 
+          full_line_count: 0,
+          partial_line_count: 0,
+          unavailable_line_count: 0,
+          requested_quantity_total: 0,
+          available_quantity_total: 0,
+          estimated_total: 0, 
+          eta_date: opt.eta_date || '9999-99-99',
+          eta_label: opt.eta_label || ''
+        };
+      }
+      
+      let s = suppMap[sId];
+      s.requested_quantity_total += opt.requested_qty;
+      s.available_quantity_total += opt.available_qty;
+      s.estimated_total += (opt.unit_price * (opt.available_qty > opt.requested_qty ? opt.requested_qty : opt.available_qty));
+      
+      if(opt.available_qty >= opt.requested_qty) {
+        s.full_line_count++;
+      } else if(opt.available_qty > 0) {
+        s.partial_line_count++;
+      } else {
+        s.unavailable_line_count++;
+      }
+      
+      if(opt.eta_date && opt.eta_date > s.eta_date && s.eta_date !== '9999-99-99') {
+        s.eta_date = opt.eta_date;
+        s.eta_label = opt.eta_label;
+      } else if (s.eta_date === '9999-99-99') {
+        s.eta_date = opt.eta_date;
+        s.eta_label = opt.eta_label;
+      }
+    });
+  });
+  
+  let list = Object.values(suppMap).map(s => {
+    if(s.full_line_count === ready.length) s.coverage_status = 'FULL';
+    else if(s.full_line_count > 0 || s.partial_line_count > 0) s.coverage_status = 'PARTIAL';
+    else s.coverage_status = 'UNAVAILABLE';
+    s.quantity_coverage_ratio = s.requested_quantity_total > 0 ? (s.available_quantity_total / s.requested_quantity_total) : 0;
+    return s;
+  });
+  
+  list.sort((a,b) => {
+    if(a.coverage_status === 'FULL' && b.coverage_status !== 'FULL') return -1;
+    if(b.coverage_status === 'FULL' && a.coverage_status !== 'FULL') return 1;
+    
+    if(a.coverage_status === 'FULL' && b.coverage_status === 'FULL') {
+      if(a.eta_date !== b.eta_date) return a.eta_date < b.eta_date ? -1 : 1;
+      return a.estimated_total - b.estimated_total;
+    }
+    
+    if(b.full_line_count !== a.full_line_count) return b.full_line_count - a.full_line_count;
+    if(b.quantity_coverage_ratio !== a.quantity_coverage_ratio) return b.quantity_coverage_ratio - a.quantity_coverage_ratio;
+    if(a.eta_date !== b.eta_date) return a.eta_date < b.eta_date ? -1 : 1;
+    return a.estimated_total - b.estimated_total;
+  });
+  
+  currentRankedSuppliers = list;
+  
+  if(list.length === 0 || list[0].coverage_status === 'UNAVAILABLE') {
+    $('#rec-supp-name').textContent = "No suppliers available";
+    $('#rec-supp-avail').textContent = "0";
+    $('#btn-select-rec').disabled = true;
+    return;
+  }
+  
+  let rec = list[0];
+  $('#rec-supp-name').textContent = rec.supplier_name;
+  $('#rec-supp-avail').textContent = `${rec.coverage_status} — ${rec.full_line_count} / ${ready.length} medicines`;
+  $('#rec-supp-eta').textContent = `ETA: ${rec.eta_label}`;
+  
+  if(rec.coverage_status === 'FULL') {
+    $('#rec-supp-reason').textContent = "Why recommended? Complete fulfillment · earliest complete delivery";
+  } else {
+    $('#rec-supp-reason').textContent = "Why recommended? Highest availability";
+  }
+  
+  let alts = list.slice(1).map(s => `
+    <div class="med-card flex-between">
+      <div>
+        <div style="font-weight:600">${esc(s.supplier_name)}</div>
+        <div class="tiny">${s.coverage_status} — ${s.full_line_count}/${ready.length} fully available</div>
+        <div class="tiny">ETA: ${s.eta_label} · ₹${Math.round(s.estimated_total)}</div>
+      </div>
+      <button class="btn-outline" onclick="placeOrder('${esc(s.supplier_id)}')">Select</button>
+    </div>
+  `).join('');
+  $('#other-suppliers-list').innerHTML = alts || '<div class="tiny">No other suppliers available.</div>';
+}
+
+async function placeOrder(supplierId) {
+  if(!supplierId) {
+    supplierId = currentRankedSuppliers[0].supplier_id;
+  }
+  
+  let supplierData = currentRankedSuppliers.find(s => s.supplier_id === supplierId);
+  
+  let ready = currentItems.filter(i => isReady(i));
+  let excluded = currentItems.filter(i => i.resolution.decision === 'NO_MATCH' || i.resolution.decision === 'EXCLUDED');
+  
+  let reqItems = ready.map(i => {
+    let opt = (i.suppliers || []).find(o => (o.supplier_id || o.supplier_name) === supplierId) || {};
+    return {
+      master_product_id: i.resolution.master_product_id,
+      product_name: i.resolution.product_name,
+      quantity: i.input.quantity,
+      unit: i.input.unit,
+      raw_text: i.input.raw_text,
+      supplier_name: supplierData.supplier_name,
+      unit_price: opt.unit_price || 0,
+      line_total: opt.line_total || 0,
+      requested_quantity: opt.requested_qty || i.input.quantity
+    };
+  });
+  
+  let exclItems = excluded.map(i => ({
+    raw_text: i.input.raw_text,
+    reason: i.resolution.reason
+  }));
+  
+  showOverlay(['Placing order...']);
+  try {
+    let state = getDemoState();
+    let dt = new Date();
+    let dStr = dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0') + String(dt.getDate()).padStart(2,'0');
+    let oId = `PF-${dStr}-${String(state.orders.length+1).padStart(3,'0')}`;
+    
+    let order = {
+      id: oId,
+      pharmacy_name: 'Krishna Medical Store',
+      payload: { items: reqItems, excluded_lines: exclItems },
+      supplier_snapshot: supplierData,
+      status: 'PLACED',
+      placed_at: new Date().toISOString()
+    };
+    
+    state.orders.unshift(order);
+    saveDemoState(state);
+    
+    toggle('#pharmacy-suppliers', false);
+    toggle('#pharmacy-confirmed', true);
+    $('#conf-order-id').textContent = `Order ${oId}`;
+    $('#conf-supp').textContent = supplierData.supplier_name;
+    $('#conf-lines').textContent = `${reqItems.length} medicines`;
+    
+    let confEta = document.getElementById('conf-eta');
+    if(!confEta) {
+      confEta = document.createElement('p');
+      confEta.id = 'conf-eta';
+      document.getElementById('pharmacy-confirmed').insertBefore(confEta, document.getElementById('pharmacy-confirmed').querySelector('.btn-primary').parentElement);
+    }
+    confEta.innerHTML = `<strong>Expected delivery:</strong> ${supplierData.eta_label}`;
+    
+  } catch(e) {
+    alert(e.message);
+  } finally {
+    hideOverlay();
+  }
+}
+
+function loadPharmacyOrders() {
+  let state = getDemoState();
+  let orders = state.orders || [];
+  
+  let html = orders.map(o => {
+    let qty = o.payload.items.length;
+    let sup = (o.supplier_snapshot && o.supplier_snapshot.supplier_name) || o.payload.items[0]?.supplier_name || 'Supplier';
+    let badge = (o.status === 'RECONCILED' || o.status === 'INVOICED') ? 'ok' : 'neutral';
+    
+    let viewAct = '';
+    if(o.status === 'RECONCILED' || o.status === 'INVOICED') {
+      viewAct = `<button class="btn-outline" onclick="viewReconciliation('${o.id}')">View Invoice Check</button>`;
+    } else {
+      viewAct = `<button class="btn-outline" disabled>View Order</button>`;
+    }
+    
+    return `
+      <div class="card card-flush mb-4">
+        <div class="card-body flex-between">
+          <div>
+            <h3 style="margin:0;">Order ${o.id}</h3>
+            <div class="tiny">${sup} · ${qty} items</div>
+          </div>
+          <div class="flex-gap">
+            <span class="badge badge-${badge}">${o.status}</span>
+            ${viewAct}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  $('#pharmacy-orders-list').innerHTML = html || '<p class="tiny">No orders yet.</p>';
+}
+
+async function viewReconciliation(orderId) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(!o || !o.invoice_reconciliation) {
+    alert("Reconciliation data not found. Please ensure the supplier generated the invoice.");
+    return;
+  }
+  
+  let rec = o.invoice_reconciliation;
+  
+  toggle('#pharmacy-home', false);
+  toggle('#pharmacy-reconciled', true);
+  
+  $('#rec-order-id-label').textContent = `Order ${orderId}`;
+  
+  if(rec.clean_match) {
+    $('#rec-summary-badge').className = 'badge badge-ok';
+    $('#rec-summary-badge').textContent = 'All items matched perfectly';
+  } else {
+    let exCount = rec.summary.exceptions;
+    $('#rec-summary-badge').className = 'badge badge-warn';
+    $('#rec-summary-badge').textContent = `${exCount} item(s) need attention`;
+  }
+  
+  $('#rec-lines-table').innerHTML = (rec.rows||[]).map(r => {
+    let qs = r.quantity_status;
+    let ps = r.price_status;
+    
+    let statHtml = '';
+    if(qs === 'MATCH' && (ps === 'MATCH' || ps === 'NOT_CHECKED')) {
+      statHtml = '<span class="badge badge-ok">✓ Matched</span>';
+    } else {
+      let errs = [];
+      if(qs === 'SHORT_SUPPLY') errs.push(`Short by ${r.ordered_qty - (r.invoiced_qty||0)}`);
+      else if(qs === 'EXCESS_SUPPLY') errs.push(`${(r.invoiced_qty||0) - r.ordered_qty} extra`);
+      else if(qs === 'MISSING_ITEM') errs.push('Missing from invoice');
+      else if(qs === 'UNEXPECTED_ITEM') errs.push('Not ordered');
+      
+      statHtml = errs.map(e => `<span class="badge badge-err mb-2" style="display:block;width:max-content;">${e}</span>`).join('');
+    }
+    
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:500">${esc(r.product_name)}</div>
+          <div class="details-summary" onclick="toggleDetails(this)">View details</div>
+          <div class="details-content">ID: ${esc(r.master_product_id)}
+Batch: ${esc((r.batch||[]).join(','))}
+Rate: ${r.invoice_rate}</div>
+        </td>
+        <td>${r.ordered_qty}</td>
+        <td>${r.invoiced_qty || 0}</td>
+        <td>${statHtml}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// --- Supplier Workflow ---
+
+function loadSupplierOrders() {
+  let state = getDemoState();
+  let orders = state.orders || [];
+  
+  let active = orders.filter(o => o.status === 'PLACED' || o.status === 'CONFIRMED' || o.status === 'DISPATCHED' || o.status === 'DELIVERED');
+  let others = orders.filter(o => o.status === 'INVOICED' || o.status === 'RECONCILED');
+  let html = '';
+  
+  if(active.length > 0) {
+    html += active.map(o => `
+      <div class="card card-flush mb-4" style="border-left: 4px solid var(--amber);">
+        <div class="card-body flex-between">
+          <div>
+            <h3 style="margin:0;">Order ${o.id}</h3>
+            <div class="tiny">${esc(o.pharmacy_name)} · ${o.payload.items.length} items</div>
+          </div>
+          <div class="flex-gap">
+            <span class="badge badge-warn">${o.status}</span>
+            <button class="btn-primary" onclick="openSupplierOrder('${o.id}')">Manage Order</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  if(others.length > 0) {
+    html += '<h3 class="mt-8">Historical Orders</h3>';
+    html += others.map(o => `
+      <div class="card card-flush mb-4">
+        <div class="card-body flex-between">
+          <div>
+            <h3 style="margin:0;">Order ${o.id}</h3>
+            <div class="tiny">${esc(o.pharmacy_name)} · ${o.payload.items.length} items</div>
+          </div>
+          <div class="flex-gap">
+            <span class="badge badge-neutral">${o.status}</span>
+            <button class="btn-outline" onclick="openSupplierOrder('${o.id}')">View Invoice</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  $('#supplier-orders-list').innerHTML = html || '<p class="tiny">No orders.</p>';
+}
+
+function openSupplierOrder(orderId) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(!o) return;
+  
+  toggle('#supplier-home', false);
+  toggle('#supplier-order-detail', true);
+  
+  $('#so-id').textContent = `Order ${o.id}`;
+  $('#so-pharmacy').textContent = o.pharmacy_name;
+  
+  let isEditable = o.status === 'PLACED' || o.status === 'CONFIRMED';
+  
+  $('#so-lines').innerHTML = o.payload.items.map((i, idx) => {
+    let fq = i.fulfilled_quantity !== undefined ? i.fulfilled_quantity : i.quantity;
+    let actHtml = isEditable ? `
+      <div class="qty-editor" style="width:100px;">
+        <button class="qty-btn" onclick="adjFulfillQty('${o.id}', ${idx}, -1)">-</button>
+        <input type="number" id="fq_${o.id}_${idx}" class="qty-input" value="${fq}" disabled>
+        <button class="qty-btn" onclick="adjFulfillQty('${o.id}', ${idx}, 1)">+</button>
+      </div>` : `<strong>${fq}</strong>`;
+      
+    return `
+      <tr>
+        <td>
+          <div style="font-weight:500">${esc(i.product_name)}</div>
+          <div class="tiny">ID: ${esc(i.master_product_id)}</div>
+        </td>
+        <td>${i.quantity} ${esc(i.unit||'')}</td>
+        <td>${actHtml}</td>
+      </tr>
+    `;
+  }).join('');
+  
+  let actionsHtml = '';
+  if(o.status === 'PLACED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'CONFIRMED')">Confirm Order</button>`;
+  else if(o.status === 'CONFIRMED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'DISPATCHED')">Mark Dispatched</button>`;
+  else if(o.status === 'DISPATCHED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'DELIVERED')">Mark Delivered</button>`;
+  else if(o.status === 'DELIVERED') actionsHtml = `<button class="btn-primary" onclick="generateInvoice('${o.id}')">Generate Invoice</button>`;
+  
+  $('#so-actions').innerHTML = actionsHtml;
+  
+  let metaHtml = '';
+  if(o.supplier_snapshot && o.supplier_snapshot.eta_label) {
+    metaHtml += `<p class="tiny"><strong>Expected Delivery:</strong> ${o.supplier_snapshot.eta_label}</p>`;
+  }
+  if(o.delivered_at) {
+    metaHtml += `<p class="tiny"><strong>Delivered:</strong> ${new Date(o.delivered_at).toLocaleString()}</p>`;
+  }
+  let metaDiv = document.getElementById('so-meta');
+  if(!metaDiv) {
+    metaDiv = document.createElement('div');
+    metaDiv.id = 'so-meta';
+    document.getElementById('so-pharmacy').parentElement.appendChild(metaDiv);
+  }
+  metaDiv.innerHTML = metaHtml;
+  
+  if(o.invoice) {
+    toggle('#so-invoice-section', true);
+    let inv = o.invoice;
+    $('#so-invoice-preview').innerHTML = `
+      <div class="flex-between mb-2">
+        <strong>${inv.invoice_id}</strong>
+        <span>Total: ₹${inv.grand_total}</span>
+      </div>
+      <div class="tiny">${inv.lines.length} lines · <span class="badge badge-neutral">Demo supplier network</span></div>
+    `;
+  } else {
+    toggle('#so-invoice-section', false);
+  }
+}
+
+function adjFulfillQty(orderId, itemIdx, delta) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(!o) return;
+  
+  let item = o.payload.items[itemIdx];
+  if(item.fulfilled_quantity === undefined) item.fulfilled_quantity = item.quantity;
+  item.fulfilled_quantity = Math.max(0, Math.min(item.quantity, item.fulfilled_quantity + delta));
+  
+  saveDemoState(state);
+  openSupplierOrder(orderId);
+}
+
+function setOrderStatus(orderId, status) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(o) {
+    o.status = status;
+    if(status === 'DELIVERED') o.delivered_at = new Date().toISOString();
+    saveDemoState(state);
+    openSupplierOrder(orderId);
+  }
+}
+
+async function generateInvoice(orderId) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(!o) return;
+  
+  let supplierName = o.supplier_snapshot ? o.supplier_snapshot.supplier_name : o.payload.items[0].supplier_name;
+  
+  showOverlay(['Generating supplier invoice...', 'Calculating taxes...', 'Reconciling...']);
+  try {
+    let r = await fetch('/api/invoice/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ items: o.payload.items, supplier_name: supplierName, order_id: o.id })
+    });
+    let inv = await r.json();
+    o.invoice = inv;
+    o.status = 'INVOICED';
+    
+    let recRes = await fetch('/api/reconcile', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ order_items: o.payload.items, invoice_lines: inv.lines })
+    });
+    o.invoice_reconciliation = await recRes.json();
+    o.status = 'RECONCILED';
+    
+    saveDemoState(state);
+    openSupplierOrder(orderId);
+  } catch(e) {
+    alert(e.message);
+  } finally {
+    hideOverlay();
+  }
+}
+
+// Start
+setRole('pharmacy');
+
+</script>
+</body>
+</html>

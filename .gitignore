@@ -1,0 +1,15 @@
+venv/
+.env
+__pycache__/
+*.pyc
+*.zip
+.DS_Store
+.runtime/
+eval_ground_truth/
+eval_evidence_baseline/
+scratch/
+0*_*.json
+FP_ANALYSIS.json
+tests_run_freeze.txt
+freeze_hashes.txt
+baseline_test_output.txt

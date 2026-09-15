@@ -1,0 +1,2784 @@
+{
+  "mode": "fast",
+  "passes_requested": [
+    "original"
+  ],
+  "passes_succeeded": 1,
+  "pass_errors": [],
+  "image_quality": {
+    "score": 0.862,
+    "blur": 1131.8,
+    "width": 960,
+    "height": 1280,
+    "mean_luminance": 167.9,
+    "warnings": []
+  },
+  "items": [
+    {
+      "input": {
+        "raw_text": "No-pill gel",
+        "medicine_name": "No-pill gel",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "gel",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999701976812,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=No-pill gel",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6593,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "151121",
+            "product_name": "Nowill 1.5mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Zee Laboratories",
+            "score": 0.726,
+            "name_score": 0.75,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "163124",
+            "product_name": "O Pill 200mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Orison Pharma International",
+            "score": 0.726,
+            "name_score": 0.75,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "153247",
+            "product_name": "Nicopill 5mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Micro Nova Pharmaceuticals Ltd",
+            "score": 0.7216,
+            "name_score": 0.745,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "217064",
+            "product_name": "T-Pill Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "BestoChem Formulations  India  Ltd",
+            "score": 0.682,
+            "name_score": 0.7,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "223096",
+            "product_name": "T-Pill 250mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "BestoChem Formulations  India  Ltd",
+            "score": 0.682,
+            "name_score": 0.7,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "151121",
+        "candidate_product_name": "Nowill 1.5mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Medfal Forte 21 50 str",
+        "medicine_name": "Medfal Forte",
+        "quantity": 21.0,
+        "unit": "str",
+        "strength": "50",
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635748,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Medfal Forte",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "ORDER_QUANTITY",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7794,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "136617",
+            "product_name": "Mefac Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "P & B Pharmaceuticals  Ltd",
+            "score": 0.7794,
+            "name_score": 0.8107,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "136276",
+            "product_name": "Mefwal Forte 500mg/325mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Wallace Pharmaceuticals Pvt Ltd",
+            "score": 0.766,
+            "name_score": 0.7955,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "142953",
+            "product_name": "Medinac Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alde Medi Impex Ltd",
+            "score": 0.7216,
+            "name_score": 0.745,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "146495",
+            "product_name": "Mecofag Forte Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Pritus Healthcare",
+            "score": 0.7216,
+            "name_score": 0.745,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "138061",
+            "product_name": "Mefna P Forte Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Medfence Labs",
+            "score": 0.7156,
+            "name_score": 0.7382,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "136617",
+        "candidate_product_name": "Mefac Forte Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Turcin Drink (Adult)",
+        "medicine_name": "Turcin Drink",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "Adult",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999205271592,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Turcin Drink",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5789,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "219564",
+            "product_name": "Tucin LS Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "I.I.F.A Health Care",
+            "score": 0.5789,
+            "name_score": 0.5828,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "225578",
+            "product_name": "Trinocin 200mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Trident Pharma",
+            "score": 0.5645,
+            "name_score": 0.5665,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "215013",
+            "product_name": "Tussin Dmr Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Synchem Lab",
+            "score": 0.5608,
+            "name_score": 0.5623,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "215581",
+            "product_name": "Tussin Dmr Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Synchem Lab",
+            "score": 0.5608,
+            "name_score": 0.5623,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "218382",
+            "product_name": "Turip D Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Pharmaceuticals Pvt Ltd",
+            "score": 0.5502,
+            "name_score": 0.5503,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "219564",
+        "candidate_product_name": "Tucin LS Syrup"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Duolin Rota Caps",
+        "medicine_name": "Duolin Rota Caps",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Duolin Rota Caps",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8847,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "58441",
+            "product_name": "Duolin Rotacap",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cipla Ltd",
+            "score": 0.8164,
+            "name_score": 0.8528,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "63741",
+            "product_name": "Dolinsta Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Indoco Remedies Ltd",
+            "score": 0.6723,
+            "name_score": 0.6889,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "58811",
+            "product_name": "Duolin Forte Rotacap",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cipla Ltd",
+            "score": 0.657,
+            "name_score": 0.6716,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "58237",
+            "product_name": "Duolin 3 Respules 3ml",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cipla Ltd",
+            "score": 0.6527,
+            "name_score": 0.6667,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "71913",
+            "product_name": "Duolin 3 Respules 3ml",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cipla Ltd",
+            "score": 0.6527,
+            "name_score": 0.6667,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "58441",
+        "candidate_product_name": "Duolin Rotacap"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Vicks VapoRub 39 155",
+        "medicine_name": "Vicks VapoRub",
+        "quantity": 155.0,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999991178536121,
+        "group_name": null,
+        "notes": "39; reader_votes=1/1; readings=Vicks VapoRub",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "ORDER_QUANTITY",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5226,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "231764",
+            "product_name": "Ulsorub Gel",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Om Biotec",
+            "score": 0.5226,
+            "name_score": 0.5189,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "233229",
+            "product_name": "Vicks Action 500 Advanced Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Procter & Gamble Hygiene and Health Care Ltd",
+            "score": 0.5202,
+            "name_score": 0.5161,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "233306",
+            "product_name": "Victoza Solution for Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Novo Nordisk India Pvt Ltd",
+            "score": 0.484,
+            "name_score": 0.475,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "236188",
+            "product_name": "Vivapod 200mg Tablet DT",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Skyever Pharmaceuticals Private Limited",
+            "score": 0.4735,
+            "name_score": 0.463,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "233929",
+            "product_name": "Viclob Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Kivi Labs Ltd",
+            "score": 0.4687,
+            "name_score": 0.4576,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "231764",
+        "candidate_product_name": "Ulsorub Gel"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Glimot nab",
+        "medicine_name": "Glimot nab",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Glimot nab",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7864,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "98743",
+            "product_name": "GLIMTAB 2MG TABLET",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "C M R Life Sciences",
+            "score": 0.7864,
+            "name_score": 0.8186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "100457",
+            "product_name": "Glimtab 1mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "C M R Life Sciences",
+            "score": 0.7864,
+            "name_score": 0.8186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "98925",
+            "product_name": "Glimitab 1mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Centaur Pharmaceuticals Pvt Ltd",
+            "score": 0.7602,
+            "name_score": 0.7889,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "99850",
+            "product_name": "Glimitab 2mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Centaur Pharmaceuticals Pvt Ltd",
+            "score": 0.7602,
+            "name_score": 0.7889,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "98254",
+            "product_name": "Glimo 2mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Zen Medica Pvt Ltd",
+            "score": 0.6556,
+            "name_score": 0.67,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "98743",
+        "candidate_product_name": "GLIMTAB 2MG TABLET"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Hot water Bag",
+        "medicine_name": "Hot water Bag",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635748,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Hot water Bag",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5554,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "241524",
+            "product_name": "Water for Injection Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Albert David Ltd",
+            "score": 0.5554,
+            "name_score": 0.5562,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "104078",
+            "product_name": "Hinate G Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Adips Laboratories Ltd",
+            "score": 0.5129,
+            "name_score": 0.5078,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "2539",
+            "product_name": "Aculife Sterile Water for injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aculife Healthcare Private Limited",
+            "score": 0.5112,
+            "name_score": 0.5059,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "4586",
+            "product_name": "Aculife Sterile Water for injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aculife Healthcare Private Limited",
+            "score": 0.5112,
+            "name_score": 0.5059,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "152819",
+            "product_name": "Nirlife Sterile Water for injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Nirlife Healthcare",
+            "score": 0.5112,
+            "name_score": 0.5059,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "241524",
+        "candidate_product_name": "Water for Injection Injection"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Olimet smg",
+        "medicine_name": "Olimet smg",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999046326138,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Olimet smg",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6635,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "161738",
+            "product_name": "Obimet SR Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Corona Remedies Pvt Ltd",
+            "score": 0.6635,
+            "name_score": 0.6789,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "161995",
+            "product_name": "Obimet SR 1gm Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Corona Remedies Pvt Ltd",
+            "score": 0.6635,
+            "name_score": 0.6789,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "161715",
+            "product_name": "Olimelt 5  Tablet MD",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Intas Pharmaceuticals Ltd",
+            "score": 0.6626,
+            "name_score": 0.678,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "125354",
+            "product_name": "Limet 600mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cure Quick Pharmaceuticals",
+            "score": 0.6556,
+            "name_score": 0.67,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "96624",
+            "product_name": "Glimet M 1mg/500mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "MPC Pharmaceuticals",
+            "score": 0.6424,
+            "name_score": 0.655,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "161738",
+        "candidate_product_name": "Obimet SR Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "D.N.S 500 ml",
+        "medicine_name": "D.N.S",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999284744405,
+        "group_name": null,
+        "notes": "500 ml; reader_votes=1/1; readings=D.N.S",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "PACK_OR_VOLUME",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8976,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "58438",
+            "product_name": "Dns Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Venus Remedies Ltd",
+            "score": 0.803,
+            "name_score": 0.8375,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "63645",
+            "product_name": "D.N.S. Dexts Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Parenteral Drugs India Ltd",
+            "score": 0.5838,
+            "name_score": 0.5884,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "58969",
+            "product_name": "Din DS 80mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Mapra Laboratories Pvt Ltd",
+            "score": 0.5364,
+            "name_score": 0.5345,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "59291",
+            "product_name": "Dinosis Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Jay Ell Healthcare Pvt. Ltd",
+            "score": 0.4651,
+            "name_score": 0.4536,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "42882",
+            "product_name": "C.R.M.S Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Pharmed Ltd",
+            "score": 0.4477,
+            "name_score": 0.4338,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "58438",
+        "candidate_product_name": "Dns Solution"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "R.L 500 ml",
+        "medicine_name": "R.L",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999994039542747,
+        "group_name": null,
+        "notes": "500 ml; reader_votes=1/1; readings=R.L",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "PACK_OR_VOLUME",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5689,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "185166",
+            "product_name": "Reol 20mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Olcare Laboratories",
+            "score": 0.5689,
+            "name_score": 0.5714,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "185373",
+            "product_name": "Roll 20mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Floreat Medica Pvt Ltd",
+            "score": 0.5689,
+            "name_score": 0.5714,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "184200",
+            "product_name": "Ridol 2mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Gufic Bioscience Ltd",
+            "score": 0.4576,
+            "name_score": 0.445,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "184573",
+            "product_name": "Rozel Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Intas Pharmaceuticals Ltd",
+            "score": 0.4576,
+            "name_score": 0.445,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "185159",
+            "product_name": "Ridyl Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Apex Laboratories Pvt Ltd",
+            "score": 0.4576,
+            "name_score": 0.445,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "185166",
+        "candidate_product_name": "Reol 20mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "N.S 100 ml so",
+        "medicine_name": "N.S",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635748,
+        "group_name": null,
+        "notes": "100 ml so; reader_votes=1/1; readings=N.S",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "PACK_OR_VOLUME",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8363,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "151137",
+            "product_name": "N S Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "AstraZeneca",
+            "score": 0.7553,
+            "name_score": 0.7833,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "153422",
+            "product_name": "N.S Infusion",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Venus Remedies Ltd",
+            "score": 0.5588,
+            "name_score": 0.56,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "150709",
+            "product_name": "Nims 100mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Mediwin Pharmaceuticals",
+            "score": 0.5249,
+            "name_score": 0.5214,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "63645",
+            "product_name": "D.N.S. Dexts Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Parenteral Drugs India Ltd",
+            "score": 0.4928,
+            "name_score": 0.485,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "42882",
+            "product_name": "C.R.M.S Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Pharmed Ltd",
+            "score": 0.475,
+            "name_score": 0.4648,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "151137",
+        "candidate_product_name": "N S Solution"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "N.S 500 ml",
+        "medicine_name": "N.S",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635748,
+        "group_name": null,
+        "notes": "500 ml; reader_votes=1/1; readings=N.S",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "PACK_OR_VOLUME",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8363,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "151137",
+            "product_name": "N S Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "AstraZeneca",
+            "score": 0.7553,
+            "name_score": 0.7833,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "153422",
+            "product_name": "N.S Infusion",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Venus Remedies Ltd",
+            "score": 0.5588,
+            "name_score": 0.56,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "150709",
+            "product_name": "Nims 100mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Mediwin Pharmaceuticals",
+            "score": 0.5249,
+            "name_score": 0.5214,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "63645",
+            "product_name": "D.N.S. Dexts Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Parenteral Drugs India Ltd",
+            "score": 0.4928,
+            "name_score": 0.485,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "42882",
+            "product_name": "C.R.M.S Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Pharmed Ltd",
+            "score": 0.475,
+            "name_score": 0.4648,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "151137",
+        "candidate_product_name": "N S Solution"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Niddle 24",
+        "medicine_name": "Niddle",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999970793869899,
+        "group_name": null,
+        "notes": "24; reader_votes=1/1; readings=Niddle",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "GAUGE",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6996,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "153283",
+            "product_name": "Nide 100mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Nectar Remedies Ltd",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "158371",
+            "product_name": "Nide 8mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Arvincare Pharma",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "158597",
+            "product_name": "Nide 200mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Nectar Remedies Ltd",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "159911",
+            "product_name": "Nide 4mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Arvincare Pharma",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "152496",
+            "product_name": "Nile 100mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Jocund India Ltd",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "153283",
+        "candidate_product_name": "Nide 100mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Interoget 22 (24) so",
+        "medicine_name": "Interoget",
+        "quantity": 22.0,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "(24) so; reader_votes=1/1; readings=Interoget",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "ORDER_QUANTITY",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7864,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "111680",
+            "product_name": "Internet 50mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Gedzrlvin Pharmaceuticals Pvt Ltd",
+            "score": 0.7864,
+            "name_score": 0.8186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "113117",
+            "product_name": "Internet 25mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Gedzrlvin Pharmaceuticals Pvt Ltd",
+            "score": 0.7864,
+            "name_score": 0.8186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "113163",
+            "product_name": "Internet 100mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Gedzrlvin Pharmaceuticals Pvt Ltd",
+            "score": 0.7864,
+            "name_score": 0.8186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "110896",
+            "product_name": "Intogest Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Integrated Laboratories Pvt Ltd",
+            "score": 0.7131,
+            "name_score": 0.7353,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "110043",
+            "product_name": "Intrabet 16mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Intra Labs India Pvt Ltd",
+            "score": 0.6898,
+            "name_score": 0.7088,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "111680",
+        "candidate_product_name": "Internet 50mg Injection"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Micropar",
+        "medicine_name": "Micropar",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Micropar",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8415,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "137724",
+            "product_name": "Micropan 40mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Micro Organics Pharmaceuticals India Pvt Ltd",
+            "score": 0.8415,
+            "name_score": 0.8813,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "144084",
+            "product_name": "Micropan 40mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Micro Organics Pharmaceuticals India Pvt Ltd",
+            "score": 0.8415,
+            "name_score": 0.8813,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "137897",
+            "product_name": "Micropan-D 10mg/40mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Micro Organics Pharmaceuticals India Pvt Ltd",
+            "score": 0.7527,
+            "name_score": 0.7803,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "142055",
+            "product_name": "Micropan-DSR 30mg/40mg Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Micro Organics Pharmaceuticals India Pvt Ltd",
+            "score": 0.7478,
+            "name_score": 0.7747,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "139887",
+            "product_name": "Microgard Solution",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Stedman Pharmaceuticals Pvt Ltd",
+            "score": 0.7424,
+            "name_score": 0.7686,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "137724",
+        "candidate_product_name": "Micropan 40mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Banda j",
+        "medicine_name": "Banda j",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Banda j",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6671,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "27687",
+            "product_name": "Bandhan 0.03mg/0.15mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Zydus Cadila",
+            "score": 0.6671,
+            "name_score": 0.683,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "32637",
+            "product_name": "Bandark 400mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Mediarka Lifesciences Pvt Ltd",
+            "score": 0.6631,
+            "name_score": 0.6786,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "29911",
+            "product_name": "Bandace SP 100mg/325mg/15mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Bandu Pharmaceuticals Private Limited",
+            "score": 0.6386,
+            "name_score": 0.6507,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "30856",
+            "product_name": "Bandej OZ Ointment",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Radico Remedies",
+            "score": 0.6325,
+            "name_score": 0.6438,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "28449",
+            "product_name": "Ban-DSR Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Drigbhyam Pharmaceutical Pvt. Ltd.",
+            "score": 0.6129,
+            "name_score": 0.6214,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "27687",
+        "candidate_product_name": "Bandhan 0.03mg/0.15mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Ketorol D.T",
+        "medicine_name": "Ketorol D.T",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635748,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Ketorol D.T",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.8391,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "115636",
+            "product_name": "Ketorol-DT Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Dr Reddy's Laboratories Ltd",
+            "score": 0.8391,
+            "name_score": 0.8786,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "115703",
+            "product_name": "Ketorol Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Dr Reddy's Laboratories Ltd",
+            "score": 0.8218,
+            "name_score": 0.8589,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "115724",
+            "product_name": "Ketorol Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Dr Reddy's Laboratories Ltd",
+            "score": 0.8218,
+            "name_score": 0.8589,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "115785",
+            "product_name": "Ketorol Gel",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Dr Reddy's Laboratories Ltd",
+            "score": 0.8218,
+            "name_score": 0.8589,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "117636",
+            "product_name": "Ketprol 10mg Tablet DT",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aspo Healthcare",
+            "score": 0.791,
+            "name_score": 0.8238,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "115636",
+        "candidate_product_name": "Ketorol-DT Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Medisallic out",
+        "medicine_name": "Medisallic",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999990065919869,
+        "group_name": null,
+        "notes": "out; reader_votes=1/1; readings=Medisallic",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.9477,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "133483",
+            "product_name": "Medisalic Ointment",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Torque Pharmaceuticals Pvt Ltd",
+            "score": 0.8895,
+            "name_score": 0.9358,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "135558",
+            "product_name": "Medisalic Soap",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Torque Pharmaceuticals Pvt Ltd",
+            "score": 0.7015,
+            "name_score": 0.7221,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "148224",
+            "product_name": "Medicillin 500mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Modern Laboratories",
+            "score": 0.6952,
+            "name_score": 0.715,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "148487",
+            "product_name": "Medicillin 250mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Modern Laboratories",
+            "score": 0.6952,
+            "name_score": 0.715,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "138071",
+            "product_name": "Medinac 50mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alde Medi Impex Ltd",
+            "score": 0.6282,
+            "name_score": 0.6388,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "133483",
+        "candidate_product_name": "Medisalic Ointment"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Flashier NurseBright Flw",
+        "medicine_name": "Flashier NurseBright Flw",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999205271628,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Flashier NurseBright Flw",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5315,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "87229",
+            "product_name": "Flaser Forte 10mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Vanguard Therapeutics Pvt Ltd",
+            "score": 0.5315,
+            "name_score": 0.529,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "16956",
+            "product_name": "Ambright LS Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Cadell Healthcare Pvt Ltd",
+            "score": 0.4917,
+            "name_score": 0.4838,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "118660",
+            "product_name": "Kedbright Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Kedarnath Healthcare pvt Ltd",
+            "score": 0.4782,
+            "name_score": 0.4684,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "89165",
+            "product_name": "Flash Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Hippo Labs Pvt Ltd",
+            "score": 0.4698,
+            "name_score": 0.4589,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "91147",
+            "product_name": "Flash Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Medcure Pharma",
+            "score": 0.4698,
+            "name_score": 0.4589,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "87229",
+        "candidate_product_name": "Flaser Forte 10mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Oral B Brush",
+        "medicine_name": "Oral B Brush",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999205271592,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Oral B Brush",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5947,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "165477",
+            "product_name": "Oral X Mouth Wash",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Arehk Healthcare",
+            "score": 0.5947,
+            "name_score": 0.6008,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "162189",
+            "product_name": "Oral L 0.03mg/0.15mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Universal Life Sciences",
+            "score": 0.5909,
+            "name_score": 0.5965,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "186070",
+            "product_name": "Resway Oral Drops Butterscotch",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alcott Healthcare Pvt Ltd",
+            "score": 0.5297,
+            "name_score": 0.527,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "162413",
+            "product_name": "Oratil 125mg Oral Suspension",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Macleods Pharmaceuticals Pvt Ltd",
+            "score": 0.5296,
+            "name_score": 0.5269,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "161646",
+            "product_name": "O2 M Oral Suspension",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Medley Pharmaceuticals",
+            "score": 0.5124,
+            "name_score": 0.5072,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "165477",
+        "candidate_product_name": "Oral X Mouth Wash"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Dabur Jal Oil 62",
+        "medicine_name": "Dabur Jal Oil",
+        "quantity": 62.0,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999403953623,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Dabur Jal Oil",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "ORDER_QUANTITY",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.55,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "70766",
+            "product_name": "Dalbrofil 100mg Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Candle Pharmaceuticals",
+            "score": 0.55,
+            "name_score": 0.55,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "208681",
+            "product_name": "SPD Oil",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Curagen Biological   Pharmaceuticals",
+            "score": 0.5309,
+            "name_score": 0.5283,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "67121",
+            "product_name": "Dabirock 150mg Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Oaknet Healthcare Pvt Ltd",
+            "score": 0.5229,
+            "name_score": 0.5192,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "133740",
+            "product_name": "Mediker Anti-Lice Oil",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Marico  Limited",
+            "score": 0.5224,
+            "name_score": 0.5186,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "60616",
+            "product_name": "Dabirex 110mg Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Dr Reddy's Laboratories Ltd",
+            "score": 0.4876,
+            "name_score": 0.4791,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "70766",
+        "candidate_product_name": "Dalbrofil 100mg Capsule"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Binafid O.S",
+        "medicine_name": "Binafid O.S",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999801317875,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Binafid O.S",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7107,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "30334",
+            "product_name": "Binafit 250mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Fitwel Pharmaceuticals Private Limited",
+            "score": 0.7107,
+            "name_score": 0.7326,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "31224",
+            "product_name": "Binacid 20mg Capsule",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Biocin Healthcare",
+            "score": 0.651,
+            "name_score": 0.6648,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "33814",
+            "product_name": "Binamed OZ Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "In Med Therapeutics",
+            "score": 0.6233,
+            "name_score": 0.6333,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "31919",
+            "product_name": "Binar OZ Ointment",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "H & Care Incorp",
+            "score": 0.5739,
+            "name_score": 0.5772,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "31204",
+            "product_name": "Binflox 200mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Biobrick Pharma",
+            "score": 0.5642,
+            "name_score": 0.5661,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "30334",
+        "candidate_product_name": "Binafit 250mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Bulecost",
+        "medicine_name": "Bulecost",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Bulecost",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6164,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "25882",
+            "product_name": "Buscogast 20mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Sanofi India  Ltd",
+            "score": 0.6164,
+            "name_score": 0.6255,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "26163",
+            "product_name": "Buscogast 20mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Sanofi India  Ltd",
+            "score": 0.6164,
+            "name_score": 0.6255,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "99513",
+            "product_name": "Glicost 1mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aronex Life Sciences Pvt Ltd",
+            "score": 0.6123,
+            "name_score": 0.6208,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "102704",
+            "product_name": "Glicost 2mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aronex Life Sciences Pvt Ltd",
+            "score": 0.6123,
+            "name_score": 0.6208,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "2781",
+            "product_name": "Alenost 70mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Macleods Pharmaceuticals Pvt Ltd",
+            "score": 0.6123,
+            "name_score": 0.6208,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "25882",
+        "candidate_product_name": "Buscogast 20mg Injection"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Nepromed gel",
+        "medicine_name": "Nepromed gel",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "gel",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999986092301304,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Nepromed gel",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7975,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "154308",
+            "product_name": "Neuromed 1mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Daksh Pharma Pvt Ltd",
+            "score": 0.7975,
+            "name_score": 0.8313,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "79298",
+            "product_name": "Eromed Gel",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Comed Chemicals Ltd",
+            "score": 0.7543,
+            "name_score": 0.7821,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "75861",
+            "product_name": "Eromed 333mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Comed Chemicals Ltd",
+            "score": 0.7543,
+            "name_score": 0.7821,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "77421",
+            "product_name": "Eromed Syrup",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Comed Chemicals Ltd",
+            "score": 0.7543,
+            "name_score": 0.7821,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "187794",
+            "product_name": "Romed 500mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Medix Biocare",
+            "score": 0.7055,
+            "name_score": 0.7267,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "154308",
+        "candidate_product_name": "Neuromed 1mg Injection"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "O sagard mouthwash",
+        "medicine_name": "O sagard mouthwash",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.999999976158145,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=O sagard mouthwash",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6007,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "161988",
+            "product_name": "Orogard Mouth Paint",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alkem Laboratories Ltd",
+            "score": 0.6007,
+            "name_score": 0.6076,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "163401",
+            "product_name": "Oflagard O Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Biomax Biotechnics Pvt Ltd",
+            "score": 0.5667,
+            "name_score": 0.569,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "151500",
+            "product_name": "New Orogard Mouth Wash Fresh Mint",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alkem Laboratories Ltd",
+            "score": 0.5379,
+            "name_score": 0.5363,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "164256",
+            "product_name": "Orasafe Mouth Wash",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Age Biotech",
+            "score": 0.5301,
+            "name_score": 0.5274,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "59047",
+            "product_name": "Dresin Mouthwash & Gargle",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "SAF Fermion Ltd",
+            "score": 0.5224,
+            "name_score": 0.5187,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "161988",
+        "candidate_product_name": "Orogard Mouth Paint"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "gargle",
+        "medicine_name": "gargle",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": null,
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999998807907341,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=gargle",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "BLOCKED_LASA",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.7182,
+        "reason": "top two catalogue candidates are too close",
+        "candidates": [
+          {
+            "master_product_id": "59261",
+            "product_name": "Drez Gargle",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Stedman Pharmaceuticals Pvt Ltd",
+            "score": 0.7182,
+            "name_score": 0.7412,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "59804",
+            "product_name": "Drez Gargle",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Stedman Pharmaceuticals Pvt Ltd",
+            "score": 0.7182,
+            "name_score": 0.7412,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "100873",
+            "product_name": "Gare 1mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Tikish Pharmaceuticals",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "101287",
+            "product_name": "Gare 2mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Tikish Pharmaceuticals",
+            "score": 0.6996,
+            "name_score": 0.72,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "202210",
+            "product_name": "Steri Gargle",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Integra Life Sciences Pvt Ltd",
+            "score": 0.6969,
+            "name_score": 0.717,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "59261",
+        "candidate_product_name": "Drez Gargle"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "PERO-650 Tablets",
+        "medicine_name": "PERO-650 Tablets",
+        "quantity": null,
+        "unit": null,
+        "strength": "650",
+        "variant": "Tablets",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999829701035,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=PERO-650 Tablets",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "STRENGTH",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5793,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "3281",
+            "product_name": "Atpera 650 Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Atlantis Formulations Pvt Ltd",
+            "score": 0.5793,
+            "name_score": 0.5833,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "178160",
+            "product_name": "Park 650 Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Healsure Lifesciences Pvt. Ltd.",
+            "score": 0.5791,
+            "name_score": 0.583,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "173668",
+            "product_name": "P 650 Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Apex Laboratories Pvt Ltd",
+            "score": 0.5643,
+            "name_score": 0.5662,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "173976",
+            "product_name": "Peroduo Gel",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Ajanta Pharma Ltd",
+            "score": 0.5521,
+            "name_score": 0.5524,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "176365",
+            "product_name": "Paramol 650 Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Raffles Pharmaceuticals",
+            "score": 0.544,
+            "name_score": 0.5432,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "3281",
+        "candidate_product_name": "Atpera 650 Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Naxamic-PLUS Tablets",
+        "medicine_name": "Naxamic-PLUS Tablets",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "Tablets",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999602635796,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=Naxamic-PLUS Tablets",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "REVIEW",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6985,
+        "reason": "candidate requires human confirmation",
+        "candidates": [
+          {
+            "master_product_id": "159203",
+            "product_name": "Naxamic 500mg Injection",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Nexkem Pharmaceuticals Pvt Ltd",
+            "score": 0.7425,
+            "name_score": 0.7688,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "155610",
+            "product_name": "Nanic-Plus Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "SH Healthcare Pvt Ltd",
+            "score": 0.7368,
+            "name_score": 0.7623,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "153817",
+            "product_name": "Nexace-Plus Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "NGS Biotech Pvt Ltd",
+            "score": 0.6949,
+            "name_score": 0.7146,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "154264",
+            "product_name": "Numic Plus Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Symbiotic Drugs",
+            "score": 0.674,
+            "name_score": 0.6909,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "153884",
+            "product_name": "Napain Plus Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Times Drugs & Pharmaceuticals Pvt Ltd",
+            "score": 0.6559,
+            "name_score": 0.6704,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "159203",
+        "candidate_product_name": "Naxamic 500mg Injection"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "SURE 21 C Tablets",
+        "medicine_name": "SURE 21 C Tablets",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "Tablets",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999829701035,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=SURE 21 C Tablets",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.658,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "94989",
+            "product_name": "G-Sure 2.6 Tablet CR",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Proqol Healthcare",
+            "score": 0.658,
+            "name_score": 0.6727,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "203443",
+            "product_name": "Surex 5mg/2.5mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6184,
+            "name_score": 0.6277,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "27226",
+            "product_name": "B Sure 16mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "30066",
+            "product_name": "B Sure 8mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "31997",
+            "product_name": "B Sure 24mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "94989",
+        "candidate_product_name": "G-Sure 2.6 Tablet CR"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "SURE 21 L Tablets",
+        "medicine_name": "SURE 21 L Tablets",
+        "quantity": null,
+        "unit": null,
+        "strength": null,
+        "variant": "Tablets",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 1.0,
+        "group_name": null,
+        "notes": "reader_votes=1/1; readings=SURE 21 L Tablets",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "UNKNOWN",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.6043,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "27226",
+            "product_name": "B Sure 16mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "30066",
+            "product_name": "B Sure 8mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "31997",
+            "product_name": "B Sure 24mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Surge Biotech Pvt Ltd",
+            "score": 0.6043,
+            "name_score": 0.6117,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "201568",
+            "product_name": "Sureheal 90mg/48mg/100mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Devoir Lifesciences Pvt Ltd",
+            "score": 0.5959,
+            "name_score": 0.6022,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "201122",
+            "product_name": "Sure Glow Cream",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Forman Medics Pvt Ltd",
+            "score": 0.5793,
+            "name_score": 0.5833,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "27226",
+        "candidate_product_name": "B Sure 16mg Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    },
+    {
+      "input": {
+        "raw_text": "Janusit M/M-FORTE Tablets 50/100",
+        "medicine_name": "Janusit M/M-FORTE Tablets",
+        "quantity": 50.0,
+        "unit": null,
+        "strength": null,
+        "variant": "Tablets",
+        "urgency": "NOT_SPECIFIED",
+        "source_engine": "sarvam_document_ai",
+        "ocr_confidence": 0.9999999523162977,
+        "group_name": null,
+        "notes": "50/100; reader_votes=1/1; readings=Janusit M/M-FORTE Tablets",
+        "line_status": "ACTIVE",
+        "is_order_line": true,
+        "quantity_role": "ORDER_QUANTITY",
+        "reader_votes": 1,
+        "reader_agreement": 0.0
+      },
+      "resolution": {
+        "decision": "NO_MATCH",
+        "master_product_id": null,
+        "product_name": null,
+        "confidence": 0.5719,
+        "reason": "no catalogue candidate is similar enough",
+        "candidates": [
+          {
+            "master_product_id": "39842",
+            "product_name": "Closit-Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Axonwave Pharmaceuticals Private Limited",
+            "score": 0.5719,
+            "name_score": 0.5749,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "9135",
+            "product_name": "Alifit Forte 300mg Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Alisier Drugs Pvt Ltd",
+            "score": 0.5719,
+            "name_score": 0.5749,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "73816",
+            "product_name": "Esitor Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "La Pharmaceuticals",
+            "score": 0.5719,
+            "name_score": 0.5749,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "26143",
+            "product_name": "Banoflam-Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Aareen Healthcare Pvt Ltd",
+            "score": 0.5631,
+            "name_score": 0.5649,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          },
+          {
+            "master_product_id": "22240",
+            "product_name": "Aclotem-Forte Tablet",
+            "strength": "",
+            "form": "allopathy",
+            "manufacturer": "Biostem pharma Pvt Ltd",
+            "score": 0.5601,
+            "name_score": 0.5614,
+            "strength_score": 0.55,
+            "strength_conflict": false
+          }
+        ],
+        "requires_review": true,
+        "candidate_master_product_id": "39842",
+        "candidate_product_name": "Closit-Forte Tablet"
+      },
+      "suppliers": [],
+      "best_supplier": null
+    }
+  ],
+  "summary": {
+    "lines": 31,
+    "auto_accept": 0,
+    "review": 31,
+    "ignored": 0,
+    "supplier_ready": 0
+  }
+}

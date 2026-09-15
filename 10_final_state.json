@@ -1,0 +1,183 @@
+{
+  "order": {
+    "id": 1,
+    "created_at": "2026-09-14T21:07:39.055190+00:00",
+    "pharmacy_name": "Test Pharmacy",
+    "status": "FULFILLED",
+    "payload": {
+      "items": [
+        {
+          "sku": "SKU0044",
+          "product_name": "Omnacortil 10",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0020",
+          "product_name": "Electral Ready To Drink",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0071",
+          "product_name": "Volini Gel",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0027",
+          "product_name": "Calciquick Gold",
+          "quantity": 155.0,
+          "price": null
+        },
+        {
+          "sku": "SKU0070",
+          "product_name": "Gelusil",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0083",
+          "product_name": "Colgate Sensitive",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0071",
+          "product_name": "Volini Gel",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0021",
+          "product_name": "ORS",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0028",
+          "product_name": "Corcal",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0082",
+          "product_name": "Sensodyne",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0042",
+          "product_name": "Levocet 5",
+          "quantity": 22.0,
+          "price": null
+        },
+        {
+          "sku": "SKU0034",
+          "product_name": "Montair LC",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0075",
+          "product_name": "Candid Cream",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0030",
+          "product_name": "Corcal D3",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0022",
+          "product_name": "U-Wash Small",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0034",
+          "product_name": "Montair LC",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0021",
+          "product_name": "ORS",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0068",
+          "product_name": "Ambrodil LS",
+          "quantity": 62.0,
+          "price": null
+        },
+        {
+          "sku": "SKU0066",
+          "product_name": "Benadryl Syrup",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0018",
+          "product_name": "Becosules",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0064",
+          "product_name": "Neurobion Forte",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0023",
+          "product_name": "U-Wash Large",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0023",
+          "product_name": "U-Wash Large",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0081",
+          "product_name": "Parodontax",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0003",
+          "product_name": "Dolokind Plus",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0032",
+          "product_name": "Statfree 135",
+          "quantity": null,
+          "price": null
+        },
+        {
+          "sku": "SKU0064",
+          "product_name": "Neurobion Forte",
+          "quantity": null,
+          "price": null
+        }
+      ]
+    }
+  },
+  "invoice": {
+    "id": 1,
+    "order_id": 1,
+    "created_at": "2026-09-14T21:08:21.792777+00:00",
+    "invoice_number": "GEN/120",
+    "supplier_name": "GLOBAL HEALTHCARE",
+    "payload_json": "{\"header\": {\"supplier_name\": \"GLOBAL HEALTHCARE\", \"invoice_number\": \"GEN/120\", \"invoice_date\": \"23/04/2025\", \"customer_name\": \"MORAYA PHARMA\", \"gstin\": \"27AAXFG3706A1ZG\", \"subtotal\": 14100.74, \"cgst\": 792.11, \"sgst\": 792.11, \"igst\": 0, \"round_off\": -0.36, \"grand_total\": 15685.0}, \"lines\": [{\"raw_text\": \"OMEE D CAP 20CAP BATCH NO. 24230299 EXP. DATE 24230299 QTY 240 MRP 230.00 RATE 25.90 AMOUNT 6216.00\", \"product_name\": \"OMEE D CAP\", \"quantity\": 240.0, \"free_quantity\": 0.0, \"unit\": \"20CAP\", \"batch\": \"24230299\", \"expiry\": \"24230299\", \"mrp\": 230.0, \"rate\": 25.9, \"discount_percent\": 0.0, \"gst_percent\": 12.0, \"line_amount\": 6216.0, \"ocr_confidence\": 0.9999963343680504, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 100MG 2ML BATCH NO. L463011A EXP. DATE L463011A QTY 40 MRP 30.00 RATE 9.90 AMOUNT 396.00\", \"product_name\": \"MIKATAX 100MG\", \"quantity\": 40.0, \"free_quantity\": 0.0, \"unit\": \"2ML\", \"batch\": \"L463011A\", \"expiry\": \"L463011A\", \"mrp\": 30.0, \"rate\": 9.9, \"discount_percent\": 0.0, \"gst_percent\": 5.0, \"line_amount\": 396.0, \"ocr_confidence\": 0.9999999470181188, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 250MG INJ 2ML BATCH NO. L474007 EXP. DATE L474007 QTY 80 MRP 50.50 RATE 18.00 AMOUNT 1440.00\", \"product_name\": \"MIKATAX 250MG INJ\", \"quantity\": 80.0, \"free_quantity\": 0.0, \"unit\": \"2ML\", \"batch\": \"L474007\", \"expiry\": \"L474007\", \"mrp\": 50.5, \"rate\": 18.0, \"discount_percent\": 0.0, \"gst_percent\": 5.0, \"line_amount\": 1440.0, \"ocr_confidence\": 0.999999642373298, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 500 MG 2ML BATCH NO. L484020 EXP. DATE L484020 QTY 40 MRP 113.76 RATE 22.50 AMOUNT 900.00\", \"product_name\": \"MIKATAX 500 MG\", \"quantity\": 40.0, \"free_quantity\": 0.0, \"unit\": \"2ML\", \"batch\": \"L484020\", \"expiry\": \"L484020\", \"mrp\": 113.76, \"rate\": 22.5, \"discount_percent\": 0.0, \"gst_percent\": 5.0, \"line_amount\": 900.0, \"ocr_confidence\": 0.999999986754525, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"SOFRAKEM 15GM 15GM BATCH NO. S24004CB EXP. DATE S24004CB QTY 50 MRP 60.00 RATE 8.50 AMOUNT 425.00\", \"product_name\": \"SOFRAKEM 15GM\", \"quantity\": 50.0, \"free_quantity\": 0.0, \"unit\": \"15GM\", \"batch\": \"S24004CB\", \"expiry\": \"S24004CB\", \"mrp\": 60.0, \"rate\": 8.5, \"discount_percent\": 0.0, \"gst_percent\": 12.0, \"line_amount\": 425.0, \"ocr_confidence\": 0.999999821186158, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"KETOKEM SHAMPOO 100ML 75GM BATCH NO. KKS24456ED EXP. DATE KKS24456ED QTY 24 MRP 130.00 RATE 39.00 AMOUNT 936.00\", \"product_name\": \"KETOKEM SHAMPOO 100ML\", \"quantity\": 24.0, \"free_quantity\": 0.0, \"unit\": \"75GM\", \"batch\": \"KKS24456ED\", \"expiry\": \"KKS24456ED\", \"mrp\": 130.0, \"rate\": 39.0, \"discount_percent\": 0.0, \"gst_percent\": 18.0, \"line_amount\": 936.0, \"ocr_confidence\": 0.9999999205271562, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"OFLOKEM OZ+ SYP 30ML 110ML BATCH NO. N24205 EXP. DATE N24205 QTY 24 MRP 235.00 RATE 69.01 AMOUNT 1656.24\", \"product_name\": \"OFLOKEM OZ+ SYP 30ML\", \"quantity\": 24.0, \"free_quantity\": 0.0, \"unit\": \"110ML\", \"batch\": \"N24205\", \"expiry\": \"N24205\", \"mrp\": 235.0, \"rate\": 69.01, \"discount_percent\": 0.0, \"gst_percent\": 12.0, \"line_amount\": 1656.24, \"ocr_confidence\": 0.9999999304612702, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"KETOKEM CT SOAP 75GM 30ML BATCH NO. OFL24019RH EXP. DATE OFL24019RH QTY 50 MRP 65.00 RATE 14.25 AMOUNT 712.50\", \"product_name\": \"KETOKEM CT SOAP 75GM\", \"quantity\": 50.0, \"free_quantity\": 0.0, \"unit\": \"30ML\", \"batch\": \"OFL24019RH\", \"expiry\": \"OFL24019RH\", \"mrp\": 65.0, \"rate\": 14.25, \"discount_percent\": 0.0, \"gst_percent\": 12.0, \"line_amount\": 712.5, \"ocr_confidence\": 0.9999998278088703, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"MAHANAC S TAB 75GM BATCH NO. KCS23083ED EXP. DATE KCS23083ED QTY 12 MRP 110.00 RATE 38.75 AMOUNT 465.00\", \"product_name\": \"MAHANAC S TAB\", \"quantity\": 12.0, \"free_quantity\": 0.0, \"unit\": \"75GM\", \"batch\": \"KCS23083ED\", \"expiry\": \"KCS23083ED\", \"mrp\": 110.0, \"rate\": 38.75, \"discount_percent\": 0.0, \"gst_percent\": 18.0, \"line_amount\": 465.0, \"ocr_confidence\": 0.999999761581526, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}, {\"raw_text\": \"10T BATCH NO. SCZAK23086 EXP. DATE SCZAK23086 QTY 60 MRP 147.90 RATE 15.90 AMOUNT 954.00\", \"product_name\": \"\", \"quantity\": 60.0, \"free_quantity\": 0.0, \"unit\": \"10T\", \"batch\": \"SCZAK23086\", \"expiry\": \"SCZAK23086\", \"mrp\": 147.9, \"rate\": 15.9, \"discount_percent\": 0.0, \"gst_percent\": 12.0, \"line_amount\": 954.0, \"ocr_confidence\": 0.9991899762383004, \"resolved_sku\": null, \"resolution_decision\": \"NO_MATCH\"}], \"arithmetic_validation\": {\"status\": \"PASS\", \"checks\": [{\"rule\": \"Line 0 Amount\", \"status\": \"PASS\", \"expected\": 6216.0, \"actual\": 6216.0}, {\"rule\": \"Line 1 Amount\", \"status\": \"PASS\", \"expected\": 396.0, \"actual\": 396.0}, {\"rule\": \"Line 2 Amount\", \"status\": \"PASS\", \"expected\": 1440.0, \"actual\": 1440.0}, {\"rule\": \"Line 3 Amount\", \"status\": \"PASS\", \"expected\": 900.0, \"actual\": 900.0}, {\"rule\": \"Line 4 Amount\", \"status\": \"PASS\", \"expected\": 425.0, \"actual\": 425.0}, {\"rule\": \"Line 5 Amount\", \"status\": \"PASS\", \"expected\": 936.0, \"actual\": 936.0}, {\"rule\": \"Line 6 Amount\", \"status\": \"PASS\", \"expected\": 1656.24, \"actual\": 1656.24}, {\"rule\": \"Line 7 Amount\", \"status\": \"PASS\", \"expected\": 712.5, \"actual\": 712.5}, {\"rule\": \"Line 8 Amount\", \"status\": \"PASS\", \"expected\": 465.0, \"actual\": 465.0}, {\"rule\": \"Line 9 Amount\", \"status\": \"PASS\", \"expected\": 954.0, \"actual\": 954.0}, {\"rule\": \"Subtotal Match\", \"status\": \"PASS\", \"expected\": 14100.74, \"actual\": 14100.74}, {\"rule\": \"Grand Total Match\", \"status\": \"PASS\", \"expected\": 15684.6, \"actual\": 15685.0}]}}",
+    "reconciliation_json": "{\"clean_match\": false, \"rows\": [{\"sku\": \"SKU0044\", \"product_name\": \"Omnacortil 10\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0020\", \"product_name\": \"Electral Ready To Drink\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0071\", \"product_name\": \"Volini Gel\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0027\", \"product_name\": \"Calciquick Gold\", \"ordered_qty\": 155.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0070\", \"product_name\": \"Gelusil\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0083\", \"product_name\": \"Colgate Sensitive\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0021\", \"product_name\": \"ORS\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0028\", \"product_name\": \"Corcal\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0082\", \"product_name\": \"Sensodyne\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0042\", \"product_name\": \"Levocet 5\", \"ordered_qty\": 22.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0034\", \"product_name\": \"Montair LC\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0075\", \"product_name\": \"Candid Cream\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0030\", \"product_name\": \"Corcal D3\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0022\", \"product_name\": \"U-Wash Small\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0068\", \"product_name\": \"Ambrodil LS\", \"ordered_qty\": 62.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0066\", \"product_name\": \"Benadryl Syrup\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0018\", \"product_name\": \"Becosules\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0064\", \"product_name\": \"Neurobion Forte\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0023\", \"product_name\": \"U-Wash Large\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0081\", \"product_name\": \"Parodontax\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0003\", \"product_name\": \"Dolokind Plus\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}, {\"sku\": \"SKU0032\", \"product_name\": \"Statfree 135\", \"ordered_qty\": 0.0, \"invoiced_qty\": 0, \"free_qty\": 0, \"quantity_status\": \"MISSING_FROM_INVOICE\", \"expected_price\": null, \"invoice_rate\": null, \"price_status\": \"NOT_CHECKED\", \"batch\": [], \"expiry\": []}], \"unresolved_invoice_lines\": [{\"raw_text\": \"OMEE D CAP 20CAP BATCH NO. 24230299 EXP. DATE 24230299 QTY 240 MRP 230.00 RATE 25.90 AMOUNT 6216.00\", \"product_name\": \"OMEE D CAP\", \"quantity\": 240.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 100MG 2ML BATCH NO. L463011A EXP. DATE L463011A QTY 40 MRP 30.00 RATE 9.90 AMOUNT 396.00\", \"product_name\": \"MIKATAX 100MG\", \"quantity\": 40.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 250MG INJ 2ML BATCH NO. L474007 EXP. DATE L474007 QTY 80 MRP 50.50 RATE 18.00 AMOUNT 1440.00\", \"product_name\": \"MIKATAX 250MG INJ\", \"quantity\": 80.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"MIKATAX 500 MG 2ML BATCH NO. L484020 EXP. DATE L484020 QTY 40 MRP 113.76 RATE 22.50 AMOUNT 900.00\", \"product_name\": \"MIKATAX 500 MG\", \"quantity\": 40.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"SOFRAKEM 15GM 15GM BATCH NO. S24004CB EXP. DATE S24004CB QTY 50 MRP 60.00 RATE 8.50 AMOUNT 425.00\", \"product_name\": \"SOFRAKEM 15GM\", \"quantity\": 50.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"KETOKEM SHAMPOO 100ML 75GM BATCH NO. KKS24456ED EXP. DATE KKS24456ED QTY 24 MRP 130.00 RATE 39.00 AMOUNT 936.00\", \"product_name\": \"KETOKEM SHAMPOO 100ML\", \"quantity\": 24.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"OFLOKEM OZ+ SYP 30ML 110ML BATCH NO. N24205 EXP. DATE N24205 QTY 24 MRP 235.00 RATE 69.01 AMOUNT 1656.24\", \"product_name\": \"OFLOKEM OZ+ SYP 30ML\", \"quantity\": 24.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"KETOKEM CT SOAP 75GM 30ML BATCH NO. OFL24019RH EXP. DATE OFL24019RH QTY 50 MRP 65.00 RATE 14.25 AMOUNT 712.50\", \"product_name\": \"KETOKEM CT SOAP 75GM\", \"quantity\": 50.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"MAHANAC S TAB 75GM BATCH NO. KCS23083ED EXP. DATE KCS23083ED QTY 12 MRP 110.00 RATE 38.75 AMOUNT 465.00\", \"product_name\": \"MAHANAC S TAB\", \"quantity\": 12.0, \"decision\": \"NO_MATCH\"}, {\"raw_text\": \"10T BATCH NO. SCZAK23086 EXP. DATE SCZAK23086 QTY 60 MRP 147.90 RATE 15.90 AMOUNT 954.00\", \"product_name\": \"\", \"quantity\": 60.0, \"decision\": \"NO_MATCH\"}], \"summary\": {\"matched\": 0, \"exceptions\": 32}}"
+  }
+}
