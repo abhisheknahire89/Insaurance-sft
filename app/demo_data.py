@@ -23,6 +23,13 @@ DEMO_SUPPLIERS = [
         "cutoff_time": "14:00",
         "lead_time_days": 0,
         "fill_rate": 1.0  # Full but maybe different ETA/price
+    },
+    {
+        "id": "SUP004",
+        "name": "HealthBridge Distributors",
+        "cutoff_time": "16:00",
+        "lead_time_days": 1,
+        "fill_rate": 0.8  # Partial
     }
 ]
 

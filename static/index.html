@@ -35,9 +35,14 @@ header { background: var(--card); border-bottom: 1px solid var(--line); padding:
 .role-btn.active { background: #FFFFFF; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
 /* Layout */
-.wrap { max-width: 1000px; margin: 32px auto; padding: 0 24px; }
+.wrap { max-width: 1000px; margin: 32px auto; padding: 0 24px; transition: max-width 0.3s ease;}
+.wrap.wide { max-width: 1400px; }
 .panel { display: none; }
 .panel.active { display: block; }
+.split-layout { display: grid; grid-template-columns: 3fr 2fr; gap: 32px; align-items: start; }
+@media (max-width: 992px) { .split-layout { grid-template-columns: 1fr; } }
+.image-panel { position: sticky; top: 80px; background: #E5E7EB; border-radius: var(--radius); overflow: hidden; display: flex; align-items: center; justify-content: center; min-height: 400px; max-height: calc(100vh - 100px); border: 1px solid var(--line); }
+.image-panel img { max-width: 100%; max-height: calc(100vh - 100px); object-fit: contain; }
 
 /* Typography */
 h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.5px; }
@@ -113,10 +118,16 @@ label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; c
 .crop-preview { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid var(--line); margin-bottom: 16px; background: #E5E7EB; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 12px;}
 
 /* Table */
-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
-th { background: #F9FAFB; color: var(--muted); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; background: white;}
+th { background: #F9FAFB; color: var(--muted); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: top;}
 tr:last-child td { border-bottom: none; }
+.main-table { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.main-table table { margin: 0; }
+.main-table tr:hover td { background: #F9FAFB; }
+.row-status-ready td { border-left: 3px solid var(--green); }
+.row-status-check td { border-left: 3px solid var(--amber); }
+.row-status-notfound td { border-left: 3px solid var(--red); }
 
 /* Tracker */
 .tracker { display: flex; justify-content: space-between; position: relative; margin: 32px 0; }
@@ -197,81 +208,77 @@ tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
-    <!-- Pharmacy Review Exceptions -->
-    <div id="pharmacy-review" class="hidden">
-      <div class="text-center mb-4">
-        <h1>Requirement Processed</h1>
-        <div id="review-summary" class="badge badge-warn" style="font-size: 14px; padding: 6px 12px; margin-bottom: 16px;"></div>
-      </div>
+    <!-- Pharmacy Review & Suppliers (Split Screen) -->
+    <div id="pharmacy-review-suppliers" class="hidden split-layout">
       
-      <div id="exception-container" class="exception-container card hidden">
-        <div class="flex-between mb-4">
-          <h3 id="exception-counter">1 of 2</h3>
-          <span class="badge badge-warn">Needs your check</span>
-        </div>
+      <div class="left-panel">
         
-        <div class="crop-preview">
-          (Original image crop will appear here)
-        </div>
-        
-        <p class="tiny" id="exception-reason">The handwriting could match two different medicines.</p>
-        <h2 id="exception-raw" style="margin-bottom: 24px;">Raw text</h2>
-        
-        <div id="exception-candidates"></div>
-        
-        <div class="mt-4">
-          <label>Quantity</label>
-          <div class="qty-editor" style="width: 120px;">
-            <button class="qty-btn" onclick="adjQty('ex-qty', -1)">-</button>
-            <input type="number" id="ex-qty" class="qty-input" value="1" min="1">
-            <button class="qty-btn" onclick="adjQty('ex-qty', 1)">+</button>
+        <!-- Review Section -->
+        <div id="pharmacy-review">
+          <div class="flex-between mb-4">
+            <h1 style="margin:0;">Requirement Processed</h1>
+            <div id="review-summary" class="badge badge-warn" style="font-size: 14px; padding: 6px 12px;"></div>
+          </div>
+          
+          <div id="requirement-actions" class="flex-gap mb-4"></div>
+          
+          <div id="main-table-container" class="main-table">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 30px;">#</th>
+                  <th>Medicine read</th>
+                  <th>Matched product</th>
+                  <th>Form</th>
+                  <th>Quantity</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="requirement-tbody"></tbody>
+            </table>
+          </div>
+          
+          <div id="batch-review-workspace" class="hidden">
+            <div class="flex-between mb-4 mt-8" style="border-top: 2px solid var(--line); padding-top: 32px;">
+              <h2 style="margin:0;">NEEDS YOUR CHECK — <span id="batch-count">0</span> ITEMS</h2>
+              <div id="bulk-accept-container"></div>
+            </div>
+            <div id="exception-list"></div>
+            <div class="mt-4 text-right">
+              <button class="btn-outline" onclick="toggleBatchWorkspace(false)">← Back to list</button>
+            </div>
           </div>
         </div>
-        
-        <div class="flex-between mt-8">
-          <button class="btn-outline" onclick="markNotFound()">Not found</button>
-          <button class="btn-primary" onclick="confirmException()">Confirm & Next</button>
-        </div>
-      </div>
-      
-      <!-- List view of ready items -->
-      <div id="ready-items-container" class="mt-8">
-        <h3>Ready Medicines</h3>
-        <div id="ready-items-list"></div>
-        <div class="text-right mt-4 hidden" id="find-suppliers-wrap">
-          <button class="btn-primary btn-large" style="width: auto; display: inline-block;" onclick="showSuppliers()">Find Suppliers →</button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Pharmacy Supplier Discovery -->
-    <div id="pharmacy-suppliers" class="hidden">
-      <h1>Find Suppliers</h1>
-      <p>Select who should fulfill this requirement.</p>
-      
-      <div class="card">
-        <span class="badge badge-ok mb-2">Recommended</span>
-        <h2 id="rec-supp-name">Supplier Name</h2>
-        <p class="tiny" id="rec-supp-reason">Why recommended? Complete order · earliest delivery</p>
-        
-        <div class="grid-2 mb-4">
-          <div>
-            <div class="tiny">Availability</div>
-            <strong id="rec-supp-avail">18 / 18 medicines</strong>
+        <!-- Find Suppliers Section -->
+        <div id="pharmacy-suppliers" class="hidden">
+          <div class="flex-between mb-4">
+            <h1 style="margin:0;">Supplier Options</h1>
+            <button class="btn-outline" onclick="toggleSuppliersView(false)">← Back to requirement</button>
           </div>
-          <div>
-            <div class="tiny">Expected delivery</div>
-            <strong id="rec-supp-eta">Tomorrow</strong>
+          <p class="mb-4">Select the best supplier to fulfill this requirement.</p>
+          
+          <div id="supplier-cards-container"></div>
+          
+          <div class="mt-8">
+            <button class="btn-outline" onclick="toggleCoverageMatrix(true)">Compare suppliers</button>
+          </div>
+          
+          <div id="coverage-matrix-container" class="hidden mt-4 main-table">
+            <table>
+              <thead id="coverage-matrix-head"></thead>
+              <tbody id="coverage-matrix-body"></tbody>
+            </table>
           </div>
         </div>
         
-        <button class="btn-primary" id="btn-select-rec" onclick="placeOrder(null)">Select and Place Order</button>
       </div>
       
-      <h3>Compare other suppliers</h3>
-      <div id="other-suppliers-list" class="mt-4"></div>
+      <div class="right-panel image-panel" id="source-image-panel">
+        <div style="text-align: center; color: var(--muted);" id="no-image-text">No image available</div>
+        <img id="source-image-preview" src="" alt="Source Image" class="hidden">
+      </div>
       
-      <button class="btn-outline mt-4" onclick="document.getElementById('pharmacy-suppliers').classList.add('hidden'); document.getElementById('pharmacy-review').classList.remove('hidden');">← Back to requirement</button>
     </div>
 
     <!-- Pharmacy Order Confirmed -->
@@ -591,259 +598,284 @@ function processRequirementResult(data) {
   currentItems = data.items || [];
   currentSummary = data.summary || {};
   
+  if (currentImageSrc) {
+    $('#source-image-preview').src = currentImageSrc;
+    $('#source-image-preview').classList.remove('hidden');
+    $('#no-image-text').classList.add('hidden');
+  } else {
+    $('#source-image-preview').classList.add('hidden');
+    $('#no-image-text').classList.remove('hidden');
+  }
+
   exceptionList = [];
+  let safeSuggestionsCount = 0;
+  
   currentItems.forEach((item, idx) => {
     let dec = item.resolution.decision;
     let qty = parseInt(item.input.quantity);
     let missingQty = isNaN(qty) || qty < 1;
     
-    if (dec !== 'AUTO_ACCEPT') {
+    if (dec !== 'AUTO_ACCEPT' && dec !== 'USER_CONFIRMED' && dec !== 'EXCLUDED') {
       item.review_reason = 'MEDICINE_REVIEW';
       exceptionList.push(idx);
-    } else if (missingQty) {
+      
+      let cands = item.resolution.candidates || [];
+      if (cands.length === 1 && !missingQty && dec !== 'NO_MATCH') {
+        item.is_safe_suggestion = true;
+        safeSuggestionsCount++;
+      } else {
+        item.is_safe_suggestion = false;
+      }
+    } else if (dec === 'AUTO_ACCEPT' && missingQty) {
       item.resolution.reason = "Quantity wasn't clear.";
       item.input.quantity = ''; 
       item.review_reason = 'QUANTITY_REVIEW';
+      item.is_safe_suggestion = false;
       exceptionList.push(idx);
+    } else {
+      item.is_safe_suggestion = false;
     }
   });
   
   toggle('#pharmacy-home', false);
+  toggle('#pharmacy-review-suppliers', true);
   toggle('#pharmacy-review', true);
+  toggle('#pharmacy-suppliers', false);
+  toggleBatchWorkspace(false);
   
-  let readyCount = currentItems.length - exceptionList.length;
-  if(exceptionList.length > 0) {
-    $('#review-summary').textContent = `${readyCount} ready · ${exceptionList.length} need your check`;
-    $('#review-summary').className = 'badge badge-warn';
-    startExceptions();
-  } else {
-    $('#review-summary').textContent = `All ${readyCount} medicines ready`;
-    $('#review-summary').className = 'badge badge-ok';
-    toggle('#exception-container', false);
-    renderReadyItems();
-  }
+  renderRequirementTable();
 }
 
-function startExceptions() {
-  currentExceptionIndex = 0;
-  toggle('#exception-container', true);
-  toggle('#find-suppliers-wrap', false);
-  renderReadyItems();
-  renderCurrentException();
-}
-
-function isReady(item) {
-  return (item.resolution.decision === 'AUTO_ACCEPT' || item.resolution.decision === 'USER_CONFIRMED') && item.resolution.master_product_id && parseInt(item.input.quantity) > 0;
-}
-
-function renderCurrentException() {
-  if (currentExceptionIndex >= exceptionList.length) {
-    toggle('#exception-container', false);
-    let ready = currentItems.filter(i => isReady(i));
-    let excludedCount = currentItems.filter(i=>i.resolution.decision==='NO_MATCH' || i.resolution.decision==='EXCLUDED').length;
+function renderRequirementTable() {
+  let readyCount = 0;
+  let notFoundCount = 0;
+  
+  let html = currentItems.map((item, idx) => {
+    let dec = item.resolution.decision;
+    let statusHtml = '';
+    let rowClass = '';
     
-    if (excludedCount > 0) {
-      $('#review-summary').textContent = `${ready.length} medicines ready · ${excludedCount} items excluded`;
-      $('#review-summary').className = 'badge badge-warn';
+    if (isReady(item)) {
+      statusHtml = '<span class="badge badge-ok">✓ Ready</span>';
+      rowClass = 'row-status-ready';
+      readyCount++;
+    } else if (dec === 'EXCLUDED' || dec === 'NO_MATCH') {
+      statusHtml = '<span class="badge badge-err">Not found</span>';
+      rowClass = 'row-status-notfound';
+      notFoundCount++;
     } else {
-      $('#review-summary').textContent = `All ${ready.length} medicines ready`;
-      $('#review-summary').className = 'badge badge-ok';
+      statusHtml = '<span class="badge badge-warn">Needs check</span>';
+      rowClass = 'row-status-check';
     }
-    renderReadyItems();
-    return;
-  }
+    
+    return `
+      <tr class="${rowClass}">
+        <td>${idx + 1}</td>
+        <td><b>${esc(item.input.raw_text)}</b></td>
+        <td>${item.resolution.product_name ? esc(item.resolution.product_name) : '<span class="tiny">—</span>'}</td>
+        <td>${item.resolution.dosage_form ? esc(item.resolution.dosage_form) : '<span class="tiny">—</span>'}</td>
+        <td>${item.input.quantity ? item.input.quantity : '<span class="tiny">—</span>'}</td>
+        <td>${statusHtml}</td>
+      </tr>
+    `;
+  }).join('');
   
-  let itemIdx = exceptionList[currentExceptionIndex];
-  let item = currentItems[itemIdx];
+  $('#requirement-tbody').innerHTML = html;
   
-  $('#exception-counter').textContent = `${currentExceptionIndex + 1} of ${exceptionList.length}`;
-  $('#exception-reason').textContent = item.resolution.reason || 'Please confirm this medicine';
-  $('#exception-raw').textContent = item.input.raw_text || item.input.medicine_name;
-  $('#ex-qty').value = item.input.quantity || '';
+  let reviewCount = currentItems.length - readyCount - notFoundCount;
   
-  let html = '';
-  let actionsHtml = '';
-  
-  if (item.review_reason === 'QUANTITY_REVIEW' && item.resolution.master_product_id) {
-    html = `<p class="tiny" style="color:var(--green);">✓ Medicine identified: <b>${esc(item.resolution.product_name)}</b></p>`;
-    actionsHtml = `
-      <div class="flex-between mt-4">
-        <button class="btn-outline" onclick="markNotFound()">Not found / Exclude</button>
-        <button class="btn-primary" onclick="confirmQuantityOnly()">Confirm Quantity</button>
-      </div>
+  if (reviewCount > 0) {
+    $('#review-summary').textContent = `${currentItems.length} items found · ${readyCount} Ready · ${reviewCount} Need check`;
+    $('#review-summary').className = 'badge badge-warn';
+    $('#requirement-actions').innerHTML = `
+      <button class="btn-primary" onclick="toggleBatchWorkspace(true)">Review ${reviewCount} issues</button>
+      <button class="btn-outline" onclick="toggleBatchWorkspace(false)">View all ${currentItems.length}</button>
     `;
   } else {
-    let cands = item.resolution.candidates || [];
-    if (cands.length > 0) {
-      html = cands.slice(0,3).map(c => `
-        <div class="candidate-box" onclick="selectCandidate(this, '${esc(c.master_product_id)}', '${esc(c.product_name)}')">
-          <div style="font-weight:600">${esc(c.product_name)}</div>
-          <div class="tiny">${esc(c.manufacturer)} · ${Math.round(c.score*100)}% match</div>
-        </div>
-      `).join('');
-      
-      actionsHtml = `
+    $('#review-summary').textContent = `REQUIREMENT READY · ${readyCount} items included`;
+    $('#review-summary').className = 'badge badge-ok';
+    $('#requirement-actions').innerHTML = `
+      <button class="btn-primary btn-large" style="width: auto;" onclick="showSuppliers()">Find Suppliers →</button>
+      <button class="btn-outline" style="margin-left: 16px;" onclick="toggleBatchWorkspace(false)">View all ${currentItems.length}</button>
+    `;
+  }
+}
+
+function toggleBatchWorkspace(show) {
+  toggle('#main-table-container', !show);
+  toggle('#batch-review-workspace', show);
+  if (show) renderBatchReview();
+}
+
+function renderBatchReview() {
+  let pendingExceptions = exceptionList.filter(idx => !isReady(currentItems[idx]) && currentItems[idx].resolution.decision !== 'EXCLUDED');
+  $('#batch-count').textContent = pendingExceptions.length;
+  
+  if (pendingExceptions.length === 0) {
+    toggleBatchWorkspace(false);
+    renderRequirementTable();
+    return;
+  }
+  
+  let safeCount = pendingExceptions.filter(idx => currentItems[idx].is_safe_suggestion).length;
+  if (safeCount > 0) {
+    $('#bulk-accept-container').innerHTML = `<button class="btn-primary" onclick="bulkAcceptSafeSuggestions()">Accept all ${safeCount} safe suggestions</button>`;
+  } else {
+    $('#bulk-accept-container').innerHTML = '';
+  }
+  
+  let html = pendingExceptions.map(idx => {
+    let item = currentItems[idx];
+    let qtyVal = item.input.quantity || '';
+    
+    let content = '';
+    
+    if (item.review_reason === 'QUANTITY_REVIEW') {
+      content = `
+        <div class="mb-2"><span class="tiny" style="color:var(--green);">✓ Medicine identified: <b>${esc(item.resolution.product_name)}</b></span></div>
+        <div class="tiny" style="color:var(--amber);">Quantity wasn't clear</div>
         <div class="flex-between mt-4">
-          <button class="btn-outline" onclick="markNotFound()">Not found / Exclude</button>
-          <button class="btn-primary" onclick="confirmException()">Confirm Match</button>
+          <div class="qty-editor">
+            <input type="number" id="qty-${idx}" class="qty-input" value="${qtyVal}" min="1" placeholder="Qty">
+          </div>
+          <div>
+            <button class="btn-outline" onclick="resolveItemNotFound(${idx})">Exclude</button>
+            <button class="btn-primary" onclick="resolveItemQuantity(${idx})">Confirm Quantity</button>
+          </div>
         </div>
       `;
     } else {
-      html = '<p class="tiny" style="color:var(--red);">We couldn\'t confidently match this medicine.</p>';
-      actionsHtml = `
-        <div class="flex-between mt-4">
-          <button class="btn-primary" onclick="markNotFound()">Not found / Exclude from this order</button>
-        </div>
-      `;
+      let cands = item.resolution.candidates || [];
+      if (cands.length > 0) {
+        let candHtml = cands.slice(0,3).map((c, cIdx) => `
+          <label style="display:block; padding: 8px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; cursor: pointer; font-weight: normal;">
+            <input type="radio" name="cand-${idx}" value="${cIdx}" ${cIdx === 0 ? 'checked' : ''}>
+            <b>${esc(c.product_name)}</b> <span class="tiny" style="margin-left: 8px;">${esc(c.manufacturer)} · ${Math.round(c.score*100)}% match</span>
+          </label>
+        `).join('');
+        
+        content = `
+          <div class="tiny" style="color:var(--amber); margin-bottom: 8px;">${item.resolution.reason || 'Please select the correct match'}</div>
+          ${candHtml}
+          <div class="flex-between mt-4">
+            <div class="qty-editor">
+              <input type="number" id="qty-${idx}" class="qty-input" value="${qtyVal}" min="1" placeholder="Qty">
+            </div>
+            <div>
+              <button class="btn-outline" onclick="resolveItemNotFound(${idx})">Exclude</button>
+              <button class="btn-primary" onclick="resolveItemMatch(${idx})">Accept</button>
+            </div>
+          </div>
+        `;
+      } else {
+        content = `
+          <div class="tiny" style="color:var(--red); margin-bottom: 8px;">No safe catalogue match found</div>
+          <div class="text-right mt-4">
+            <button class="btn-outline" onclick="resolveItemNotFound(${idx})">Exclude from this order</button>
+          </div>
+        `;
+      }
+    }
+    
+    return `
+      <div class="card" style="margin-bottom: 16px;" id="exc-card-${idx}">
+        <h3 style="margin-bottom: 16px;">${esc(item.input.raw_text)}</h3>
+        ${content}
+      </div>
+    `;
+  }).join('');
+  
+  $('#exception-list').innerHTML = html;
+}
+
+async function fetchSuppliersForItem(item) {
+  if (item.resolution.master_product_id && parseInt(item.input.quantity) > 0) {
+    try {
+      let r = await fetch(`/api/suppliers?master_product_id=${encodeURIComponent(item.resolution.master_product_id)}&quantity=${item.input.quantity}`);
+      let j = await r.json();
+      item.suppliers = j.options || [];
+      item.best_supplier = item.suppliers.find(s => s.can_fulfil) || item.suppliers[0];
+    } catch(e) {}
+  }
+}
+
+async function bulkAcceptSafeSuggestions() {
+  let pendingExceptions = exceptionList.filter(idx => !isReady(currentItems[idx]) && currentItems[idx].resolution.decision !== 'EXCLUDED');
+  for (let idx of pendingExceptions) {
+    let item = currentItems[idx];
+    if (item.is_safe_suggestion) {
+      let cands = item.resolution.candidates;
+      item.resolution.decision = 'USER_CONFIRMED';
+      item.resolution.master_product_id = cands[0].master_product_id;
+      item.resolution.product_name = cands[0].product_name;
+      item.resolution.dosage_form = cands[0].dosage_form;
+      await fetchSuppliersForItem(item);
     }
   }
-  
-  $('#exception-candidates').innerHTML = html;
-  $('#exception-candidates').dataset.selectedId = '';
-  $('#exception-candidates').dataset.selectedName = '';
-  
-  let actionsContainer = document.getElementById('ex-actions');
-  if(!actionsContainer) {
-    actionsContainer = document.createElement('div');
-    actionsContainer.id = 'ex-actions';
-    $('#exception-candidates').parentElement.appendChild(actionsContainer);
-  }
-  actionsContainer.innerHTML = actionsHtml;
-  
-  let oldBtn = document.querySelector('#exception-container > .flex-between.mt-4');
-  if(oldBtn && oldBtn.id !== 'ex-actions') oldBtn.style.display = 'none';
+  renderBatchReview();
 }
 
-function selectCandidate(el, id, name) {
-  document.querySelectorAll('.candidate-box').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  $('#exception-candidates').dataset.selectedId = id;
-  $('#exception-candidates').dataset.selectedName = name;
-}
-
-function markNotFound() {
-  if(!confirm("We couldn't match this item. Exclude it from this order?")) return;
-  
-  let itemIdx = exceptionList[currentExceptionIndex];
-  let item = currentItems[itemIdx];
+function resolveItemNotFound(idx) {
+  let item = currentItems[idx];
   item.resolution.decision = 'EXCLUDED';
   item.resolution.reason = 'Manually excluded';
-  
-  currentExceptionIndex++;
-  renderCurrentException();
+  renderBatchReview();
 }
 
-async function confirmQuantityOnly() {
-  let itemIdx = exceptionList[currentExceptionIndex];
-  let item = currentItems[itemIdx];
-  
-  let qtyVal = $('#ex-qty').value.trim();
+async function resolveItemQuantity(idx) {
+  let item = currentItems[idx];
+  let qtyVal = $(`#qty-${idx}`).value;
   let qty = parseInt(qtyVal, 10);
-  if(!qtyVal || isNaN(qty) || qty < 1) {
+  if (!qtyVal || isNaN(qty) || qty < 1) {
     alert("Please enter a valid positive quantity.");
     return;
   }
-  
   item.input.quantity = qty;
-  
-  if(item.resolution.master_product_id) {
-    try {
-      let r = await fetch(`/api/suppliers?master_product_id=${encodeURIComponent(item.resolution.master_product_id)}&quantity=${qty}`);
-      let j = await r.json();
-      item.suppliers = j.options || [];
-      item.best_supplier = item.suppliers.find(s => s.can_fulfil) || item.suppliers[0];
-    } catch(e) {}
-  }
-  
-  currentExceptionIndex++;
-  renderReadyItems();
-  renderCurrentException();
+  item.resolution.decision = 'USER_CONFIRMED';
+  await fetchSuppliersForItem(item);
+  renderBatchReview();
 }
 
-async function confirmException() {
-  let itemIdx = exceptionList[currentExceptionIndex];
-  let item = currentItems[itemIdx];
-  
-  let id = $('#exception-candidates').dataset.selectedId;
-  let name = $('#exception-candidates').dataset.selectedName;
-  
-  if(!id) {
-    alert("Please select a candidate or click Not Found.");
-    return;
-  }
-  
-  let qtyVal = $('#ex-qty').value.trim();
+async function resolveItemMatch(idx) {
+  let item = currentItems[idx];
+  let qtyVal = $(`#qty-${idx}`).value;
   let qty = parseInt(qtyVal, 10);
-  if(!qtyVal || isNaN(qty) || qty < 1) {
+  if (!qtyVal || isNaN(qty) || qty < 1) {
     alert("Please enter a valid positive quantity.");
     return;
   }
+  
+  let selectedRadio = document.querySelector(`input[name="cand-${idx}"]:checked`);
+  if (!selectedRadio) {
+    alert("Please select a candidate.");
+    return;
+  }
+  
+  let cIdx = parseInt(selectedRadio.value);
+  let cand = item.resolution.candidates[cIdx];
   
   item.resolution.decision = 'USER_CONFIRMED';
-  item.resolution.master_product_id = id;
-  item.resolution.product_name = name;
+  item.resolution.master_product_id = cand.master_product_id;
+  item.resolution.product_name = cand.product_name;
+  item.resolution.dosage_form = cand.dosage_form;
   item.input.quantity = qty;
   
-  if(item.resolution.master_product_id) {
-    try {
-      let r = await fetch(`/api/suppliers?master_product_id=${encodeURIComponent(item.resolution.master_product_id)}&quantity=${qty}`);
-      let j = await r.json();
-      item.suppliers = j.options || [];
-      item.best_supplier = item.suppliers.find(s => s.can_fulfil) || item.suppliers[0];
-    } catch(e) {}
-  }
-  
-  currentExceptionIndex++;
-  renderReadyItems();
-  renderCurrentException();
+  await fetchSuppliersForItem(item);
+  renderBatchReview();
 }
 
-function renderReadyItems() {
-  let ready = currentItems.filter(i => isReady(i));
-  let excluded = currentItems.filter(i => i.resolution.decision === 'NO_MATCH' || i.resolution.decision === 'EXCLUDED');
-  
-  let html = '';
-  
-  if(ready.length > 0 || excluded.length > 0) {
-    html += '<h3 class="mt-4">Requirement Summary</h3>';
-    if(ready.length > 0) {
-      html += `<div class="mb-2"><span class="badge badge-ok">${ready.length} medicines ready</span></div>`;
-    }
-    if(excluded.length > 0) {
-      html += `<div class="mb-4"><span class="badge badge-warn">${excluded.length} items excluded</span> <span class="details-summary" onclick="toggleDetails(this)">View excluded items</span><div class="details-content"><ul>`;
-      html += excluded.map(e => `<li>${esc(e.input.raw_text)} (${esc(e.resolution.reason)})</li>`).join('');
-      html += `</ul></div></div>`;
-    }
-  }
-  
-  html += ready.map(item => `
-    <div class="med-card">
-      <div class="med-info">
-        <div class="med-title">${esc(item.resolution.product_name)}</div>
-        <div class="med-meta">Quantity: <b>${item.input.quantity}</b> ${esc(item.input.unit||'')}</div>
-        <div class="details-summary" onclick="toggleDetails(this)">View details</div>
-        <div class="details-content">Raw: ${esc(item.input.raw_text)}
-ID: ${esc(item.resolution.master_product_id)}
-Score: ${Math.round((item.resolution.confidence||1)*100)}%</div>
-      </div>
-      <div class="med-actions">
-        <span class="badge badge-ok">✓ Ready</span>
-      </div>
-    </div>
-  `).join('');
-  
-  $('#ready-items-list').innerHTML = html || '<div class="tiny">No items ready yet.</div>';
-  
-  if (currentExceptionIndex >= exceptionList.length && ready.length > 0) {
-    toggle('#find-suppliers-wrap', true);
-  } else {
-    toggle('#find-suppliers-wrap', false);
-  }
+function toggleSuppliersView(show) {
+  toggle('#pharmacy-review', !show);
+  toggle('#pharmacy-suppliers', show);
+}
+
+function toggleCoverageMatrix(show) {
+  toggle('#coverage-matrix-container', show);
 }
 
 function showSuppliers() {
-  toggle('#pharmacy-review', false);
-  toggle('#pharmacy-suppliers', true);
+  toggleSuppliersView(true);
+  toggleCoverageMatrix(false);
   
   let ready = currentItems.filter(i => isReady(i));
   
@@ -914,35 +946,57 @@ function showSuppliers() {
   
   currentRankedSuppliers = list;
   
-  if(list.length === 0 || list[0].coverage_status === 'UNAVAILABLE') {
-    $('#rec-supp-name').textContent = "No suppliers available";
-    $('#rec-supp-avail').textContent = "0";
-    $('#btn-select-rec').disabled = true;
-    return;
-  }
-  
-  let rec = list[0];
-  $('#rec-supp-name').textContent = rec.supplier_name;
-  $('#rec-supp-avail').textContent = `${rec.coverage_status} — ${rec.full_line_count} / ${ready.length} medicines`;
-  $('#rec-supp-eta').textContent = `ETA: ${rec.eta_label}`;
-  
-  if(rec.coverage_status === 'FULL') {
-    $('#rec-supp-reason').textContent = "Why recommended? Complete fulfillment · earliest complete delivery";
-  } else {
-    $('#rec-supp-reason').textContent = "Why recommended? Highest availability";
-  }
-  
-  let alts = list.slice(1).map(s => `
-    <div class="med-card flex-between">
-      <div>
-        <div style="font-weight:600">${esc(s.supplier_name)}</div>
-        <div class="tiny">${s.coverage_status} — ${s.full_line_count}/${ready.length} fully available</div>
-        <div class="tiny">ETA: ${s.eta_label} · ₹${Math.round(s.estimated_total)}</div>
+  // Render cards
+  let cardsHtml = list.map((s, idx) => {
+    let isRec = idx === 0 && s.coverage_status !== 'UNAVAILABLE';
+    let badgeHtml = isRec ? '<span class="badge badge-ok mb-2">Recommended</span>' : '';
+    let reasonHtml = isRec ? (s.coverage_status === 'FULL' ? '<p class="tiny" style="color:var(--green)">Complete fulfillment · earliest delivery</p>' : '<p class="tiny">Highest availability</p>') : '';
+    
+    return `
+      <div class="card ${isRec ? '' : 'mt-4'}" style="${isRec ? 'border: 2px solid var(--primary);' : ''}">
+        ${badgeHtml}
+        <h2>${esc(s.supplier_name)}</h2>
+        ${reasonHtml}
+        
+        <div class="grid-2 mb-4 mt-2">
+          <div>
+            <div class="tiny">Availability</div>
+            <strong>${s.full_line_count} / ${ready.length} medicines</strong>
+          </div>
+          <div>
+            <div class="tiny">Expected delivery</div>
+            <strong>${s.eta_label || 'Unknown'}</strong>
+          </div>
+          <div style="grid-column: span 2;">
+            <div class="tiny">Estimated Total</div>
+            <strong>₹${Math.round(s.estimated_total)}</strong>
+          </div>
+        </div>
+        
+        <button class="${isRec ? 'btn-primary' : 'btn-outline'}" onclick="placeOrder('${esc(s.supplier_id)}')">Place Order</button>
       </div>
-      <button class="btn-outline" onclick="placeOrder('${esc(s.supplier_id)}')">Select</button>
-    </div>
-  `).join('');
-  $('#other-suppliers-list').innerHTML = alts || '<div class="tiny">No other suppliers available.</div>';
+    `;
+  }).join('');
+  
+  $('#supplier-cards-container').innerHTML = cardsHtml || '<div class="tiny">No suppliers available.</div>';
+  
+  // Build Matrix
+  let thHtml = `<tr><th>Medicine</th>` + list.map(s => `<th>${esc(s.supplier_name)}</th>`).join('') + `</tr>`;
+  $('#coverage-matrix-head').innerHTML = thHtml;
+  
+  let tbHtml = ready.map(item => {
+    let tdHtml = `<td><b>${esc(item.resolution.product_name)}</b><br><span class="tiny">Needed: ${item.input.quantity}</span></td>`;
+    
+    tdHtml += list.map(s => {
+      let opt = (item.suppliers || []).find(o => (o.supplier_id || o.supplier_name) === s.supplier_id);
+      if (!opt || opt.available_qty === 0) return `<td style="color:var(--red);">0 available</td>`;
+      if (opt.available_qty < opt.requested_qty) return `<td style="color:var(--amber);">${opt.available_qty} available<br><span class="tiny">₹${opt.unit_price}/u</span></td>`;
+      return `<td style="color:var(--green);">✓ Full qty<br><span class="tiny">₹${opt.unit_price}/u</span></td>`;
+    }).join('');
+    
+    return `<tr>${tdHtml}</tr>`;
+  }).join('');
+  $('#coverage-matrix-body').innerHTML = tbHtml;
 }
 
 async function placeOrder(supplierId) {
@@ -1065,31 +1119,35 @@ async function viewReconciliation(orderId) {
   
   $('#rec-order-id-label').textContent = `Order ${orderId}`;
   
-  if(rec.clean_match) {
+  let rows = rec.rows || [];
+  let discrepancies = rows.filter(r => {
+    let qs = r.quantity_status;
+    let ps = r.price_status;
+    return !(qs === 'MATCH' && (ps === 'MATCH' || ps === 'NOT_CHECKED'));
+  });
+  
+  if(rec.clean_match || discrepancies.length === 0) {
     $('#rec-summary-badge').className = 'badge badge-ok';
     $('#rec-summary-badge').textContent = 'All items matched perfectly';
+    $('#rec-lines-table').innerHTML = `<tr><td colspan="4" class="text-center" style="padding: 32px;"><span style="font-size: 24px;">✅</span><br><br>No discrepancies found. Invoice matches order.</td></tr>`;
+    return;
   } else {
-    let exCount = rec.summary.exceptions;
     $('#rec-summary-badge').className = 'badge badge-warn';
-    $('#rec-summary-badge').textContent = `${exCount} item(s) need attention`;
+    $('#rec-summary-badge').textContent = `${discrepancies.length} discrepancy(s) found`;
   }
   
-  $('#rec-lines-table').innerHTML = (rec.rows||[]).map(r => {
+  $('#rec-lines-table').innerHTML = discrepancies.map(r => {
     let qs = r.quantity_status;
     let ps = r.price_status;
     
     let statHtml = '';
-    if(qs === 'MATCH' && (ps === 'MATCH' || ps === 'NOT_CHECKED')) {
-      statHtml = '<span class="badge badge-ok">✓ Matched</span>';
-    } else {
-      let errs = [];
-      if(qs === 'SHORT_SUPPLY') errs.push(`Short by ${r.ordered_qty - (r.invoiced_qty||0)}`);
-      else if(qs === 'EXCESS_SUPPLY') errs.push(`${(r.invoiced_qty||0) - r.ordered_qty} extra`);
-      else if(qs === 'MISSING_ITEM') errs.push('Missing from invoice');
-      else if(qs === 'UNEXPECTED_ITEM') errs.push('Not ordered');
-      
-      statHtml = errs.map(e => `<span class="badge badge-err mb-2" style="display:block;width:max-content;">${e}</span>`).join('');
-    }
+    let errs = [];
+    if(qs === 'SHORT_SUPPLY') errs.push(`Short by ${r.ordered_qty - (r.invoiced_qty||0)}`);
+    else if(qs === 'EXCESS_SUPPLY') errs.push(`${(r.invoiced_qty||0) - r.ordered_qty} extra`);
+    else if(qs === 'MISSING_ITEM') errs.push('Missing from invoice');
+    else if(qs === 'UNEXPECTED_ITEM') errs.push('Not ordered');
+    
+    statHtml = errs.map(e => `<span class="badge badge-err mb-2" style="display:block;width:max-content;">${e}</span>`).join('');
     
     return `
       <tr>
@@ -1191,7 +1249,12 @@ function openSupplierOrder(orderId) {
   }).join('');
   
   let actionsHtml = '';
-  if(o.status === 'PLACED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'CONFIRMED')">Confirm Order</button>`;
+  if(o.status === 'PLACED') {
+    actionsHtml = `
+      <button class="btn-outline" onclick="confirmAllAvailable('${o.id}')" style="margin-right: 8px;">Confirm All Available</button>
+      <button class="btn-primary" onclick="setOrderStatus('${o.id}', 'CONFIRMED')">Confirm Order</button>
+    `;
+  }
   else if(o.status === 'CONFIRMED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'DISPATCHED')">Mark Dispatched</button>`;
   else if(o.status === 'DISPATCHED') actionsHtml = `<button class="btn-primary" onclick="setOrderStatus('${o.id}', 'DELIVERED')">Mark Delivered</button>`;
   else if(o.status === 'DELIVERED') actionsHtml = `<button class="btn-primary" onclick="generateInvoice('${o.id}')">Generate Invoice</button>`;
@@ -1236,6 +1299,19 @@ function adjFulfillQty(orderId, itemIdx, delta) {
   let item = o.payload.items[itemIdx];
   if(item.fulfilled_quantity === undefined) item.fulfilled_quantity = item.quantity;
   item.fulfilled_quantity = Math.max(0, Math.min(item.quantity, item.fulfilled_quantity + delta));
+  
+  saveDemoState(state);
+  openSupplierOrder(orderId);
+}
+
+function confirmAllAvailable(orderId) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if(!o) return;
+  
+  o.payload.items.forEach(item => {
+    item.fulfilled_quantity = item.quantity;
+  });
   
   saveDemoState(state);
   openSupplierOrder(orderId);
