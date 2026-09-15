@@ -6,7 +6,7 @@ from fastapi import FastAPI,UploadFile,File,Form,HTTPException
 from fastapi.responses import HTMLResponse,JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .service import process_wantslip, process_text_requirement, supplier_options_demo
+from .service import process_wantslip, process_text_requirement, supplier_options_demo, compare_suppliers
 from .catalog import load_catalog
 from .normalize import norm_text
 from .demo_data import get_deterministic_inventory
@@ -117,6 +117,18 @@ async def text_requirement(text:str=Form(...)):
 def suppliers(master_product_id:str,quantity:float=1):
     opts=supplier_options_demo(master_product_id,quantity)
     return {'options':opts}
+
+@app.post('/api/suppliers/compare')
+async def suppliers_compare(payload: dict):
+    """
+    Whole-order supplier comparison.
+    Payload: { "items": [{"master_product_id": "...", "product_name": "...", "quantity": 15}] }
+    Returns all 4 suppliers ranked by coverage, ETA, then price.
+    """
+    items = payload.get('items', [])
+    if not items:
+        raise HTTPException(400, "No items provided")
+    return compare_suppliers(items)
 
 @app.post('/api/invoice/generate')
 async def generate_invoice(payload:dict):

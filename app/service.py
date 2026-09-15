@@ -11,38 +11,165 @@ from .lexicon import CatalogIndex
 from .normalize import norm_text
 from .demo_data import get_deterministic_inventory, DEMO_SUPPLIERS
 
-def supplier_options_demo(master_product_id:str, quantity:float):
+
+def _eta_date(lead_time_days: int) -> str:
+    """Return ISO date string for today + lead_time_days."""
+    return (datetime.now() + timedelta(days=lead_time_days)).strftime('%Y-%m-%d')
+
+
+def supplier_options_demo(master_product_id: str, quantity: float) -> list[dict]:
+    """
+    Return per-line supplier options for a single master_product_id.
+    Used by the OCR pipeline and GET /api/suppliers.
+    """
     opts = []
-    # Use price_base 100 as default to generate deterministic price. 
-    # In a real system, we'd lookup base price. Here, get_deterministic_inventory generates it reliably based on the ID.
+    need = float(quantity or 0)
     for supplier in DEMO_SUPPLIERS:
         inv = get_deterministic_inventory(master_product_id, supplier['id'], 150.0)
-        available_qty = inv['stock'] if inv['is_available'] else 0
-        can_fulfil = available_qty >= quantity
-        
-        eta_dt = datetime.now() + timedelta(days=supplier['lead_time_days'])
-        eta_date = eta_dt.strftime('%Y-%m-%d')
-        
-        if supplier['lead_time_days'] == 1:
-            eta_label = "Tomorrow"
-        elif supplier['lead_time_days'] == 0:
-            eta_label = "Today"
+        available_qty = float(inv['stock'])
+        fulfillable_qty = min(available_qty, need) if need > 0 else available_qty
+
+        if available_qty >= need and need > 0:
+            coverage_status = 'FULL'
+        elif available_qty > 0:
+            coverage_status = 'PARTIAL'
         else:
-            eta_label = f"In {supplier['lead_time_days']} days"
-            
+            coverage_status = 'UNAVAILABLE'
+
+        reference_price = 150.0
+        unit_price = inv['rate']
+        line_total = round(unit_price * fulfillable_qty, 2)
+
         opts.append({
             'supplier_id': supplier['id'],
             'supplier_name': supplier['name'],
+            'location': supplier['location'],
             'master_product_id': master_product_id,
-            'requested_qty': quantity,
+            'supplier_sku': inv['supplier_sku'],
+            'requested_qty': need,
             'available_qty': available_qty,
-            'unit_price': inv['rate'],
-            'line_total': round(inv['rate'] * quantity, 2),
-            'eta_date': eta_date,
-            'eta_label': eta_label,
-            'can_fulfil': can_fulfil
+            'fulfillable_qty': fulfillable_qty,
+            'coverage_status': coverage_status,
+            'reference_price': reference_price,
+            'unit_price': unit_price,
+            'line_total': line_total,
+            'lead_time_days': supplier['lead_time_days'],
+            'eta_date': _eta_date(supplier['lead_time_days']),
+            'eta_label': supplier['eta_label'],
+            'can_fulfil': coverage_status == 'FULL',
         })
     return opts
+
+
+def compare_suppliers(items: list[dict]) -> dict:
+    """
+    Whole-order supplier comparison.
+
+    items: list of {master_product_id, product_name, quantity}
+    Returns all 4 suppliers ranked by: FULL > PARTIAL, then ETA, then price.
+    """
+    today = datetime.now()
+    results: list[dict] = []
+
+    for supplier in DEMO_SUPPLIERS:
+        sid = supplier['id']
+        lines = []
+        full_count = 0
+        partial_count = 0
+        unavail_count = 0
+        req_qty_total = 0.0
+        fulfil_qty_total = 0.0
+        estimated_total = 0.0
+
+        for item in items:
+            mid = str(item.get('master_product_id', ''))
+            qty = float(item.get('quantity', 1) or 1)
+            name = item.get('product_name', '')
+
+            inv = get_deterministic_inventory(mid, sid, 150.0)
+            avail = float(inv['stock'])
+            fulfil = min(avail, qty)
+
+            if avail >= qty:
+                status = 'FULL'
+                full_count += 1
+            elif avail > 0:
+                status = 'PARTIAL'
+                partial_count += 1
+            else:
+                status = 'UNAVAILABLE'
+                unavail_count += 1
+
+            req_qty_total += qty
+            fulfil_qty_total += fulfil
+            line_total = round(inv['rate'] * fulfil, 2)
+            estimated_total += line_total
+
+            lines.append({
+                'master_product_id': mid,
+                'product_name': name,
+                'supplier_sku': inv['supplier_sku'],
+                'requested_qty': qty,
+                'available_qty': avail,
+                'fulfillable_qty': fulfil,
+                'coverage_status': status,
+                'unit_price': inv['rate'],
+                'line_total': line_total,
+            })
+
+        requested_line_count = len(items)
+        if full_count == requested_line_count:
+            cov_status = 'FULL'
+        elif full_count > 0 or partial_count > 0:
+            cov_status = 'PARTIAL'
+        else:
+            cov_status = 'UNAVAILABLE'
+
+        line_coverage_ratio = (
+            (full_count + partial_count) / requested_line_count
+            if requested_line_count > 0 else 0.0
+        )
+        qty_coverage_ratio = (
+            fulfil_qty_total / req_qty_total
+            if req_qty_total > 0 else 0.0
+        )
+
+        eta_date = _eta_date(supplier['lead_time_days'])
+
+        results.append({
+            'supplier_id': sid,
+            'supplier_name': supplier['name'],
+            'location': supplier['location'],
+            'profile_label': supplier['profile_label'],
+            'requested_line_count': requested_line_count,
+            'full_line_count': full_count,
+            'partial_line_count': partial_count,
+            'unavailable_line_count': unavail_count,
+            'coverage_status': cov_status,
+            'line_coverage_ratio': round(line_coverage_ratio, 3),
+            'quantity_coverage_ratio': round(qty_coverage_ratio, 3),
+            'estimated_total': round(estimated_total, 2),
+            'lead_time_days': supplier['lead_time_days'],
+            'eta_date': eta_date,
+            'eta_label': supplier['eta_label'],
+            'lines': lines,
+        })
+
+    # Rank: FULL > PARTIAL > UNAVAILABLE; then ETA asc; then price asc
+    def rank_key(s: dict):
+        cov_order = {'FULL': 0, 'PARTIAL': 1, 'UNAVAILABLE': 2}
+        cov_rank = cov_order.get(s['coverage_status'], 2)
+        # For PARTIAL, rank by line_coverage_ratio desc (negate)
+        return (
+            cov_rank,
+            -s['line_coverage_ratio'],
+            -s['quantity_coverage_ratio'],
+            s['eta_date'],
+            s['estimated_total'],
+        )
+
+    results.sort(key=rank_key)
+    return {'suppliers': results}
 
 from .validate import enforce_contract
 from .parser import parse_text_block

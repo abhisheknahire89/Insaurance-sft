@@ -400,43 +400,100 @@ tr:last-child td { border-bottom: none; }
           </div>
           
           </div> <!-- /card -->
+
+          <!-- ============================================================ -->
+          <!-- INLINE SUPPLIER OPTIONS SECTION (appears below medicines table) -->
+          <!-- ============================================================ -->
+          <div id="inline-supplier-section" class="hidden" style="margin-top: 32px;">
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+              <div>
+                <h2 id="supplier-section-title" style="margin:0 0 4px 0; font-size:18px;">Supplier Options</h2>
+                <div id="supplier-section-subtitle" class="tiny">Based on 0 confirmed medicines</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <button class="btn-outline" id="btn-compare-suppliers" style="display:flex; align-items:center; gap:6px; font-size:12px; padding:6px 12px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                  Compare Suppliers
+                </button>
+              </div>
+            </div>
+
+            <!-- Preliminary warning banner -->
+            <div id="supplier-preliminary-banner" class="hidden" style="background:var(--amber-bg); border:1px solid var(--amber); border-radius:8px; padding:12px 16px; margin-bottom:16px; display:flex; gap:10px; align-items:flex-start;">
+              <span style="font-size:16px;">⚠</span>
+              <div>
+                <div style="font-weight:600; font-size:13px; color:var(--amber);">Preliminary results</div>
+                <div class="tiny" id="supplier-preliminary-text">Supplier availability will update after you review open items.</div>
+              </div>
+            </div>
+
+            <!-- Supplier cards grid -->
+            <div id="inline-supplier-cards" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:16px;">
+              <div style="grid-column:1/-1; text-align:center; color:var(--muted); padding:40px;">Loading supplier options...</div>
+            </div>
+
+            <!-- Coverage matrix (hidden by default) -->
+            <div id="inline-coverage-matrix" class="hidden main-table" style="margin-top:8px;">
+              <table>
+                <thead id="inline-matrix-head"></thead>
+                <tbody id="inline-matrix-body"></tbody>
+              </table>
+            </div>
+
+            <!-- Demo label -->
+            <div class="tiny" style="text-align:center; color:var(--muted); margin-top:12px; padding:8px; border-top:1px solid var(--line);">
+              Demo supplier network — availability, pricing and ETA are simulated for this prototype.
+            </div>
+          </div>
+
+        </div> <!-- /pharmacy-review -->
+
+        <!-- OLD pharmacy-suppliers kept for compat but hidden -->
+        <div id="pharmacy-suppliers" class="hidden"></div>
+
+      </div>
+
+    </div>
+
+    <!-- Order Review Modal -->
+    <div id="order-review-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200; display:none; align-items:center; justify-content:center;">
+      <div style="background:white; border-radius:16px; padding:32px; width:460px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+          <div>
+            <h2 style="margin:0 0 4px 0;" id="modal-supplier-name">ABC Pharma Distributors</h2>
+            <div class="tiny" id="modal-supplier-loc">Mumbai, MH</div>
+          </div>
+          <button class="btn-outline" style="padding:4px 10px; font-size:12px; margin:0;" id="btn-modal-close">✕</button>
         </div>
 
-        <!-- Find Suppliers Section -->
-        <div id="pharmacy-suppliers" class="hidden">
-          <div class="flex-between mb-4">
+        <div style="background:var(--bg); border-radius:8px; padding:16px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
             <div>
-              <h2 style="margin:0; font-size:18px;">Supplier Options</h2>
-              <div class="tiny" id="so-subtitle">Based on 0 medicines (0 excluded)</div>
+              <div id="modal-coverage-count" style="font-size:16px; font-weight:700;">25 / 25 medicines</div>
+              <div id="modal-coverage-label" class="tiny">Available</div>
             </div>
-            <div class="flex-gap">
-              <button class="btn-outline" onclick="toggleCoverageMatrix(true)" style="display:flex; align-items:center; gap:8px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg> Compare Suppliers
-              </button>
-              <select style="width:auto; padding:8px 12px; margin:0; border:none; background:transparent; font-weight:500;">
-                <option>Sort by: Recommended</option>
-              </select>
-            </div>
+            <span id="modal-coverage-badge" class="badge badge-ok">FULL ORDER</span>
           </div>
-          <p class="mb-4">Select the best supplier to fulfill this requirement.</p>
-          
-          <div id="supplier-cards-container"></div>
-          
-          <div class="mt-8">
-            <button class="btn-outline" onclick="toggleCoverageMatrix(true)">Compare suppliers</button>
-          </div>
-          
-          <div id="coverage-matrix-container" class="hidden mt-4 main-table">
-            <table>
-              <thead id="coverage-matrix-head"></thead>
-              <tbody id="coverage-matrix-body"></tbody>
-            </table>
-          </div>
+          <div id="modal-partial-warning" class="hidden" style="background:var(--amber-bg); border-radius:6px; padding:8px 12px; font-size:12px; color:var(--amber); font-weight:500; margin-top:8px;"></div>
         </div>
-        
+
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+          <div class="tiny">Estimated order value</div>
+          <div id="modal-total" style="font-weight:700; font-size:16px;">₹ 0</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+          <div class="tiny">Expected delivery</div>
+          <div id="modal-eta" style="font-weight:600; font-size:13px;">Tomorrow</div>
+        </div>
+
+        <div style="display:flex; gap:12px;">
+          <button class="btn-outline" style="flex:1;" id="btn-modal-view-lines">View medicines</button>
+          <button class="btn-primary" style="flex:1;" id="btn-modal-confirm-order">Place Order</button>
+        </div>
       </div>
-      
     </div>
+
 
     <!-- Pharmacy Order Confirmed -->
     <div id="pharmacy-confirmed" class="hidden text-center">
@@ -882,6 +939,26 @@ function initializeApp() {
   
   document.getElementById('form-type-req').addEventListener('submit', handleTextRequirement);
   document.getElementById('btn-reset-demo').addEventListener('click', resetDemo);
+
+  // Modal buttons
+  document.getElementById('btn-modal-close').addEventListener('click', closeOrderReview);
+  document.getElementById('order-review-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('order-review-modal')) closeOrderReview();
+  });
+  document.getElementById('btn-modal-confirm-order').addEventListener('click', () => {
+    if (_pendingOrderSupplierId) placeOrder(_pendingOrderSupplierId);
+  });
+  document.getElementById('btn-modal-view-lines').addEventListener('click', () => {
+    closeOrderReview();
+    toggleBatchWorkspace(false);
+    setTableTab('READY');
+  });
+
+  // Compare suppliers button
+  document.getElementById('btn-compare-suppliers').addEventListener('click', () => {
+    let mc = document.getElementById('inline-coverage-matrix');
+    if (mc) mc.classList.toggle('hidden');
+  });
   
   // init view
   setRole('pharmacy');
@@ -1196,17 +1273,27 @@ function renderRequirementTable() {
       <button class="btn-primary" id="btn-find-suppliers" style="margin-bottom:0;">Find Suppliers →</button>
     `;
     document.getElementById('btn-find-suppliers').addEventListener('click', showSuppliers);
-  } else {
+  } else if (reviewCount > 0) {
     $('#requirement-actions').innerHTML = `
-      <div style="color:var(--amber); font-size:12px; font-weight:600; margin-bottom:12px;">Review ${reviewCount} issues to continue.</div>
-      <div style="display:flex; gap:12px;">
-        <button class="btn-primary" id="btn-review-issues" style="margin-bottom:0;">Review ${reviewCount} issues →</button>
-        <button class="btn-outline" id="btn-view-all" style="margin-bottom:0;">View all ${currentItems.length} items</button>
+      <div style="color:var(--amber); font-size:12px; font-weight:600; margin-bottom:8px;">${reviewCount} item${reviewCount > 1 ? 's' : ''} need${reviewCount === 1 ? 's' : ''} review</div>
+      <div style="font-size:11px; color:var(--muted); margin-bottom:8px;">Supplier options below are preliminary</div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-primary" id="btn-review-issues" style="margin-bottom:0; font-size:12px;">Review ${reviewCount} →</button>
+        <button class="btn-outline" id="btn-view-all" style="margin-bottom:0; font-size:12px;">View all</button>
       </div>
     `;
     document.getElementById('btn-review-issues').addEventListener('click', () => toggleBatchWorkspace(true));
     document.getElementById('btn-view-all').addEventListener('click', () => toggleBatchWorkspace(false));
+  } else {
+    // No ready items at all
+    $('#requirement-actions').innerHTML = `
+      <div style="color:var(--muted); font-size:12px;">No medicines matched yet.</div>
+    `;
   }
+
+  // Auto-refresh suppliers inline (debounced slightly so table renders first)
+  clearTimeout(window._supplierRefreshTimer);
+  window._supplierRefreshTimer = setTimeout(() => refreshInlineSuppliers(), 50);
 }
 
 function toggleBatchWorkspace(show) {
@@ -1375,192 +1462,285 @@ async function resolveItemMatch(idx) {
   renderBatchReview();
 }
 
+// ---- Supplier state (vars declared at top of script) -------------------
+
 function toggleSuppliersView(show) {
-  toggle('#pharmacy-review', !show);
-  toggle('#pharmacy-suppliers', show);
+  // Legacy compat — now a no-op since suppliers are inline
 }
 
 function toggleCoverageMatrix(show) {
+  toggle('#inline-coverage-matrix', show);
   toggle('#coverage-matrix-container', show);
 }
 
 function showSuppliers() {
-  toggleSuppliersView(true);
-  toggleCoverageMatrix(false);
-  
-  let ready = currentItems.filter(i => isReady(i));
-  
-  let suppMap = {};
-  ready.forEach(item => {
-    (item.suppliers || []).forEach(opt => {
-      let sId = opt.supplier_id || opt.supplier_name;
-      if(!suppMap[sId]) {
-        suppMap[sId] = { 
-          supplier_id: sId,
-          supplier_name: opt.supplier_name, 
-          full_line_count: 0,
-          partial_line_count: 0,
-          unavailable_line_count: 0,
-          requested_quantity_total: 0,
-          available_quantity_total: 0,
-          estimated_total: 0, 
-          eta_date: opt.eta_date || '9999-99-99',
-          eta_label: opt.eta_label || ''
-        };
-      }
-      
-      let s = suppMap[sId];
-      s.requested_quantity_total += opt.requested_qty;
-      s.available_quantity_total += opt.available_qty;
-      s.estimated_total += (opt.unit_price * (opt.available_qty > opt.requested_qty ? opt.requested_qty : opt.available_qty));
-      
-      if(opt.available_qty >= opt.requested_qty) {
-        s.full_line_count++;
-      } else if(opt.available_qty > 0) {
-        s.partial_line_count++;
-      } else {
-        s.unavailable_line_count++;
-      }
-      
-      if(opt.eta_date && opt.eta_date > s.eta_date && s.eta_date !== '9999-99-99') {
-        s.eta_date = opt.eta_date;
-        s.eta_label = opt.eta_label;
-      } else if (s.eta_date === '9999-99-99') {
-        s.eta_date = opt.eta_date;
-        s.eta_label = opt.eta_label;
-      }
-    });
-  });
-  
-  let list = Object.values(suppMap).map(s => {
-    if(s.full_line_count === ready.length) s.coverage_status = 'FULL';
-    else if(s.full_line_count > 0 || s.partial_line_count > 0) s.coverage_status = 'PARTIAL';
-    else s.coverage_status = 'UNAVAILABLE';
-    s.quantity_coverage_ratio = s.requested_quantity_total > 0 ? (s.available_quantity_total / s.requested_quantity_total) : 0;
-    return s;
-  });
-  
-  list.sort((a,b) => {
-    if(a.coverage_status === 'FULL' && b.coverage_status !== 'FULL') return -1;
-    if(b.coverage_status === 'FULL' && a.coverage_status !== 'FULL') return 1;
-    
-    if(a.coverage_status === 'FULL' && b.coverage_status === 'FULL') {
-      if(a.eta_date !== b.eta_date) return a.eta_date < b.eta_date ? -1 : 1;
-      return a.estimated_total - b.estimated_total;
-    }
-    
-    if(b.full_line_count !== a.full_line_count) return b.full_line_count - a.full_line_count;
-    if(b.quantity_coverage_ratio !== a.quantity_coverage_ratio) return b.quantity_coverage_ratio - a.quantity_coverage_ratio;
-    if(a.eta_date !== b.eta_date) return a.eta_date < b.eta_date ? -1 : 1;
-    return a.estimated_total - b.estimated_total;
-  });
-  
-  currentRankedSuppliers = list;
-  
-  $('#so-subtitle').textContent = `Based on ${ready.length} medicines (${currentItems.length - ready.length} excluded)`;
+  // Legacy — now suppliers auto-show inline, just scroll to them
+  document.getElementById('inline-supplier-section')?.scrollIntoView({behavior: 'smooth'});
+}
 
-  // Render cards
-  let cardsHtml = list.map((s, idx) => {
+async function refreshInlineSuppliers() {
+  let ready = currentItems.filter(isReady);
+  let review = currentItems.filter(isNeedsReview);
+  let excluded = currentItems.filter(isExcluded);
+
+  // Show the section whenever we have results
+  let section = document.getElementById('inline-supplier-section');
+  if (!section) return;
+  section.classList.remove('hidden');
+
+  let isPreliminary = review.length > 0;
+
+  // Update section heading
+  let titleEl = document.getElementById('supplier-section-title');
+  let subtitleEl = document.getElementById('supplier-section-subtitle');
+  let banner = document.getElementById('supplier-preliminary-banner');
+  let prelText = document.getElementById('supplier-preliminary-text');
+
+  if (isPreliminary) {
+    titleEl.innerHTML = 'Supplier Options <span style="font-size:12px; font-weight:400; color:var(--amber);">(Preliminary)</span>';
+    subtitleEl.textContent = `Based on ${ready.length} confirmed medicines · ${review.length} items pending review`;
+    banner.classList.remove('hidden');
+    banner.style.display = 'flex';
+    prelText.textContent = `Supplier selection will be enabled after you review ${review.length} open item${review.length > 1 ? 's' : ''}.`;
+  } else {
+    titleEl.textContent = 'Supplier Options';
+    let excTxt = excluded.length > 0 ? ` · ${excluded.length} excluded` : '';
+    subtitleEl.textContent = `Based on ${ready.length} medicines${excTxt}`;
+    banner.classList.add('hidden');
+    banner.style.display = 'none';
+  }
+
+  if (ready.length === 0) {
+    document.getElementById('inline-supplier-cards').innerHTML =
+      '<div style="grid-column:1/-1; text-align:center; color:var(--muted); padding:40px;">No ready medicines to compare suppliers for.</div>';
+    return;
+  }
+
+  // Loading indicator
+  document.getElementById('inline-supplier-cards').innerHTML =
+    '<div style="grid-column:1/-1; text-align:center; color:var(--muted); padding:40px;"><span style="font-size:13px;">Checking 4 demo distributors…</span></div>';
+
+  // Build payload
+  let items = ready.map(i => ({
+    master_product_id: i.resolution.master_product_id,
+    product_name: i.resolution.product_name,
+    quantity: Number(i.input.quantity)
+  }));
+
+  try {
+    let resp = await fetch('/api/suppliers/compare', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({items})
+    });
+    if (!resp.ok) throw new Error('Supplier API failed');
+    let data = await resp.json();
+    currentRankedSuppliers = data.suppliers || [];
+    renderInlineSupplierCards(currentRankedSuppliers, ready.length, isPreliminary);
+    renderInlineCoverageMatrix(currentRankedSuppliers, ready);
+  } catch (e) {
+    console.error('Supplier compare failed', e);
+    document.getElementById('inline-supplier-cards').innerHTML =
+      '<div style="grid-column:1/-1; text-align:center; color:var(--red); padding:40px;">Could not load supplier options.</div>';
+  }
+}
+
+function renderInlineSupplierCards(suppliers, readyCount, isPreliminary) {
+  const AVATAR_COLORS = [
+    {bg: 'var(--blue-bg)',  fg: 'var(--primary)'},
+    {bg: '#EDE9FE',        fg: '#7C3AED'},
+    {bg: '#DCFCE7',        fg: '#16A34A'},
+    {bg: '#FEF3C7',        fg: '#D97706'},
+  ];
+
+  let cardsHtml = suppliers.map((s, idx) => {
     let isRec = idx === 0 && s.coverage_status !== 'UNAVAILABLE';
-    let recBadge = isRec ? '<div style="background:var(--green); color:white; font-size:10px; font-weight:600; padding:4px 12px; border-radius:12px 12px 0 0; position:absolute; top:0; left:0; right:0; display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Recommended</div>' : '';
-    let borderStyle = isRec ? 'border: 2px solid var(--green);' : 'border: 1px solid var(--line);';
-    let padTop = isRec ? 'padding-top: 36px;' : 'padding-top: 24px;';
-    
-    let covBadgeClass = s.coverage_status === 'FULL' ? 'badge-ok' : (s.coverage_status === 'PARTIAL' ? 'badge-warn' : 'badge-err');
-    let covBadgeText = s.coverage_status === 'FULL' ? 'FULL ORDER' : s.coverage_status;
-    let covCountHtml = `<span style="color:var(--green); font-weight:600; background:var(--green-bg); padding:2px 8px; border-radius:99px; font-size:11px;">${s.full_line_count} / ${ready.length} medicines</span>`;
-    
-    let initial = s.supplier_name.charAt(0);
-    let initialColor = isRec ? 'var(--primary)' : (idx === 1 ? '#8B5CF6' : (idx === 2 ? '#0284C7' : '#D946EF'));
-    let initialBg = isRec ? 'var(--blue-bg)' : (idx === 1 ? '#EDE9FE' : (idx === 2 ? '#E0F2FE' : '#FAE8FF'));
-    
-    let checklist = [];
-    if (s.coverage_status === 'FULL') checklist.push('<div style="color:var(--green);">✓ Complete fulfillment</div>');
-    else checklist.push(`<div style="color:var(--red);">× ${ready.length - s.full_line_count} medicines unavailable</div>`);
-    
-    if (idx === 0) checklist.push('<div style="color:var(--green);">✓ Earliest complete delivery</div>');
-    else if (idx === 1) checklist.push('<div style="color:var(--green);">✓ Good pricing</div>');
-    else if (idx === 2) checklist.push('<div style="color:var(--green);">✓ Wide product range</div>');
-    else if (idx === 3) checklist.push('<div style="color:var(--green);">✓ Value pricing</div>');
-    
-    if (isRec) checklist.push('<div style="color:var(--green);">✓ Competitive pricing</div>');
+    let borderStyle = isRec ? 'border:2px solid var(--green);' : 'border:1px solid var(--line);';
+    let padTop = isRec ? '36px' : '20px';
+    let col = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+
+    let recBadge = isRec ? `
+      <div style="background:var(--green); color:white; font-size:10px; font-weight:700;
+        padding:5px 12px; border-radius:8px 8px 0 0; position:absolute; top:0; left:0; right:0;
+        display:flex; align-items:center; gap:5px;">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="white"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+        ★ Recommended
+      </div>` : '';
+
+    let covBadgeClass = s.coverage_status === 'FULL' ? 'badge-ok'
+      : s.coverage_status === 'PARTIAL' ? 'badge-warn' : 'badge-err';
+    let covBadgeText = s.coverage_status === 'FULL' ? 'FULL ORDER'
+      : s.coverage_status === 'PARTIAL' ? 'PARTIAL' : 'UNAVAILABLE';
+
+    let covColor = s.coverage_status === 'FULL' ? 'var(--green)'
+      : s.coverage_status === 'PARTIAL' ? 'var(--amber)' : 'var(--red)';
+
+    let bullets = [];
+    if (s.coverage_status === 'FULL') {
+      bullets.push('<div style="color:var(--green);">&#10003; Complete fulfillment</div>');
+    } else if (s.unavailable_line_count > 0) {
+      bullets.push(`<div style="color:var(--red);">&#10007; ${s.unavailable_line_count} medicine${s.unavailable_line_count > 1 ? 's' : ''} unavailable</div>`);
+    }
+    bullets.push(`<div style="color:var(--muted);">${s.profile_label || ''}</div>`);
+
+    let selectDisabled = isPreliminary ? 'disabled title="Resolve open items first"' : '';
+    let selectStyle = isPreliminary
+      ? 'flex:1; opacity:0.5; cursor:not-allowed;'
+      : 'flex:1;';
+    let gapsBtnText = s.coverage_status === 'FULL' ? 'View Details' : 'View Gaps';
 
     return `
-      <div class="card card-flush" style="position:relative; border-radius:12px; ${borderStyle} display:flex; flex-direction:column;">
+      <div style="position:relative; border-radius:12px; ${borderStyle} background:white;
+        display:flex; flex-direction:column; box-shadow:0 1px 3px rgba(0,0,0,0.08);">
         ${recBadge}
-        <div style="padding:24px; ${padTop} flex:1; display:flex; flex-direction:column;">
-          <div style="display:flex; gap:12px; margin-bottom:16px;">
-            <div style="width:32px; height:32px; border-radius:50%; background:${initialBg}; color:${initialColor}; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px; flex-shrink:0;">${initial}</div>
-            <div>
-              <div style="font-weight:600; font-size:14px;">${esc(s.supplier_name)}</div>
-              <div class="tiny" style="display:flex; align-items:center; gap:4px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${idx%2===0 ? 'Mumbai, MH' : (idx===1 ? 'Pune, MH' : (idx===2 ? 'Delhi, DL' : 'Bengaluru, KA'))}</div>
+        <div style="padding:20px; padding-top:${padTop}; flex:1; display:flex; flex-direction:column;">
+
+          <div style="display:flex; gap:10px; margin-bottom:14px;">
+            <div style="width:30px; height:30px; border-radius:50%; background:${col.bg}; color:${col.fg};
+              display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0;">
+              ${esc(s.supplier_name.charAt(0))}
+            </div>
+            <div style="min-width:0;">
+              <div style="font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(s.supplier_name)}</div>
+              <div style="font-size:11px; color:var(--muted);">${esc(s.location)}</div>
             </div>
           </div>
-          
-          <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
-            ${covCountHtml}
+
+          <div style="display:flex; gap:6px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+            <span style="color:${covColor}; font-weight:700; font-size:13px;">${s.full_line_count} / ${readyCount}</span>
             <span class="badge ${covBadgeClass}" style="font-size:10px;">${covBadgeText}</span>
           </div>
-          
-          <div style="display:flex; gap:16px; align-items:center; margin-bottom:16px;">
-            <div style="font-size:18px; font-weight:700;">₹ ${Math.round(s.estimated_total).toLocaleString()}</div>
-            <div class="tiny" style="display:flex; align-items:center; gap:4px; font-weight:500;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              ${s.eta_label}
-            </div>
+
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+            <div style="font-size:17px; font-weight:700;">₹ ${Math.round(s.estimated_total).toLocaleString('en-IN')}</div>
+            <div style="font-size:12px; color:var(--muted); font-weight:500;">📅 ${esc(s.eta_label)}</div>
           </div>
-          
-          <div class="tiny" style="flex:1; display:flex; flex-direction:column; gap:6px; margin-bottom:24px; font-weight:500;">
-            ${checklist.join('')}
+
+          <div style="flex:1; font-size:12px; display:flex; flex-direction:column; gap:5px; margin-bottom:16px;">
+            ${bullets.join('')}
           </div>
-          
-          <div style="display:flex; gap:12px;">
-            <button class="btn-outline btn-view-gaps" style="flex:1; background:var(--blue-bg); border:none;">${s.coverage_status === 'FULL' ? 'View Details' : 'View Gaps'}</button>
-            <button class="btn-primary btn-place-order" style="flex:1;" data-supplier-id="${esc(s.supplier_id)}">Select</button>
+
+          <div style="display:flex; gap:8px;">
+            <button class="btn-outline btn-view-gaps"
+              style="flex:1; font-size:12px; padding:7px; background:var(--blue-bg); border:none;">
+              ${gapsBtnText}
+            </button>
+            <button class="btn-primary btn-select-supplier"
+              style="${selectStyle} font-size:12px; padding:7px;"
+              data-supplier-id="${esc(s.supplier_id)}"
+              ${selectDisabled}>
+              ${isRec ? 'Select ★' : 'Select'}
+            </button>
           </div>
         </div>
       </div>
     `;
+  }).join('');
 
-  }).join('');
-  $('#supplier-cards-container').className = 'grid-2 mt-4';
-  $('#supplier-cards-container').style.gridTemplateColumns = 'repeat(4, 1fr)';
-  $('#supplier-cards-container').style.gap = '16px';
-  $('#supplier-cards-container').innerHTML = cardsHtml || '<div class="tiny">No suppliers available.</div>';
-  // Build Matrix
-  let thHtml = `<tr><th>Medicine</th>` + list.map(s => `<th>${esc(s.supplier_name)}</th>`).join('') + `</tr>`;
-  $('#coverage-matrix-head').innerHTML = thHtml;
-  
-  let tbHtml = ready.map(item => {
-    let tdHtml = `<td><b>${esc(item.resolution.product_name)}</b><br><span class="tiny">Needed: ${item.input.quantity}</span></td>`;
-    
-    tdHtml += list.map(s => {
-      let opt = (item.suppliers || []).find(o => (o.supplier_id || o.supplier_name) === s.supplier_id);
-      if (!opt || opt.available_qty === 0) return `<td style="color:var(--red);">0 available</td>`;
-      if (opt.available_qty < opt.requested_qty) return `<td style="color:var(--amber);">${opt.available_qty} available<br><span class="tiny">₹${opt.unit_price}/u</span></td>`;
-      return `<td style="color:var(--green);">✓ Full qty<br><span class="tiny">₹${opt.unit_price}/u</span></td>`;
-    }).join('');
-    
-    return `<tr>${tdHtml}</tr>`;
-  }).join('');
-  $('#coverage-matrix-body').innerHTML = tbHtml;
-  
-  // Bind dynamic event listeners
-  document.querySelectorAll('.btn-place-order').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      placeOrder(e.target.getAttribute('data-supplier-id'));
+  let container = document.getElementById('inline-supplier-cards');
+  container.innerHTML = cardsHtml || '<div style="grid-column:1/-1;">No suppliers available.</div>';
+
+  // Wire events
+  container.querySelectorAll('.btn-select-supplier').forEach(btn => {
+    btn.addEventListener('click', e => {
+      let sid = e.target.getAttribute('data-supplier-id');
+      openOrderReview(sid);
     });
   });
-  
-  document.querySelectorAll('.btn-view-gaps').forEach(btn => {
-    btn.addEventListener('click', () => toggleCoverageMatrix(true));
+  container.querySelectorAll('.btn-view-gaps').forEach(btn => {
+    btn.addEventListener('click', () => {
+      let mc = document.getElementById('inline-coverage-matrix');
+      mc.classList.toggle('hidden');
+    });
   });
 }
 
-async function placeOrder(supplierId) {
-  if(!supplierId) {
-    supplierId = currentRankedSuppliers[0].supplier_id;
+function renderInlineCoverageMatrix(suppliers, readyItems) {
+  let thead = document.getElementById('inline-matrix-head');
+  let tbody = document.getElementById('inline-matrix-body');
+  if (!thead || !tbody) return;
+
+  thead.innerHTML = '<tr><th>Medicine</th><th>Need</th>' +
+    suppliers.map(s => `<th>${esc(s.supplier_name)}</th>`).join('') + '</tr>';
+
+  tbody.innerHTML = readyItems.map(item => {
+    let cells = suppliers.map(s => {
+      let line = (s.lines || []).find(l => l.master_product_id == item.resolution.master_product_id);
+      if (!line || line.available_qty === 0)
+        return `<td style="color:var(--red); font-size:12px;">&#10007; Unavailable</td>`;
+      if (line.coverage_status === 'PARTIAL')
+        return `<td style="color:var(--amber); font-size:12px;">${line.available_qty}/${line.requested_qty}<br><span class="tiny">₹${line.unit_price}/u</span></td>`;
+      return `<td style="color:var(--green); font-size:12px;">&#10003; Full<br><span class="tiny">₹${line.unit_price}/u</span></td>`;
+    }).join('');
+    return `<tr>
+      <td><b style="font-size:12px;">${esc(item.resolution.product_name || item.input.raw_text)}</b></td>
+      <td style="font-size:12px;">${item.input.quantity}</td>
+      ${cells}
+    </tr>`;
+  }).join('');
+}
+
+let _pendingOrderSupplierId = null;
+
+function openOrderReview(supplierId) {
+  let s = currentRankedSuppliers.find(x => x.supplier_id === supplierId);
+  if (!s) return;
+  _pendingOrderSupplierId = supplierId;
+
+  let readyCount = currentItems.filter(isReady).length;
+  let isPartial = s.coverage_status !== 'FULL';
+
+  document.getElementById('modal-supplier-name').textContent = s.supplier_name;
+  document.getElementById('modal-supplier-loc').textContent = s.location;
+  document.getElementById('modal-coverage-count').textContent =
+    `${s.full_line_count} / ${readyCount} medicines available`;
+  document.getElementById('modal-coverage-label').textContent =
+    isPartial ? `${s.unavailable_line_count} medicine(s) unavailable` : 'Full coverage';
+
+  let badge = document.getElementById('modal-coverage-badge');
+  if (s.coverage_status === 'FULL') {
+    badge.className = 'badge badge-ok';
+    badge.textContent = 'FULL ORDER';
+  } else {
+    badge.className = 'badge badge-warn';
+    badge.textContent = 'PARTIAL ORDER';
   }
+
+  let warn = document.getElementById('modal-partial-warning');
+  if (isPartial) {
+    warn.classList.remove('hidden');
+    warn.textContent = `${s.unavailable_line_count} medicine(s) cannot be fulfilled by this supplier and will be excluded from this order.`;
+  } else {
+    warn.classList.add('hidden');
+  }
+
+  document.getElementById('modal-total').textContent =
+    `₹ ${Math.round(s.estimated_total).toLocaleString('en-IN')}`;
+  document.getElementById('modal-eta').textContent = s.eta_label;
+
+  let modal = document.getElementById('order-review-modal');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+}
+
+function closeOrderReview() {
+  let modal = document.getElementById('order-review-modal');
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
+  _pendingOrderSupplierId = null;
+}
+
+// End of new inline supplier functions
+function showOldSuppliers() {} // deprecated, kept for any lingering refs
+
+
+async function placeOrder(supplierId) {
+  if (!supplierId) {
+    supplierId = _pendingOrderSupplierId || (currentRankedSuppliers[0] && currentRankedSuppliers[0].supplier_id);
+  }
+  if (!supplierId) return;
+  
+  closeOrderReview();
   
   let supplierData = currentRankedSuppliers.find(s => s.supplier_id === supplierId);
   
@@ -1568,19 +1748,27 @@ async function placeOrder(supplierId) {
   let excluded = currentItems.filter(i => i.resolution.decision === 'NO_MATCH' || i.resolution.decision === 'EXCLUDED');
   
   let reqItems = ready.map(i => {
-    let opt = (i.suppliers || []).find(o => (o.supplier_id || o.supplier_name) === supplierId) || {};
+    // Prefer line data from whole-order compare result (has correct unit_price / fulfillable_qty)
+    let supLine = (supplierData?.lines || []).find(l => l.master_product_id == i.resolution.master_product_id) || {};
+    let fallbackOpt = (i.suppliers || []).find(o => (o.supplier_id || o.supplier_name) === supplierId) || {};
+    let unit_price = supLine.unit_price || fallbackOpt.unit_price || 0;
+    let fulfil_qty = supLine.fulfillable_qty || fallbackOpt.fulfillable_qty || Number(i.input.quantity);
     return {
       master_product_id: i.resolution.master_product_id,
       product_name: i.resolution.product_name,
       quantity: i.input.quantity,
+      fulfilled_quantity: fulfil_qty,
       unit: i.input.unit,
       raw_text: i.input.raw_text,
+      supplier_id: supplierId,
       supplier_name: supplierData.supplier_name,
-      unit_price: opt.unit_price || 0,
-      line_total: opt.line_total || 0,
-      requested_quantity: opt.requested_qty || i.input.quantity
+      supplier_sku: supLine.supplier_sku || fallbackOpt.supplier_sku || '',
+      unit_price: unit_price,
+      line_total: round2(unit_price * fulfil_qty),
     };
   });
+  
+  function round2(n) { return Math.round(n * 100) / 100; }
   
   let exclItems = excluded.map(i => ({
     raw_text: i.input.raw_text,
@@ -1598,7 +1786,18 @@ async function placeOrder(supplierId) {
       id: oId,
       pharmacy_name: 'Krishna Medical Store',
       payload: { items: reqItems, excluded_lines: exclItems },
-      supplier_snapshot: supplierData,
+      supplier_snapshot: {
+        supplier_id: supplierData.supplier_id,
+        supplier_name: supplierData.supplier_name,
+        location: supplierData.location || '',
+        coverage_status: supplierData.coverage_status,
+        estimated_total: supplierData.estimated_total,
+        eta_date: supplierData.eta_date,
+        eta_label: supplierData.eta_label,
+        lead_time_days: supplierData.lead_time_days,
+        full_line_count: supplierData.full_line_count,
+        requested_line_count: supplierData.requested_line_count,
+      },
       status: 'PLACED',
       placed_at: new Date().toISOString()
     };
@@ -1606,20 +1805,17 @@ async function placeOrder(supplierId) {
     state.orders.unshift(order);
     saveDemoState(state);
     
-    toggle('#pharmacy-suppliers', false);
+    toggle('#inline-supplier-section', false);
+    toggle('#pharmacy-review-suppliers', false);
     toggle('#pharmacy-confirmed', true);
     $('#conf-order-id').textContent = `Order ${oId}`;
     $('#conf-supp').textContent = supplierData.supplier_name;
     $('#conf-lines').textContent = `${reqItems.length} medicines`;
     
     let confEta = document.getElementById('conf-eta');
-    if(!confEta) {
-      confEta = document.createElement('p');
-      confEta.id = 'conf-eta';
-      document.getElementById('pharmacy-confirmed').insertBefore(confEta, document.getElementById('pharmacy-confirmed').querySelector('.btn-primary').parentElement);
-    }
-    confEta.innerHTML = `<strong>Expected delivery:</strong> ${supplierData.eta_label}`;
+    if (confEta) confEta.textContent = `Expected delivery: ${supplierData.eta_label}`;
     
+
   } catch(e) {
     alert(e.message);
   } finally {
