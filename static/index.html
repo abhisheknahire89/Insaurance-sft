@@ -33,7 +33,7 @@ body { margin: 0; display: flex; height: 100vh; overflow: hidden; background: va
 .header-top { height: 60px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; padding: 0 24px; background: white; flex-shrink: 0;}
 .content-wrapper { flex: 1; display: flex; overflow: hidden; }
 .center-workspace { flex: 1; overflow-y: auto; padding: 24px 32px; background: var(--bg); }
-.sidebar-right { width: 340px; background: var(--bg); border-left: 1px solid var(--line); padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0;}
+.sidebar-right { width: 340px; min-width: 0; background: var(--bg); border-left: 1px solid var(--line); padding: 24px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 24px; flex-shrink: 0;}
 
 /* Sidebar Styles */
 .brand { font-weight: 700; font-size: 18px; letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 32px; padding: 0 8px;}
@@ -159,7 +159,6 @@ tr:last-child td { border-bottom: none; }
 .tracker-label { font-size: 12px; font-weight: 500; color: var(--muted); text-align: center;}
 .tracker-step.done .tracker-label, .tracker-step.active .tracker-label { color: var(--ink); }
 
-/* Utility */
 .hidden { display: none !important; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
 .flex-gap { display: flex; gap: 12px; align-items: center;}
@@ -169,6 +168,114 @@ tr:last-child td { border-bottom: none; }
 .mb-4 { margin-bottom: 16px; }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
+
+/* ---- Source image preview card ----------------------------------------- */
+.source-preview-card {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.source-image-viewport {
+  width: 100%;
+  height: 420px;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+}
+.source-image-viewport:active { cursor: grabbing; }
+#source-image-preview {
+  display: block;
+  /* Natural size driven by object-fit:contain within the viewport */
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  transform-origin: center center;
+  transition: transform 0.15s ease;
+  pointer-events: none;  /* let viewport handle drag */
+}
+.source-zoom-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #F3F4F6;
+  border-radius: 0 0 8px 8px;
+  padding: 6px 10px;
+}
+.source-zoom-btn {
+  padding: 4px 6px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+}
+.source-zoom-btn:hover { background: #E5E7EB; }
+#source-zoom-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 36px;
+  text-align: center;
+}
+/* Fullscreen lightbox */
+#source-fullscreen-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 300;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+#source-fullscreen-modal.active { display: flex; }
+#source-fullscreen-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  display: block;
+}
+#source-fullscreen-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  color: white;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+#source-fullscreen-close:hover { background: rgba(0,0,0,0.8); }
+@media (max-width: 1024px) {
+  .source-image-viewport { height: 320px; }
+}
+@media (max-width: 768px) {
+  .sidebar-right { width: 100%; border-left: none; border-top: 1px solid var(--line); }
+  .source-image-viewport { height: 260px; }
+}
 </style>
 </head>
 <body>
@@ -494,6 +601,11 @@ tr:last-child td { border-bottom: none; }
       </div>
     </div>
 
+    <!-- Fullscreen image lightbox -->
+    <div id="source-fullscreen-modal">
+      <button id="source-fullscreen-close" title="Close (Esc)">✕</button>
+      <img id="source-fullscreen-img" src="" alt="Want slip fullscreen">
+    </div>
 
     <!-- Pharmacy Order Confirmed -->
     <div id="pharmacy-confirmed" class="hidden text-center">
@@ -598,25 +710,37 @@ tr:last-child td { border-bottom: none; }
   </div> <!-- /center-workspace -->
 
   <div class="sidebar-right" id="sidebar-right">
-    <div class="card" style="padding:16px; margin-bottom:0;">
-      <h3 style="display:flex; align-items:center; gap:8px;">
+    <div class="card source-preview-card" style="padding:16px; margin-bottom:0;">
+      <h3 style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
         Original Want Slip
       </h3>
-      <div class="image-panel mt-4" id="source-image-panel" style="min-height:300px; border-radius:8px;">
-        <div style="text-align: center; color: var(--muted);" id="no-image-text">No image available</div>
-        <img id="source-image-preview" src="" alt="Source Image" class="hidden" style="max-height:400px; object-fit:contain;">
+
+      <!-- VIEWPORT — image is always contained here -->
+      <div class="source-image-viewport" id="source-image-viewport">
+        <div style="text-align:center; color:var(--muted); font-size:13px; pointer-events:none;" id="no-image-text">No image available</div>
+        <img id="source-image-preview" src="" alt="Source Image" class="hidden">
       </div>
-      <div class="flex-between mt-4" style="background:#F3F4F6; padding:8px; border-radius:8px;">
-        <div class="flex-gap">
-          <button style="padding:4px; background:white; border-radius:4px; border:1px solid var(--line); display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></button>
-          <span class="tiny" style="font-weight:600;">100%</span>
-          <button style="padding:4px; background:white; border-radius:4px; border:1px solid var(--line); display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></button>
+
+      <!-- ZOOM CONTROLS -->
+      <div class="source-zoom-controls">
+        <div class="flex-gap" style="gap:6px;">
+          <button class="source-zoom-btn" id="btn-zoom-out" title="Zoom out">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <span id="source-zoom-label">Fit</span>
+          <button class="source-zoom-btn" id="btn-zoom-in" title="Zoom in">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+          </button>
+          <button class="source-zoom-btn" id="btn-zoom-reset" title="Reset to fit" style="font-size:10px; padding:4px 7px;">1:1</button>
         </div>
-        <button style="padding:4px; background:white; border-radius:4px; border:1px solid var(--line); display:flex;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg></button>
+        <button class="source-zoom-btn" id="btn-zoom-fullscreen" title="Fullscreen">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+        </button>
       </div>
     </div>
-    
+
+
     <div class="card" style="padding:16px; margin-bottom:0;">
       <h3 style="display:flex; align-items:center; gap:8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -971,6 +1095,148 @@ function initializeApp() {
   renderOrders();
 }
 
+// ==========================================================================
+// IMAGE VIEWPORT CONTROLLER
+// Handles: zoom (CSS transform), pan (drag at zoom>1), fullscreen modal.
+// The viewport CSS (overflow:hidden) is the single source of truth for bounds.
+// ==========================================================================
+
+(function initImageViewport() {
+  // State
+  let zoom      = 1;
+  let panX      = 0;
+  let panY      = 0;
+  const ZOOM_STEP = 0.25;
+  const ZOOM_MIN  = 0.5;
+  const ZOOM_MAX  = 4;
+
+  const viewport  = document.getElementById('source-image-viewport');
+  const img       = document.getElementById('source-image-preview');
+  const label     = document.getElementById('source-zoom-label');
+  const fsModal   = document.getElementById('source-fullscreen-modal');
+  const fsImg     = document.getElementById('source-fullscreen-img');
+  const fsClose   = document.getElementById('source-fullscreen-close');
+
+  function applyTransform() {
+    img.style.transform = `scale(${zoom}) translate(${panX / zoom}px, ${panY / zoom}px)`;
+    label.textContent = zoom === 1 ? 'Fit' : `${Math.round(zoom * 100)}%`;
+  }
+
+  // Public reset — called on new image selection
+  window.resetImageZoom = function() {
+    zoom = 1;
+    panX = 0;
+    panY = 0;
+    applyTransform();
+  };
+
+  // Clamp pan so image edge doesn't leave viewport
+  function clampPan() {
+    const vw = viewport.clientWidth;
+    const vh = viewport.clientHeight;
+    const maxX = (vw * (zoom - 1)) / 2;
+    const maxY = (vh * (zoom - 1)) / 2;
+    panX = Math.max(-maxX, Math.min(maxX, panX));
+    panY = Math.max(-maxY, Math.min(maxY, panY));
+  }
+
+  // Zoom buttons
+  document.getElementById('btn-zoom-in').addEventListener('click', () => {
+    zoom = Math.min(ZOOM_MAX, parseFloat((zoom + ZOOM_STEP).toFixed(2)));
+    panX = 0; panY = 0;
+    applyTransform();
+  });
+  document.getElementById('btn-zoom-out').addEventListener('click', () => {
+    zoom = Math.max(ZOOM_MIN, parseFloat((zoom - ZOOM_STEP).toFixed(2)));
+    clampPan();
+    applyTransform();
+  });
+  document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+    window.resetImageZoom();
+  });
+
+  // Scroll-to-zoom on viewport
+  viewport.addEventListener('wheel', e => {
+    if (!currentImageSrc) return;
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
+    zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, parseFloat((zoom + delta).toFixed(2))));
+    clampPan();
+    applyTransform();
+  }, { passive: false });
+
+  // Drag-to-pan (only when zoom > 1)
+  let dragging = false;
+  let dragStartX = 0, dragStartY = 0;
+  let panStartX = 0, panStartY = 0;
+
+  viewport.addEventListener('mousedown', e => {
+    if (zoom <= 1) return;
+    dragging = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    panStartX  = panX;
+    panStartY  = panY;
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    panX = panStartX + (e.clientX - dragStartX);
+    panY = panStartY + (e.clientY - dragStartY);
+    clampPan();
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+
+  // Touch-to-pan
+  let touchStartX = 0, touchStartY = 0;
+  let panStartXt = 0, panStartYt = 0;
+  viewport.addEventListener('touchstart', e => {
+    if (zoom <= 1 || e.touches.length !== 1) return;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    panStartXt  = panX;
+    panStartYt  = panY;
+  }, { passive: true });
+  viewport.addEventListener('touchmove', e => {
+    if (zoom <= 1 || e.touches.length !== 1) return;
+    panX = panStartXt + (e.touches[0].clientX - touchStartX);
+    panY = panStartYt + (e.touches[0].clientY - touchStartY);
+    clampPan();
+    applyTransform();
+    e.preventDefault();
+  }, { passive: false });
+
+  // Double-click to zoom in/reset
+  viewport.addEventListener('dblclick', () => {
+    if (!currentImageSrc) return;
+    if (zoom >= 2) { window.resetImageZoom(); }
+    else { zoom = Math.min(ZOOM_MAX, zoom + 0.5); panX = 0; panY = 0; applyTransform(); }
+  });
+
+  // Fullscreen
+  document.getElementById('btn-zoom-fullscreen').addEventListener('click', () => {
+    if (!currentImageSrc) return;
+    fsImg.src = currentImageSrc;
+    fsModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  });
+  function closeFullscreen() {
+    fsModal.classList.remove('active');
+    document.body.style.overflow = '';
+    fsImg.src = '';
+  }
+  fsClose.addEventListener('click', closeFullscreen);
+  fsModal.addEventListener('click', e => { if (e.target === fsModal) closeFullscreen(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (fsModal.classList.contains('active')) { closeFullscreen(); }
+    }
+  });
+
+  applyTransform();
+})();
+
 function handleImageSelection(e) {
   const file = e.target.files?.[0];
   if (file) {
@@ -978,6 +1244,8 @@ function handleImageSelection(e) {
     $('#source-image-preview').src = currentImageSrc;
     $('#source-image-preview').classList.remove('hidden');
     $('#no-image-text').classList.add('hidden');
+    // Reset zoom/pan whenever a new image is loaded
+    if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
   }
 }
 
