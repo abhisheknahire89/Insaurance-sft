@@ -113,7 +113,7 @@ label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; c
 .badge-neutral { background: #F3F4F6; color: var(--muted); }
 
 /* Progress Overlay */
-.overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; display: none; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; display: none; }
 .overlay.active { display: flex; }
 .spinner { width: 40px; height: 40px; border: 3px solid var(--line); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -225,8 +225,40 @@ tr:last-child td { border-bottom: none; }
       
       <div class="center-workspace" id="center-workspace">
         <div class="overlay" id="overlay">
-          <div class="spinner"></div>
-          <div class="overlay-text" id="overlayText">Processing...</div>
+          <!-- Fallback spinner for other loaders -->
+          <div id="overlay-fallback">
+            <div class="spinner"></div>
+            <div class="overlay-text" id="overlayText">Processing...</div>
+          </div>
+          
+          <!-- New UX for Want Slip Processing -->
+          <div class="card" id="overlay-wantslip" style="width: 420px; text-align: left; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <h3 style="margin-bottom:20px;" id="process-title">Preparing your requirement</h3>
+            
+            <div id="process-checklist" style="margin-bottom: 24px;">
+              <div id="step-img" style="margin-bottom:12px; color:var(--green); font-weight:500;"><span style="display:inline-block; width:20px;">✓</span> Image received</div>
+              <div id="step-read" style="margin-bottom:12px; color:var(--blue); font-weight:500;"><span style="display:inline-block; width:20px;">●</span> Reading and matching medicines</div>
+              <div id="step-qty" style="margin-bottom:12px; color:var(--muted);"><span style="display:inline-block; width:20px;">○</span> Checking quantities</div>
+              <div id="step-sup" style="margin-bottom:12px; color:var(--muted);"><span style="display:inline-block; width:20px;">○</span> Preparing supplier options</div>
+            </div>
+            
+            <div id="process-copy" style="font-size:14px; margin-bottom:16px;">
+              We're reading the handwriting and matching medicines against our catalogue.<br><br>
+              Usually ready in 20–30 seconds.
+            </div>
+            
+            <div style="font-size:12px; color:var(--muted);">
+              PharmaFlow will only ask you to review items it cannot resolve safely.
+            </div>
+
+            <div style="font-size:12px; color:var(--muted); margin-top:20px; border-top:1px solid var(--line); padding-top:16px; display:flex; justify-content:space-between; align-items:center;">
+              <div>Elapsed: <span id="process-timer">0</span> sec</div>
+              <div id="process-actions" style="display:none; gap:8px;">
+                <button class="btn-outline" style="padding:4px 8px; font-size:12px; margin:0;" onclick="location.reload()">Try another</button>
+                <button class="btn-primary" style="padding:4px 8px; font-size:12px; margin:0;" onclick="document.getElementById('process-actions').style.display='none'">Keep waiting</button>
+              </div>
+            </div>
+          </div>
         </div>
         
         <!-- ========================================== -->
@@ -664,24 +696,97 @@ async function getCompressedFile(file) {
   });
 }
 
-function showOverlay(steps) {
+let processTimerInterval = null;
+let processStartTime = 0;
+
+function showOverlay(steps, type = 'fallback') {
   const o = $('#overlay');
-  const t = $('#overlayText');
   o.classList.add('active');
-  let i = 0;
-  t.textContent = steps[0];
-  if(steps.length > 1) {
-    o.dataset.iv = setInterval(() => {
-      i = Math.min(i + 1, steps.length - 1);
-      t.textContent = steps[i];
-    }, 1200);
+  
+  if (type === 'wantslip') {
+    $('#overlay-fallback').style.display = 'none';
+    $('#overlay-wantslip').style.display = 'block';
+    
+    // Reset state
+    $('#process-title').textContent = 'Preparing your requirement';
+    $('#process-title').style.color = 'var(--ink)';
+    $('#process-copy').innerHTML = "We're reading the handwriting and matching medicines against our catalogue.<br><br>Usually ready in 20–30 seconds.";
+    
+    $('#step-img').innerHTML = '<span style="display:inline-block; width:20px;">✓</span> Image received';
+    $('#step-img').style.color = 'var(--green)';
+    
+    $('#step-read').innerHTML = '<span style="display:inline-block; width:20px;">●</span> Reading and matching medicines';
+    $('#step-read').style.color = 'var(--blue)';
+    
+    $('#step-qty').innerHTML = '<span style="display:inline-block; width:20px;">○</span> Checking quantities';
+    $('#step-qty').style.color = 'var(--muted)';
+    
+    $('#step-sup').innerHTML = '<span style="display:inline-block; width:20px;">○</span> Preparing supplier options';
+    $('#step-sup').style.color = 'var(--muted)';
+    
+    $('#process-actions').style.display = 'none';
+    $('#process-timer').textContent = '0';
+    
+    processStartTime = Date.now();
+    processTimerInterval = setInterval(() => {
+      let elapsed = Math.floor((Date.now() - processStartTime) / 1000);
+      $('#process-timer').textContent = elapsed;
+      
+      if (elapsed === 20) {
+        $('#process-copy').innerHTML = "Still working — handwritten slips can take a little longer.<br><br>We're matching carefully rather than guessing.";
+      } else if (elapsed === 45) {
+        $('#process-copy').innerHTML = "<b style='color:var(--amber);'>This is taking longer than usual.</b><br><br>Your image is still being processed.";
+        $('#process-actions').style.display = 'flex';
+      }
+    }, 1000);
+    
+  } else {
+    $('#overlay-fallback').style.display = 'flex';
+    $('#overlay-fallback').style.flexDirection = 'column';
+    $('#overlay-fallback').style.alignItems = 'center';
+    $('#overlay-wantslip').style.display = 'none';
+    
+    const t = $('#overlayText');
+    let i = 0;
+    t.textContent = steps[0];
+    if(steps.length > 1) {
+      o.dataset.iv = setInterval(() => {
+        i = Math.min(i + 1, steps.length - 1);
+        t.textContent = steps[i];
+      }, 1200);
+    }
   }
 }
 
-function hideOverlay() {
-  const o = $('#overlay');
-  o.classList.remove('active');
-  clearInterval(o.dataset.iv);
+function hideOverlay(successResult = null) {
+  if (processTimerInterval) {
+    clearInterval(processTimerInterval);
+    processTimerInterval = null;
+  }
+  
+  if (successResult && $('#overlay-wantslip').style.display === 'block') {
+    // Show success transition
+    $('#step-read').innerHTML = '<span style="display:inline-block; width:20px;">✓</span> Reading and matching medicines';
+    $('#step-read').style.color = 'var(--green)';
+    $('#step-qty').innerHTML = '<span style="display:inline-block; width:20px;">✓</span> Checking quantities';
+    $('#step-qty').style.color = 'var(--green)';
+    $('#step-sup').innerHTML = '<span style="display:inline-block; width:20px;">✓</span> Preparing supplier options';
+    $('#step-sup').style.color = 'var(--green)';
+    
+    $('#process-title').innerHTML = '<span style="color:var(--green);">✓ Requirement ready</span>';
+    
+    let elapsedStr = $('#process-timer').textContent;
+    $('#process-copy').innerHTML = `<b style="color:var(--ink); font-size:16px;">${successResult.total} items found</b><br>${successResult.ready} Ready · ${successResult.review} Need check · ${successResult.notfound} Not found<br><br>Processing time: ${elapsedStr} seconds`;
+    
+    setTimeout(() => {
+      const o = $('#overlay');
+      o.classList.remove('active');
+    }, 1200);
+  } else {
+    const o = $('#overlay');
+    o.classList.remove('active');
+    clearInterval(o.dataset.iv);
+  }
 }
 
 function adjQty(id, delta) {
@@ -822,7 +927,7 @@ async function handleWantSlipUpload() {
     const fd = new FormData();
     fd.append('file', compressedFile, compressedFile.name);
 
-    showOverlay(['Preparing image...', 'Reading your slip...', 'Matching medicines...', 'Checking quantities...']);
+    showOverlay([], 'wantslip');
 
     await ensureCatalogReady();
 
@@ -854,6 +959,12 @@ async function handleWantSlipUpload() {
       e.isRenderError = true;
       throw e;
     }
+    
+    let readyCount = currentItems.filter(isReady).length;
+    let notFoundCount = currentItems.filter(isExcluded).length;
+    let reviewCount = currentItems.filter(isNeedsReview).length;
+    
+    hideOverlay({ total: currentItems.length, ready: readyCount, review: reviewCount, notfound: notFoundCount });
 
   } catch (error) {
     console.error('Want-slip processing failed', error);
@@ -884,9 +995,9 @@ async function handleWantSlipUpload() {
       </div>
     `;
     errDiv.classList.remove('hidden');
+    hideOverlay();
     
   } finally {
-    hideOverlay();
     btn.disabled = false;
     btn.textContent = 'Read want slip';
   }
