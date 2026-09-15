@@ -18,7 +18,8 @@ import time, hashlib
 from .lexicon import CatalogIndex
 
 BASE=Path(__file__).resolve().parents[1]; load_dotenv(BASE/'.env')
-DATA=BASE/'data'; RUNTIME=BASE/'.runtime'; RUNTIME.mkdir(exist_ok=True)
+import tempfile
+DATA=BASE/'data'; RUNTIME=Path(tempfile.gettempdir())/'.runtime'; RUNTIME.mkdir(exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
