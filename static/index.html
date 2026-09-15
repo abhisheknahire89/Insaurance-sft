@@ -212,7 +212,7 @@ tr:last-child td { border-bottom: none; }
           <button class="role-btn" onclick="setRole('supplier')">Supplier</button>
           <button class="role-btn" onclick="setRole('invoices')">Invoices</button>
           <button class="role-btn" onclick="setRole('reports')">Reports</button>
-          <button class="role-btn" style="color:var(--red);" onclick="resetDemo()">Reset</button>
+          <button class="role-btn" style="color:var(--red);" id="btn-reset-demo">Reset</button>
         </div>
         <div class="user-profile">
           <div class="avatar">AN</div>
@@ -242,10 +242,10 @@ tr:last-child td { border-bottom: none; }
       <div class="grid-2">
         <div class="card">
           <h2>Upload Want Slip</h2>
-          <form id="form-upload-slip">
+          <form id="form-upload-slip" novalidate>
             <label>Photo of handwritten requirement</label>
             <input type="file" name="file" id="slipFile" accept="image/png,image/jpeg" required>
-            <button class="btn-primary btn-large">Read want slip</button>
+            <button type="button" id="btn-read-wantslip" class="btn-primary btn-large">Read want slip</button>
           </form>
           <div class="tiny">For best results: Keep the whole slip visible and avoid shadows.</div>
         </div>
@@ -758,33 +758,128 @@ async function ensureCatalogReady() {
   }
 }
 
-$('#form-upload-slip').onsubmit = async e => {
-  e.preventDefault();
-  let file = $('#slipFile').files[0];
-  if(!file) return;
+// --- Initialization ---
+
+document.addEventListener('DOMContentLoaded', () => {
+  initializeApp();
+});
+
+function initializeApp() {
+  document.getElementById('btn-read-wantslip').addEventListener('click', handleWantSlipUpload);
+  document.getElementById('form-upload-slip').addEventListener('submit', e => {
+    e.preventDefault();
+    handleWantSlipUpload();
+  });
   
-  showOverlay(['Preparing image...', 'Reading your slip...', 'Matching medicines...', 'Checking quantities...']);
+  document.getElementById('slipFile').addEventListener('change', handleImageSelection);
+
+  // other bindings...
+  
+  document.getElementById('form-type-req').addEventListener('submit', handleTextRequirement);
+  document.getElementById('btn-reset-demo').addEventListener('click', resetDemo);
+  
+  // init view
+  setRole('pharmacy');
+  
+  let state = getDemoState();
+  if(!state.orders) {
+    state.orders = [];
+    saveDemoState(state);
+  }
+  renderOrders();
+}
+
+function handleImageSelection(e) {
+  const file = e.target.files?.[0];
+  if (file) {
+    currentImageSrc = URL.createObjectURL(file);
+    $('#source-image-preview').src = currentImageSrc;
+    $('#source-image-preview').classList.remove('hidden');
+    $('#no-image-text').classList.add('hidden');
+  }
+}
+
+async function handleWantSlipUpload() {
+  const input = document.getElementById('slipFile');
+  const file = input?.files?.[0];
+
+  if (!file) {
+    alert('Choose a want-slip image first.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-read-wantslip');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+
   try {
-    let compressedFile = await getCompressedFile(file);
+    const compressedFile = await getCompressedFile(file);
     currentImageSrc = URL.createObjectURL(compressedFile);
-    
-    let fd = new FormData(e.target);
-    fd.set('file', compressedFile);
-    
+    $('#source-image-preview').src = currentImageSrc;
+    $('#source-image-preview').classList.remove('hidden');
+    $('#no-image-text').classList.add('hidden');
+
+    const fd = new FormData();
+    fd.append('file', compressedFile, compressedFile.name);
+
+    showOverlay(['Preparing image...', 'Reading your slip...', 'Matching medicines...', 'Checking quantities...']);
+
     await ensureCatalogReady();
+
+    const response = await fetch('/api/wantslip', {
+      method: 'POST',
+      body: fd
+    });
+
+    const bodyText = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      throw new Error(`Invalid server response (${response.status})`);
+    }
+
+    if (!response.ok) {
+      throw new Error(data.detail || data.error || `Want-slip processing failed (${response.status})`);
+    }
+
+    processRequirementResult(data);
+
+  } catch (error) {
+    console.error('Want-slip processing failed', error);
     
-    let r = await fetch('/api/wantslip', { method: 'POST', body: fd });
-    let j = await r.json();
-    if(!r.ok) throw new Error(j.detail || 'Upload failed');
-    processRequirementResult(j);
-  } catch (err) {
-    alert("We couldn't reliably read this slip. " + err.message);
+    // Instead of alerting and resetting, update UI directly
+    toggle('#pharmacy-home', false);
+    toggle('#pharmacy-review', false);
+    toggle('#pharmacy-review-suppliers', false);
+    
+    // Create an inline error state
+    let errDiv = document.getElementById('ocr-error-state');
+    if (!errDiv) {
+      errDiv = document.createElement('div');
+      errDiv.id = 'ocr-error-state';
+      errDiv.className = 'card mt-4';
+      document.getElementById('center-workspace').appendChild(errDiv);
+    }
+    
+    errDiv.innerHTML = `
+      <h2 style="color:var(--red);">We couldn't process this want slip.</h2>
+      <p>${esc(error.message || "Something went wrong during OCR extraction.")}</p>
+      <div class="mt-4 flex-gap">
+        <button class="btn-primary" onclick="location.reload()">Try again</button>
+      </div>
+    `;
+    errDiv.classList.remove('hidden');
+    
   } finally {
     hideOverlay();
+    btn.disabled = false;
+    btn.textContent = 'Read want slip';
   }
-};
+}
 
-$('#form-type-req').onsubmit = async e => {
+async function handleTextRequirement(e) {
   e.preventDefault();
   currentImageSrc = null;
   showOverlay(['Resolving requirement...', 'Matching medicines...', 'Checking availability...']);
@@ -801,7 +896,7 @@ $('#form-type-req').onsubmit = async e => {
   } finally {
     hideOverlay();
   }
-};
+}
 
 function processRequirementResult(data) {
   currentItems = data.items || [];
@@ -940,13 +1035,16 @@ function renderRequirementTable() {
   
   if (reviewCount > 0) {
     $('#requirement-actions').innerHTML = `
-      <button class="btn-primary" style="margin-bottom:0;" onclick="toggleBatchWorkspace(true)">Review ${reviewCount} issues →</button>
-      <button class="btn-outline" style="margin-bottom:0;" onclick="toggleBatchWorkspace(false)">View all ${currentItems.length} items</button>
+      <button class="btn-primary" id="btn-review-issues" style="margin-bottom:0;">Review ${reviewCount} issues →</button>
+      <button class="btn-outline" id="btn-view-all" style="margin-bottom:0;">View all ${currentItems.length} items</button>
     `;
+    document.getElementById('btn-review-issues').addEventListener('click', () => toggleBatchWorkspace(true));
+    document.getElementById('btn-view-all').addEventListener('click', () => toggleBatchWorkspace(false));
   } else {
     $('#requirement-actions').innerHTML = `
-      <button class="btn-primary" style="margin-bottom:0;" onclick="showSuppliers()">Find Suppliers →</button>
+      <button class="btn-primary" id="btn-find-suppliers" style="margin-bottom:0;">Find Suppliers →</button>
     `;
+    document.getElementById('btn-find-suppliers').addEventListener('click', showSuppliers);
   }
 }
 
@@ -1253,31 +1351,13 @@ function showSuppliers() {
           </div>
           
           <div style="display:flex; gap:12px;">
-            <button class="btn-outline" style="flex:1; background:var(--blue-bg); border:none;" onclick="toggleCoverageMatrix(true)">${s.coverage_status === 'FULL' ? 'View Details' : 'View Gaps'}</button>
-            <button class="btn-primary" style="flex:1;" onclick="placeOrder('${esc(s.supplier_id)}')">Select</button>
+            <button class="btn-outline btn-view-gaps" style="flex:1; background:var(--blue-bg); border:none;">${s.coverage_status === 'FULL' ? 'View Details' : 'View Gaps'}</button>
+            <button class="btn-primary btn-place-order" style="flex:1;" data-supplier-id="${esc(s.supplier_id)}">Select</button>
           </div>
         </div>
       </div>
     `;
-        
-        <div class="grid-2 mb-4 mt-2">
-          <div>
-            <div class="tiny">Availability</div>
-            <strong>${s.full_line_count} / ${ready.length} medicines</strong>
-          </div>
-          <div>
-            <div class="tiny">Expected delivery</div>
-            <strong>${s.eta_label || 'Unknown'}</strong>
-          </div>
-          <div style="grid-column: span 2;">
-            <div class="tiny">Estimated Total</div>
-            <strong>₹${Math.round(s.estimated_total)}</strong>
-          </div>
-        </div>
-        
-        <button class="${isRec ? 'btn-primary' : 'btn-outline'}" onclick="placeOrder('${esc(s.supplier_id)}')">Place Order</button>
-      </div>
-    `;
+
   }).join('');
   $('#supplier-cards-container').className = 'grid-2 mt-4';
   $('#supplier-cards-container').style.gridTemplateColumns = 'repeat(4, 1fr)';
@@ -1300,6 +1380,17 @@ function showSuppliers() {
     return `<tr>${tdHtml}</tr>`;
   }).join('');
   $('#coverage-matrix-body').innerHTML = tbHtml;
+  
+  // Bind dynamic event listeners
+  document.querySelectorAll('.btn-place-order').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      placeOrder(e.target.getAttribute('data-supplier-id'));
+    });
+  });
+  
+  document.querySelectorAll('.btn-view-gaps').forEach(btn => {
+    btn.addEventListener('click', () => toggleCoverageMatrix(true));
+  });
 }
 
 async function placeOrder(supplierId) {
@@ -1666,8 +1757,7 @@ async function generateInvoice(orderId) {
   }
 }
 
-// Start
-setRole('pharmacy');
+// Start handled in DOMContentLoaded
 
 </script>
 </body>
