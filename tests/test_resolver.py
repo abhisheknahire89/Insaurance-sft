@@ -2,7 +2,7 @@ from app.catalog import load_catalog,resolve
 from app.models import OCRLine
 from app.validate import enforce_contract
 from pathlib import Path
-CAT=load_catalog(str(Path(__file__).resolve().parents[1]/'tests'/'fixtures'/'medicine_master_small.csv'))
+CAT=load_catalog(str(Path(__file__).resolve().parents[1]/'data'/'medicine_master_demo.csv'))
 
 def line(name,qty=1,conf=.95,strength=None):
     return OCRLine(name,name,qty,strength=strength,ocr_confidence=conf,reader_agreement=.95,reader_votes=2,quantity_role='ORDER_QUANTITY')

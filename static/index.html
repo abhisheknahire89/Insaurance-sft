@@ -1038,7 +1038,7 @@ async function ensureCatalogReady() {
     
     // update overlay text if visible
     let t = $('#overlayText');
-    if (t) t.textContent = "Preparing medicine catalogue (loading ~253K rows)...";
+    if (t) t.textContent = "Preparing medicine catalogue (loading ~84 rows)...";
     
     await new Promise(res => setTimeout(res, 1000));
   }
@@ -1609,7 +1609,7 @@ function renderBatchReview() {
       `;
     } else {
       let cands = item.resolution.candidates || [];
-      if (cands.length > 0) {
+      if (cands.length > 0 && item.resolution.decision !== 'NO_MATCH') {
         let candHtml = cands.slice(0,3).map((c, cIdx) => `
           <label style="display:block; padding: 8px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; cursor: pointer; font-weight: normal;">
             <input type="radio" name="cand-${idx}" value="${cIdx}" ${cIdx === 0 ? 'checked' : ''}>

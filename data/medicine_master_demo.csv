@@ -1,0 +1,85 @@
+sku,product_name,strength,form,manufacturer,aliases
+SKU0001,Dolo 650,650 mg,tablet,Micro Labs,Dolo650
+SKU0002,Dolo 500,500 mg,tablet,Micro Labs,Dolo500
+SKU0003,Dolokind Plus,,tablet,,Dolokind
+SKU0004,Doloact,,tablet,,Dolo Act
+SKU0005,Pan 40,40 mg,tablet,,Pan40
+SKU0006,Pan 20,20 mg,tablet,,Pan20
+SKU0007,Pantop 40,40 mg,tablet,,Pantop40
+SKU0008,Pantop D,,tablet,,Pantop-D
+SKU0009,Allegra 120,120 mg,tablet,,Allegra120
+SKU0010,Allegra 180,180 mg,tablet,,Allegra180
+SKU0011,Azithral 500,500 mg,tablet,,Azithral500
+SKU0012,Azithral 250,250 mg,tablet,,Azithral250
+SKU0013,Azee 500,500 mg,tablet,,Azee500
+SKU0014,Azee 250,250 mg,tablet,,Azee250
+SKU0015,Shelcal 500,500 mg,tablet,,Shelcal500
+SKU0016,Shelcal XT,,tablet,,ShelcalXT
+SKU0017,Shelcal HD,,tablet,,ShelcalHD
+SKU0018,Becosules,,capsule,,Becosule Becosules capsule
+SKU0019,Electral,,sachet,,ORS Electral
+SKU0020,Electral Ready To Drink,,liquid,,Electral RTD
+SKU0021,ORS,,sachet,,oral rehydration salts
+SKU0022,U-Wash Small,,wash,,U Wash small Uwash small
+SKU0023,U-Wash Large,,wash,,U Wash large Uwash large
+SKU0024,Iodifresh,,product,,Iodi Fresh Iodifresh
+SKU0025,PartySmart,,capsule,Himalaya,Party Smart
+SKU0026,Himalaya Kajal,,kajal,Himalaya,Himalaya Kajal
+SKU0027,Calciquick Gold,,tablet,,Calci Quick Gold
+SKU0028,Corcal,,tablet,,Corcal
+SKU0029,Corcal 500,500 mg,tablet,,Corcal500
+SKU0030,Corcal D3,,tablet,,Corcal D3
+SKU0031,Alibac Shampoo,,shampoo,,Alibac
+SKU0032,Statfree 135,135 mg,tablet,,Statfree135
+SKU0033,Montek LC,,tablet,,Montek-LC
+SKU0034,Montair LC,,tablet,,Montair-LC
+SKU0035,Augmentin 625,625 mg,tablet,,Augmentin625
+SKU0036,Amoxyclav 625,625 mg,tablet,,Amoxyclav625
+SKU0037,Paracetamol 500,500 mg,tablet,,PCM 500
+SKU0038,Crocin 500,500 mg,tablet,,Crocin500
+SKU0039,Crocin Advance,500 mg,tablet,,Crocin Adv
+SKU0040,Combiflam,,tablet,,Combiflam
+SKU0041,Cetirizine 10,10 mg,tablet,,Cetirizine10
+SKU0042,Levocet 5,5 mg,tablet,,Levocet5
+SKU0043,Avil 25,25 mg,tablet,,Avil25
+SKU0044,Omnacortil 10,10 mg,tablet,,Omnacortil10
+SKU0045,Omnacortil 20,20 mg,tablet,,Omnacortil20
+SKU0046,Rantac 150,150 mg,tablet,,Rantac150
+SKU0047,Rabekind 20,20 mg,tablet,,Rabekind20
+SKU0048,Rablet 20,20 mg,tablet,,Rablet20
+SKU0049,Telma 40,40 mg,tablet,,Telma40
+SKU0050,Telmikind 40,40 mg,tablet,,Telmikind40
+SKU0051,Amlokind 5,5 mg,tablet,,Amlokind5
+SKU0052,Amlong 5,5 mg,tablet,,Amlong5
+SKU0053,Atorva 10,10 mg,tablet,,Atorva10
+SKU0054,Atorva 20,20 mg,tablet,,Atorva20
+SKU0055,Rosuvastatin 10,10 mg,tablet,,Rosuvas10
+SKU0056,Rosuvastatin 20,20 mg,tablet,,Rosuvas20
+SKU0057,Metformin 500,500 mg,tablet,,Metformin500
+SKU0058,Glycomet 500,500 mg,tablet,,Glycomet500
+SKU0059,Thyronorm 25,25 mcg,tablet,,Thyronorm25
+SKU0060,Thyronorm 50,50 mcg,tablet,,Thyronorm50
+SKU0061,Thyronorm 100,100 mcg,tablet,,Thyronorm100
+SKU0062,Limcee 500,500 mg,tablet,,Vitamin C Limcee
+SKU0063,Zincovit,,tablet,,Zincovit
+SKU0064,Neurobion Forte,,tablet,,Neurobion
+SKU0065,Evion 400,400 mg,capsule,,Evion400
+SKU0066,Benadryl Syrup,,syrup,,Benadryl
+SKU0067,Ascoril LS,,syrup,,Ascoril LS
+SKU0068,Ambrodil LS,,syrup,,Ambrodil LS
+SKU0069,Digene Gel,,gel,,Digene
+SKU0070,Gelusil,,liquid,,Gelusil
+SKU0071,Volini Gel,,gel,,Volini
+SKU0072,Moov Gel,,gel,,Moov
+SKU0073,Betadine Ointment,,ointment,,Betadine
+SKU0074,Soframycin Cream,,cream,,Soframycin
+SKU0075,Candid Cream,,cream,,Candid
+SKU0076,Clotrimazole Cream,,cream,,Clotrimazole
+SKU0077,Dettol Antiseptic,,liquid,,Dettol
+SKU0078,Savlon Antiseptic,,liquid,,Savlon
+SKU0079,Himalaya Neem Face Wash,,wash,Himalaya,Neem Face Wash
+SKU0080,Himalaya Shampoo,,shampoo,Himalaya,Himalaya Shampoo
+SKU0081,Parodontax,,toothpaste,,Parodontax
+SKU0082,Sensodyne,,toothpaste,,Sensodyne
+SKU0083,Colgate Sensitive,,toothpaste,,Colgate Sensitive
+SKU0084,Eno,,sachet,,ENO fruit salt

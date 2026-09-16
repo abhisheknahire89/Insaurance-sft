@@ -13,7 +13,7 @@ load_dotenv(root / '.env', override=True)
 def main():
     samples_dir = root / 'samples' / 'wantslips'
     ground_truth_dir = root / 'eval_ground_truth'
-    catalog_path = root / 'data' / 'medicine_master.csv'
+    catalog_path = root / 'data' / 'medicine_master_demo.csv'
     
     api_key = os.getenv('SARVAM_API_KEY')
     if not api_key:

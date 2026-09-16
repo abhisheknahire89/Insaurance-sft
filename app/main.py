@@ -38,7 +38,7 @@ async def load_catalog_bg(app: FastAPI, cat_path: Path):
         app.state.catalog_status = {
             'loaded': True,
             'loading': False,
-            'source': f'data/medicine_master.csv',
+            'source': f'data/medicine_master_demo.csv',
             'rows': len(catalog),
             'active': active,
             'discontinued': discontinued,
@@ -61,7 +61,7 @@ async def lifespan(app: FastAPI):
     app.state.catalog = []
     app.state.catalog_index = None
     
-    cat_path = DATA/'medicine_master.csv'
+    cat_path = DATA/'medicine_master_demo.csv'
     if not cat_path.exists():
         app.state.catalog_status = {'loaded': False, 'loading': False, 'error': 'NOT_FOUND'}
         print("MEDICINE MASTER NOT FOUND. Starting anyway.")

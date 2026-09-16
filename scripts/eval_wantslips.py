@@ -18,7 +18,7 @@ load_dotenv(root / '.env', override=True)
 def main():
     samples_dir = root / 'samples' / 'wantslips'
     eval_dir = root / 'eval'
-    catalog_path = root / 'data' / 'medicine_master.csv'
+    catalog_path = root / 'data' / 'medicine_master_demo.csv'
     inventory_path = root / 'data' / 'supplier_inventory.csv'
     
     api_key = os.getenv('SARVAM_API_KEY')

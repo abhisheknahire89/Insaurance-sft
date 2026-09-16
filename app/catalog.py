@@ -55,7 +55,7 @@ def load_catalog(path:str)->List[CatalogRow]:
     return rows
 
 def _strength_tokens(s:str)->set[str]:
-    return set(re.findall(r"\d+(?:\.\d+)?\s*(?:mg|mcg|g|gm|ml|iu|%)", norm_text(s)))
+    return set(re.findall(r"\b(\d+(?:\.\d+)?)\s*(?:mg|mcg|g|gm|ml|iu|%)?\b", norm_text(s)))
 
 def _strength_score(query:str,row:CatalogRow)->tuple[float,bool]:
     q=_strength_tokens(query); r=_strength_tokens(f"{row.product_name} {row.strength}")
@@ -92,7 +92,7 @@ def resolve(line:OCRLine,catalog:List[CatalogRow],correction_master_id:Optional[
     for total,ns,ss,conflict,row in scored[:5]:
         cand.append({'master_product_id':row.master_product_id,'product_name':row.product_name,'strength':row.strength,'form':row.form,'manufacturer':row.manufacturer,'score':round(total,4),'name_score':round(ns,4),'strength_score':round(ss,4),'strength_conflict':bool(conflict)})
     # Explicit NO_MATCH: never leak a random SKU for low-similarity text.
-    if top[1] < 0.70:
+    if top[1] < 0.75:
         return Resolution('NO_MATCH',None,None,round(top[0],4),'no catalogue candidate is similar enough',cand,True,cand[0]['master_product_id'],cand[0]['product_name'])
     lasa,reason=lasa_guard(q,top[4].product_name,second[4].product_name if second[4] else None,top[0],second[0])
     if lasa:
