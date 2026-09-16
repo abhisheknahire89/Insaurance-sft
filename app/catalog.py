@@ -67,7 +67,7 @@ def _strength_score(query:str,row:CatalogRow)->tuple[float,bool]:
 def resolve(line:OCRLine,catalog:List[CatalogRow],correction_master_id:Optional[str]=None,index:CatalogIndex|None=None)->Resolution:
     if not line.is_order_line or line.line_status in {'CROSSED_OUT','NOTE'}:
         return Resolution('IGNORE',None,None,0.0,'not an active order line',[],False)
-    q=(line.medicine_name or '').strip()
+    q=(f"{line.medicine_name or ''} {line.variant or ''} {line.strength or ''}").strip()
     if len(brand_root(q))<2:
         return Resolution('NO_MATCH',None,None,0.0,'insufficient medicine text',[],True)
     idx=index or CatalogIndex(catalog)
@@ -75,7 +75,7 @@ def resolve(line:OCRLine,catalog:List[CatalogRow],correction_master_id:Optional[
     scored=[]
     for row in candidates:
         ns=max(score_name(q,row.product_name), score_name(q,f"{row.product_name} {row.aliases}"))
-        ss,conflict=_strength_score(f"{line.medicine_name} {line.strength or ''}",row)
+        ss,conflict=_strength_score(q,row)
         total=0.88*ns+0.12*ss
         if correction_master_id and row.master_product_id==correction_master_id:
             total=min(1.0,total+0.08)
