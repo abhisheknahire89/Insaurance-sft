@@ -209,7 +209,7 @@ def process_wantslip(src:str,catalog:list[CatalogRow],cat_index:CatalogIndex,api
             correction=correction_for(db_conn,norm_text(line.raw_text))
         res=enforce_contract(line,resolve(line,catalog,correction,cat_index))
         opts=supplier_options_demo(res.master_product_id,line.quantity) if res.master_product_id else []
-        best=next((o for o in opts if o.can_fulfil),None)
+        best=next((o for o in opts if o['can_fulfil']),None)
         items.append({'input':line.__dict__,'resolution':res.__dict__,'suppliers':opts,'best_supplier':best})
     return {'mode':accuracy_mode,'passes_requested':names,'passes_succeeded':len(reads),'pass_errors':errors,'image_quality':image_quality(src),'items':items,
             'summary':{'lines':len(items),'auto_accept':sum(x['resolution']['decision']=='AUTO_ACCEPT' for x in items),'review':sum(x['resolution']['requires_review'] for x in items),
@@ -224,7 +224,7 @@ def process_text_requirement(text:str,catalog:list[CatalogRow],cat_index:Catalog
             correction=correction_for(db_conn,norm_text(line.raw_text))
         res=enforce_contract(line,resolve(line,catalog,correction,cat_index))
         opts=supplier_options_demo(res.master_product_id,line.quantity) if res.master_product_id else []
-        best=next((o for o in opts if o.can_fulfil),None)
+        best=next((o for o in opts if o['can_fulfil']),None)
         items.append({'input':line.__dict__,'resolution':res.__dict__,'suppliers':opts,'best_supplier':best})
     return {'items':items,'summary':{'lines':len(items),'auto_accept':sum(x['resolution']['decision']=='AUTO_ACCEPT' for x in items),'review':sum(x['resolution']['requires_review'] for x in items),'supplier_ready':sum(x['best_supplier'] is not None for x in items)}}
 
