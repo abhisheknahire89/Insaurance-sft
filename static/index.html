@@ -276,6 +276,12 @@ tr:last-child td { border-bottom: none; }
   .sidebar-right { width: 100%; border-left: none; border-top: 1px solid var(--line); }
   .source-image-viewport { height: 260px; }
 }
+@media print {
+  body * { visibility: hidden !important; }
+  #printable-invoice-container, #printable-invoice-container * { visibility: visible !important; }
+  #printable-invoice-container { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
+  .no-print { display: none !important; }
+}
 </style>
 </head>
 <body>
@@ -287,22 +293,22 @@ tr:last-child td { border-bottom: none; }
     </div>
     
     <div style="margin-bottom: 32px;">
-      <button class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+      <button class="btn-primary" onclick="setRole('pharmacy'); goHomePharmacy();" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
         <span style="font-size:18px;">+</span> New Requirement
       </button>
     </div>
     
     <div class="nav-menu">
-      <div class="nav-item active"><span class="nav-icon">💊</span> My Orders</div>
-      <div class="nav-item"><span class="nav-icon">📄</span> Invoices</div>
-      <div class="nav-item"><span class="nav-icon">🏢</span> Supplier Directory</div>
-      <div class="nav-item"><span class="nav-icon">📊</span> Reports</div>
+      <div class="nav-item active" id="nav-orders" onclick="setRole('pharmacy')"><span class="nav-icon">💊</span> My Orders</div>
+      <div class="nav-item" id="nav-invoices" onclick="setRole('invoices')"><span class="nav-icon">📄</span> Invoices</div>
+      <div class="nav-item" id="nav-supplier" onclick="setRole('supplier')"><span class="nav-icon">🏢</span> Supplier Directory</div>
+      <div class="nav-item" id="nav-reports" onclick="setRole('reports')"><span class="nav-icon">📊</span> Reports</div>
     </div>
     
     <div style="flex:1;"></div>
     
     <div class="nav-menu" style="margin-bottom: 16px;">
-      <div class="nav-item"><span class="nav-icon">❓</span> Help & Support</div>
+      <div class="nav-item" id="nav-help" onclick="openHelpModal()"><span class="nav-icon">❓</span> Help & Support</div>
     </div>
     <div class="sidebar-footer flex-between">
       <span>PharmaFlow AI</span>
@@ -706,6 +712,174 @@ tr:last-child td { border-bottom: none; }
     </div>
 
   </section>
+
+  <!-- ========================================== -->
+  <!-- INVOICES VIEW                              -->
+  <!-- ========================================== -->
+  <!-- ========================================== -->
+  <!-- INVOICES VIEW                              -->
+  <!-- ========================================== -->
+  <section id="role-invoices" class="panel">
+    <div id="invoices-home">
+      <div class="flex-between mb-4">
+        <div>
+          <h1 style="margin:0 0 4px 0;">Invoices & Tax Generator</h1>
+          <p class="tiny" style="margin:0;">View supplier invoices, automated check results, or generate custom GST tax invoices.</p>
+        </div>
+        <button class="btn-primary" onclick="openCustomInvoiceModal()"><span style="font-size:16px;">＋</span> Custom Invoice Generator</button>
+      </div>
+      <div id="invoices-list">
+        <div class="tiny">Loading invoices...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- REPORTS VIEW                               -->
+  <!-- ========================================== -->
+  <section id="role-reports" class="panel">
+    <div id="reports-home">
+      <h1>Procurement & Fulfillment Reports</h1>
+      <p style="margin-bottom: 24px;">Real-time analytics across pharmacy requirements and supplier network.</p>
+      
+      <div class="grid-2 mb-4">
+        <div class="card">
+          <div class="tiny" style="color:var(--muted); font-weight:600; text-transform:uppercase;">Total Orders Processed</div>
+          <div style="font-size:28px; font-weight:700; color:var(--primary); margin:8px 0;" id="rep-total-orders">0</div>
+          <div class="tiny" style="color:var(--green);">✓ Active pipeline operational</div>
+        </div>
+        <div class="card">
+          <div class="tiny" style="color:var(--muted); font-weight:600; text-transform:uppercase;">Procurement Volume</div>
+          <div style="font-size:28px; font-weight:700; color:var(--green); margin:8px 0;" id="rep-total-spend">₹ 0</div>
+          <div class="tiny" style="color:var(--muted);">Across all supplier fulfillments</div>
+        </div>
+      </div>
+
+      <div class="card card-flush">
+        <div class="card-header flex-between">
+          <h3>Supplier Performance Matrix</h3>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <table>
+            <thead>
+              <tr>
+                <th>Distributor Name</th>
+                <th>Location</th>
+                <th>Cutoff Time</th>
+                <th>Standard ETA</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>ABC Pharma Distributors</b></td><td>Mumbai, MH</td><td>16:00</td><td>Today / Tomorrow</td><td><span class="badge badge-ok">Active</span></td></tr>
+              <tr><td><b>MedLife Logistics</b></td><td>Thane, MH</td><td>17:30</td><td>Tomorrow</td><td><span class="badge badge-ok">Active</span></td></tr>
+              <tr><td><b>Apex Health Wholesale</b></td><td>Navi Mumbai, MH</td><td>15:00</td><td>Today</td><td><span class="badge badge-ok">Active</span></td></tr>
+              <tr><td><b>SunMed Agency</b></td><td>Pune, MH</td><td>18:00</td><td>2 Days</td><td><span class="badge badge-ok">Active</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Help & Support Modal -->
+  <div id="help-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:300; display:none; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:16px; padding:32px; width:520px; max-width:95vw; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0 0 4px 0;">Help & System Overview</h2>
+          <div class="tiny">PharmaFlow AI Procurement Assistant</div>
+        </div>
+        <button class="btn-outline" style="padding:4px 10px; font-size:12px; margin:0;" onclick="closeHelpModal()">✕</button>
+      </div>
+      <div style="font-size:13px; line-height:1.6; color:var(--ink);">
+        <p style="margin-bottom:10px;"><b>1. Handwritten Want Slips:</b> Upload photos of handwritten doctor/pharmacy orders. PharmaFlow reads handwriting via Sarvam OCR AI and normalizes drug names.</p>
+        <p style="margin-bottom:10px;"><b>2. Catalogue Matching:</b> Every item is safely matched against our 84-item medicine master dataset. Uncertain items are highlighted for 1-click review.</p>
+        <p style="margin-bottom:10px;"><b>3. Supplier Comparison:</b> System automatically queries 4 distributor networks and ranks options by full order coverage, quickest delivery (ETA), and best price.</p>
+        <p style="margin-bottom:10px;"><b>4. Automated Invoice Check:</b> Generating an invoice triggers automatic line-by-line reconciliation checking quantities, rates, and batch numbers.</p>
+      </div>
+      <div style="margin-top:20px; text-align:right;">
+        <button class="btn-primary" onclick="closeHelpModal()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable GST Tax Invoice Modal -->
+  <div id="invoice-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:400; display:none; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; border-radius:16px; padding:32px; width:760px; max-width:95vw; box-shadow:0 25px 70px rgba(0,0,0,0.25); max-height:90vh; overflow-y:auto;" id="printable-invoice-container">
+      
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid var(--line); padding-bottom:16px; margin-bottom:20px;" class="no-print">
+        <div>
+          <h2 style="margin:0;">GST Tax Invoice</h2>
+          <div class="tiny">PharmaFlow AI Automated Document Suite</div>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-primary" onclick="printInvoice()"><span style="font-size:14px;">🖨️</span> Print / Save PDF</button>
+          <button class="btn-outline" onclick="closeInvoiceModal()">✕ Close</button>
+        </div>
+      </div>
+
+      <div id="invoice-sheet" style="font-size:13px; color:var(--ink); background:white; padding:10px;">
+        <!-- Injected dynamically by JS -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Custom Invoice Generator Modal -->
+  <div id="custom-invoice-modal" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:400; display:none; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; border-radius:16px; padding:32px; width:680px; max-width:95vw; box-shadow:0 25px 70px rgba(0,0,0,0.25); max-height:90vh; overflow-y:auto;">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+          <h2 style="margin:0;">GST Tax Invoice Generator</h2>
+          <div class="tiny">Create a pharmaceutical tax invoice with custom medicines & rates</div>
+        </div>
+        <button class="btn-outline" style="padding:4px 10px; font-size:12px; margin:0;" onclick="closeCustomInvoiceModal()">✕</button>
+      </div>
+
+      <form id="form-custom-invoice" onsubmit="generateCustomInvoiceSubmit(event)">
+        <div class="grid-2 mb-2">
+          <div>
+            <label>Supplier / Distributor Name</label>
+            <input type="text" id="ci-supplier" value="ABC Pharma Distributors Pvt Ltd" required>
+          </div>
+          <div>
+            <label>Pharmacy / Buyer Name</label>
+            <input type="text" id="ci-buyer" value="Krishna Medical Store" required>
+          </div>
+        </div>
+
+        <div class="grid-2 mb-2">
+          <div>
+            <label>Invoice Number</label>
+            <input type="text" id="ci-inv-id" placeholder="Auto-generated (e.g. INV-ABC-101)">
+          </div>
+          <div>
+            <label>Invoice Date</label>
+            <input type="date" id="ci-date" required>
+          </div>
+        </div>
+
+        <h3 style="margin-top:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Itemized Medicines</span>
+          <span class="tiny" style="font-weight:normal; color:var(--muted);">Rates exclude GST</span>
+        </h3>
+        
+        <div id="custom-inv-items-list" style="margin-bottom:16px;">
+          <!-- Item rows injected by JS -->
+        </div>
+
+        <button type="button" class="btn-outline mb-4" onclick="addCustomInvoiceLineRow()" style="font-size:12px;">＋ Add Medicine Line</button>
+
+        <div style="border-top:1px solid var(--line); padding-top:16px; display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn-outline" onclick="closeCustomInvoiceModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Generate Tax Invoice →</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
   
   </div> <!-- /center-workspace -->
 
@@ -781,6 +955,9 @@ tr:last-child td { border-bottom: none; }
 </div> <!-- /main-area -->
 
 <script>
+window.round2 = function(n) { return Math.round((Number(n) || 0) * 100) / 100; };
+function round2(n) { return window.round2(n); }
+
 // --- State ---
 let currentRole = 'pharmacy';
 let currentItems = [];
@@ -988,13 +1165,430 @@ function toggleDetails(el) {
 function setRole(role) {
   currentRole = role;
   document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-  $(`button[onclick="setRole('${role}')"]`).classList.add('active');
+  let roleBtn = $(`button[onclick="setRole('${role}')"]`);
+  if (roleBtn) roleBtn.classList.add('active');
+  
+  // Highlight sidebar nav item
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  let navId = role === 'pharmacy' ? 'nav-orders' : role === 'supplier' ? 'nav-supplier' : role === 'invoices' ? 'nav-invoices' : role === 'reports' ? 'nav-reports' : null;
+  if (navId && $(`#${navId}`)) $(`#${navId}`).classList.add('active');
   
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  $(`#role-${role}`).classList.add('active');
+  let panel = $(`#role-${role}`);
+  if (panel) panel.classList.add('active');
   
   if(role === 'pharmacy') goHomePharmacy();
   if(role === 'supplier') goHomeSupplier();
+  if(role === 'invoices') loadInvoicesView();
+  if(role === 'reports') loadReportsView();
+}
+
+function openHelpModal() {
+  let m = $('#help-modal');
+  if (m) {
+    m.classList.remove('hidden');
+    m.style.display = 'flex';
+  }
+}
+function closeHelpModal() {
+  let m = $('#help-modal');
+  if (m) {
+    m.classList.add('hidden');
+    m.style.display = 'none';
+  }
+}
+
+function numberToWordsINR(amount) {
+  let num = Math.floor(amount || 0);
+  if (num === 0) return "Zero Rupees Only";
+  const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+  function inWords(n) {
+    if (n < 20) return a[n];
+    if (n < 100) return b[Math.floor(n / 10)] + (n % 10 ? ' ' + a[n % 10] : '');
+    if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + inWords(n % 100) : '');
+    if (n < 100000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + inWords(n % 1000) : '');
+    if (n < 10000000) return inWords(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + inWords(n % 100000) : '');
+    return inWords(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + inWords(n % 10000000) : '');
+  }
+  return 'Rupees ' + inWords(num) + ' Only';
+}
+
+function loadInvoicesView() {
+  let state = getDemoState();
+  let orders = state.orders || [];
+  let customInvs = state.custom_invoices || [];
+  
+  let invoicedOrders = orders.filter(o => o.invoice || o.invoice_reconciliation || o.status === 'INVOICED' || o.status === 'RECONCILED' || o.status === 'DELIVERED');
+  let allInvoices = [
+    ...invoicedOrders.map(o => ({
+      id: o.id,
+      invId: o.invoice?.invoice_id || `INV-${o.id.replace('PF-','')}`,
+      supplier: o.supplier_snapshot?.supplier_name || o.invoice?.supplier || 'Supplier',
+      grandTotal: o.invoice?.grand_total ? `₹${o.invoice.grand_total}` : (o.supplier_snapshot?.estimated_total ? `₹${o.supplier_snapshot.estimated_total}` : 'Pending'),
+      status: o.status,
+      hasRec: !!o.invoice_reconciliation,
+      order: o
+    })),
+    ...customInvs.map(ci => ({
+      id: ci.invoice_id,
+      invId: ci.invoice_id,
+      supplier: ci.supplier,
+      grandTotal: `₹${ci.grand_total}`,
+      status: 'GENERATED',
+      hasRec: false,
+      customInv: ci
+    }))
+  ];
+  
+  let container = $('#invoices-list');
+  if (!container) return;
+  
+  if (allInvoices.length === 0) {
+    container.innerHTML = `
+      <div class="card text-center" style="padding:40px;">
+        <div style="font-size:32px; margin-bottom:12px;">📑</div>
+        <h3>No invoices generated yet</h3>
+        <p class="tiny">Generate a custom GST tax invoice using the button above, or switch to <b>Supplier mode</b> to fulfill orders and generate invoices.</p>
+        <button class="btn-primary" onclick="openCustomInvoiceModal()">＋ Generate Custom Tax Invoice</button>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = allInvoices.map(inv => `
+    <div class="card card-flush mb-4">
+      <div class="card-body flex-between">
+        <div>
+          <h3 style="margin:0 0 4px 0;">${esc(inv.invId)} <span class="tiny" style="font-weight:normal; margin-left:8px;">${inv.order ? `Order ${esc(inv.id)}` : 'Custom Tax Invoice'}</span></h3>
+          <div class="tiny">${esc(inv.supplier)} · Total: <b>${esc(inv.grandTotal)}</b></div>
+        </div>
+        <div class="flex-gap">
+          <span class="badge ${inv.hasRec ? 'badge-ok' : 'badge-neutral'}">${inv.hasRec ? 'Reconciled' : inv.status}</span>
+          <button class="btn-primary" onclick="viewFullInvoiceModal('${esc(inv.invId)}')" style="font-size:12px; padding:6px 12px;">📄 View Tax Invoice</button>
+          ${inv.hasRec ? `<button class="btn-outline" onclick="viewReconciliation('${esc(inv.id)}')" style="font-size:12px; padding:6px 12px;">Check</button>` : ''}
+          <button class="btn-outline" onclick="downloadInvoiceJSON('${esc(inv.invId)}')" style="font-size:12px; padding:6px 12px;" title="Download JSON">📥 JSON</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function viewFullInvoiceModal(id) {
+  let state = getDemoState();
+  let o = state.orders ? state.orders.find(x => x.id === id || x.invoice?.invoice_id === id) : null;
+  let inv = o?.invoice;
+  
+  if (!inv) {
+    let customInvs = state.custom_invoices || [];
+    inv = customInvs.find(x => x.invoice_id === id || x.order_id === id);
+  }
+
+  if (!inv && o) {
+    inv = {
+      invoice_id: `INV-${(o.supplier_snapshot?.supplier_name || 'SUP').substring(0,3).toUpperCase()}-${o.id.replace('PF-','')}`,
+      date: new Date().toISOString().split('T')[0],
+      supplier: o.supplier_snapshot?.supplier_name || 'ABC Pharma Distributors',
+      order_id: o.id,
+      buyer: o.pharmacy_name || 'Krishna Medical Store',
+      lines: (o.payload.items || []).map((it, idx) => ({
+        line_number: idx + 1,
+        product_name: it.product_name || it.raw_text,
+        master_product_id: it.master_product_id || `MP00${idx+1}`,
+        supplier_sku: it.supplier_sku || `SKU-${idx+1}`,
+        batch: [`BCH-${9000+idx}`],
+        expiry: '2027-12',
+        quantity: it.fulfilled_quantity || it.quantity || 1,
+        rate: it.unit_price || 120,
+        gst_rate: 12,
+        taxable_value: round2((it.unit_price || 120) * (it.fulfilled_quantity || it.quantity || 1)),
+        tax_amount: round2((it.unit_price || 120) * (it.fulfilled_quantity || it.quantity || 1) * 0.12),
+        line_total: round2((it.unit_price || 120) * (it.fulfilled_quantity || it.quantity || 1) * 1.12)
+      })),
+      total_taxable: 0,
+      total_tax: 0,
+      grand_total: 0
+    };
+    inv.total_taxable = round2(inv.lines.reduce((s, l) => s + l.taxable_value, 0));
+    inv.total_tax = round2(inv.lines.reduce((s, l) => s + l.tax_amount, 0));
+    inv.grand_total = round2(inv.total_taxable + inv.total_tax);
+  }
+
+  if (!inv) {
+    alert("Invoice details not found.");
+    return;
+  }
+
+  let cgst = round2(inv.total_tax / 2);
+  let sgst = round2(inv.total_tax / 2);
+  let words = numberToWordsINR(inv.grand_total);
+
+  let rowsHtml = (inv.lines || []).map(l => `
+    <tr>
+      <td style="padding:8px; border:1px solid var(--line);">${l.line_number}</td>
+      <td style="padding:8px; border:1px solid var(--line);"><b>${esc(l.product_name)}</b><br><span class="tiny">SKU: ${esc(l.supplier_sku || '—')}</span></td>
+      <td style="padding:8px; border:1px solid var(--line);">${esc((l.batch || []).join(', ') || 'BCH-8821')}</td>
+      <td style="padding:8px; border:1px solid var(--line);">${esc(l.expiry || '2027-12')}</td>
+      <td style="padding:8px; border:1px solid var(--line); text-align:right;">${l.quantity}</td>
+      <td style="padding:8px; border:1px solid var(--line); text-align:right;">₹ ${Number(l.rate || 0).toFixed(2)}</td>
+      <td style="padding:8px; border:1px solid var(--line); text-align:right;">${l.gst_rate || 12}%</td>
+      <td style="padding:8px; border:1px solid var(--line); text-align:right;">₹ ${Number(l.taxable_value || 0).toFixed(2)}</td>
+      <td style="padding:8px; border:1px solid var(--line); text-align:right; font-weight:600;">₹ ${Number(l.line_total || 0).toFixed(2)}</td>
+    </tr>
+  `).join('');
+
+  let sheetHtml = `
+    <div style="border:1px solid #111; padding:24px; border-radius:8px; background:white;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #111; padding-bottom:12px; margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0 0 4px 0; color:var(--primary); font-size:22px;">TAX INVOICE</h2>
+          <div style="font-weight:700; font-size:15px;">${esc(inv.supplier)}</div>
+          <div class="tiny">GSTIN: 27AAACB1234F1Z0 · DL No: 20B/21B-441209</div>
+          <div class="tiny">Plot 42, MIDC Industrial Area, Mumbai, MH - 400093</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px; font-weight:700; color:var(--ink);">${esc(inv.invoice_id)}</div>
+          <div class="tiny"><b>Date:</b> ${esc(inv.date || new Date().toISOString().split('T')[0])}</div>
+          <div class="tiny"><b>Order Ref:</b> ${esc(inv.order_id || 'PF-DIRECT')}</div>
+          <div class="tiny"><b>Payment Terms:</b> Net 30 Days</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; background:#F8F9FA; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
+        <div>
+          <div class="tiny" style="color:var(--muted); font-weight:600; text-transform:uppercase;">Billed To / Buyer</div>
+          <div style="font-weight:700; font-size:14px;">${esc(inv.buyer || o?.pharmacy_name || 'Krishna Medical Store')}</div>
+          <div class="tiny">GSTIN: 27AQWPB9876K1Z9 · DL No: 20B/1109</div>
+          <div class="tiny">Shop 4, Station Road, Chembur, Mumbai, MH - 400071</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="tiny" style="color:var(--muted); font-weight:600; text-transform:uppercase;">Invoice Status</div>
+          <span class="badge badge-ok" style="margin-top:4px;">PAID / RECONCILED</span>
+        </div>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+        <thead>
+          <tr style="background:#F3F4F6;">
+            <th style="padding:8px; border:1px solid var(--line); width:30px;">#</th>
+            <th style="padding:8px; border:1px solid var(--line);">Product / Medicine Description</th>
+            <th style="padding:8px; border:1px solid var(--line);">Batch</th>
+            <th style="padding:8px; border:1px solid var(--line);">Exp</th>
+            <th style="padding:8px; border:1px solid var(--line); text-align:right;">Qty</th>
+            <th style="padding:8px; border:1px solid var(--line); text-align:right;">Rate (₹)</th>
+            <th style="padding:8px; border:1px solid var(--line); text-align:right;">GST</th>
+            <th style="padding:8px; border:1px solid var(--line); text-align:right;">Taxable (₹)</th>
+            <th style="padding:8px; border:1px solid var(--line); text-align:right;">Total (₹)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml}
+        </tbody>
+      </table>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="max-width:340px;">
+          <div class="tiny" style="font-weight:600; color:var(--muted);">AMOUNT IN WORDS</div>
+          <div style="font-weight:600; font-size:13px; margin-top:4px;">${words}</div>
+          <div class="tiny" style="margin-top:16px; color:var(--muted); line-height:1.4;">
+            Terms & Conditions:<br>
+            1. Goods once sold will not be taken back.<br>
+            2. Subject to Mumbai Jurisdiction.<br>
+            3. E. & O.E.
+          </div>
+        </div>
+
+        <div style="width:260px;">
+          <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--line);">
+            <span>Subtotal (Taxable):</span>
+            <b>₹ ${Number(inv.total_taxable).toFixed(2)}</b>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--line);">
+            <span>CGST (6%):</span>
+            <span>₹ ${cgst.toFixed(2)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--line);">
+            <span>SGST (6%):</span>
+            <span>₹ ${sgst.toFixed(2)}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 0; font-size:16px; font-weight:700; color:var(--green); border-bottom:2px solid #111;">
+            <span>Grand Total:</span>
+            <span>₹ ${Number(inv.grand_total).toFixed(2)}</span>
+          </div>
+          
+          <div style="text-align:center; margin-top:24px;">
+            <div style="font-size:11px; color:var(--muted); font-weight:600;">For ${esc(inv.supplier)}</div>
+            <div style="height:32px;"></div>
+            <div style="font-size:11px; border-top:1px dashed #666; padding-top:4px; display:inline-block;">Authorised Signatory</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  $('#invoice-sheet').innerHTML = sheetHtml;
+  let modal = $('#invoice-modal');
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+}
+
+function closeInvoiceModal() {
+  let modal = $('#invoice-modal');
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
+}
+
+function printInvoice() {
+  window.print();
+}
+
+function downloadInvoiceJSON(id) {
+  let state = getDemoState();
+  let o = state.orders ? state.orders.find(x => x.id === id || x.invoice?.invoice_id === id) : null;
+  let inv = o?.invoice;
+  if (!inv) {
+    let customInvs = state.custom_invoices || [];
+    inv = customInvs.find(x => x.invoice_id === id || x.order_id === id);
+  }
+  if (!inv) {
+    alert("Invoice data not found.");
+    return;
+  }
+  let str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inv, null, 2));
+  let a = document.createElement('a');
+  a.setAttribute("href", str);
+  a.setAttribute("download", `${inv.invoice_id || 'invoice'}.json`);
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function openCustomInvoiceModal() {
+  let m = $('#custom-invoice-modal');
+  if (!m) return;
+  $('#ci-date').value = new Date().toISOString().split('T')[0];
+  $('#ci-inv-id').value = `INV-CUSTOM-${Math.floor(1000 + Math.random() * 9000)}`;
+  
+  let list = $('#custom-inv-items-list');
+  list.innerHTML = '';
+  addCustomInvoiceLineRow("Dolo 650 Tablet", 10, 120, 12);
+  addCustomInvoiceLineRow("Pan 40 Capsule", 5, 95, 12);
+  
+  m.classList.remove('hidden');
+  m.style.display = 'flex';
+}
+
+function closeCustomInvoiceModal() {
+  let m = $('#custom-invoice-modal');
+  if (!m) return;
+  m.classList.add('hidden');
+  m.style.display = 'none';
+}
+
+let customRowCounter = 0;
+function addCustomInvoiceLineRow(product_name = '', qty = 1, rate = 100, gst = 12) {
+  customRowCounter++;
+  let id = customRowCounter;
+  let list = $('#custom-inv-items-list');
+  
+  let div = document.createElement('div');
+  div.className = 'flex-gap mb-2';
+  div.id = `ci-row-${id}`;
+  div.innerHTML = `
+    <input type="text" placeholder="Medicine Name" value="${esc(product_name)}" class="ci-pname" style="flex:2; margin:0;" required>
+    <input type="number" placeholder="Qty" value="${qty}" min="1" class="ci-qty" style="width:70px; margin:0;" required>
+    <input type="number" placeholder="Rate (₹)" value="${rate}" step="0.5" class="ci-rate" style="width:90px; margin:0;" required>
+    <select class="ci-gst" style="width:80px; margin:0;">
+      <option value="5" ${gst == 5 ? 'selected' : ''}>5%</option>
+      <option value="12" ${gst == 12 ? 'selected' : ''}>12%</option>
+      <option value="18" ${gst == 18 ? 'selected' : ''}>18%</option>
+    </select>
+    <button type="button" class="btn-outline" onclick="document.getElementById('ci-row-${id}').remove()" style="padding:6px 10px; color:var(--red); font-size:12px;">✕</button>
+  `;
+  list.appendChild(div);
+}
+
+function generateCustomInvoiceSubmit(e) {
+  e.preventDefault();
+  let supplier = $('#ci-supplier').value.trim() || 'ABC Pharma Distributors Pvt Ltd';
+  let buyer = $('#ci-buyer').value.trim() || 'Krishna Medical Store';
+  let invId = $('#ci-inv-id').value.trim() || `INV-CUSTOM-${Math.floor(1000 + Math.random() * 9000)}`;
+  let invDate = $('#ci-date').value || new Date().toISOString().split('T')[0];
+  
+  let rowEls = document.querySelectorAll('#custom-inv-items-list .flex-gap');
+  if (rowEls.length === 0) {
+    alert("Please add at least one medicine line.");
+    return;
+  }
+  
+  let lines = [];
+  let totalTaxable = 0;
+  let totalTax = 0;
+  
+  rowEls.forEach((row, idx) => {
+    let name = row.querySelector('.ci-pname').value.trim() || `Medicine ${idx+1}`;
+    let qty = Number(row.querySelector('.ci-qty').value) || 1;
+    let rate = Number(row.querySelector('.ci-rate').value) || 0;
+    let gstRate = Number(row.querySelector('.ci-gst').value) || 12;
+    
+    let taxable = round2(rate * qty);
+    let taxAmt = round2(taxable * (gstRate / 100));
+    let lineTot = round2(taxable + taxAmt);
+    
+    totalTaxable += taxable;
+    totalTax += taxAmt;
+    
+    lines.push({
+      line_number: idx + 1,
+      product_name: name,
+      master_product_id: `MP00${idx+1}`,
+      supplier_sku: `SKU-${idx+1}`,
+      batch: [`BCH-${9100+idx}`],
+      expiry: '2027-12',
+      quantity: qty,
+      rate: rate,
+      gst_rate: gstRate,
+      taxable_value: taxable,
+      tax_amount: taxAmt,
+      line_total: lineTot
+    });
+  });
+  
+  let grandTotal = round2(totalTaxable + totalTax);
+  
+  let inv = {
+    invoice_id: invId,
+    date: invDate,
+    supplier: supplier,
+    buyer: buyer,
+    order_id: `CUSTOM-${invId}`,
+    lines: lines,
+    total_taxable: round2(totalTaxable),
+    total_tax: round2(totalTax),
+    grand_total: grandTotal
+  };
+  
+  let state = getDemoState();
+  if (!state.custom_invoices) state.custom_invoices = [];
+  state.custom_invoices.unshift(inv);
+  saveDemoState(state);
+  
+  closeCustomInvoiceModal();
+  loadInvoicesView();
+  viewFullInvoiceModal(invId);
+}
+
+function loadReportsView() {
+  let state = getDemoState();
+  let orders = state.orders || [];
+  let totalOrders = orders.length;
+  let totalSpend = orders.reduce((sum, o) => {
+    let amt = o.invoice?.grand_total || o.supplier_snapshot?.estimated_total || 0;
+    return sum + Number(amt);
+  }, 0);
+  
+  if ($('#rep-total-orders')) $('#rep-total-orders').textContent = totalOrders;
+  if ($('#rep-total-spend')) $('#rep-total-spend').textContent = `₹ ${Math.round(totalSpend).toLocaleString('en-IN')}`;
 }
 
 function goHomePharmacy() {
@@ -1702,6 +2296,11 @@ async function resolveItemQuantity(idx) {
   renderBatchReview();
 }
 
+async function confirmQuantityOnly(idx) {
+  // confirmQuantityOnly()
+  return await resolveItemQuantity(idx);
+}
+
 async function resolveItemMatch(idx) {
   let item = currentItems[idx];
   let qtyVal = $(`#qty-${idx}`).value;
@@ -1731,6 +2330,17 @@ async function resolveItemMatch(idx) {
 }
 
 // ---- Supplier state (vars declared at top of script) -------------------
+
+function rankSuppliers(suppliers) {
+  return suppliers.sort((a, b) => {
+    if (a.coverage_status === 'FULL' && b.coverage_status !== 'FULL') return -1;
+    if (b.coverage_status === 'FULL' && a.coverage_status !== 'FULL') return 1;
+    if (a.eta_date < b.eta_date) return -1;
+    if (b.eta_date < a.eta_date) return 1;
+    let opt = a;
+    return (opt.unit_price || a.estimated_total) - (b.unit_price || b.estimated_total);
+  });
+}
 
 function toggleSuppliersView(show) {
   // Legacy compat — now a no-op since suppliers are inline
@@ -2036,8 +2646,6 @@ async function placeOrder(supplierId) {
     };
   });
   
-  function round2(n) { return Math.round(n * 100) / 100; }
-  
   let exclItems = excluded.map(i => ({
     raw_text: i.input.raw_text,
     reason: i.resolution.reason
@@ -2054,18 +2662,7 @@ async function placeOrder(supplierId) {
       id: oId,
       pharmacy_name: 'Krishna Medical Store',
       payload: { items: reqItems, excluded_lines: exclItems },
-      supplier_snapshot: {
-        supplier_id: supplierData.supplier_id,
-        supplier_name: supplierData.supplier_name,
-        location: supplierData.location || '',
-        coverage_status: supplierData.coverage_status,
-        estimated_total: supplierData.estimated_total,
-        eta_date: supplierData.eta_date,
-        eta_label: supplierData.eta_label,
-        lead_time_days: supplierData.lead_time_days,
-        full_line_count: supplierData.full_line_count,
-        requested_line_count: supplierData.requested_line_count,
-      },
+      supplier_snapshot: supplierData,
       status: 'PLACED',
       placed_at: new Date().toISOString()
     };
@@ -2104,7 +2701,7 @@ function loadPharmacyOrders() {
     if(o.status === 'RECONCILED' || o.status === 'INVOICED') {
       viewAct = `<button class="btn-outline" onclick="viewReconciliation('${o.id}')">View Invoice Check</button>`;
     } else {
-      viewAct = `<button class="btn-outline" disabled>View Order</button>`;
+      viewAct = `<button class="btn-outline" onclick="viewPharmacyOrderDetail('${o.id}')">View Order</button>`;
     }
     
     return `
@@ -2124,6 +2721,16 @@ function loadPharmacyOrders() {
   }).join('');
   
   $('#pharmacy-orders-list').innerHTML = html || '<p class="tiny">No orders yet.</p>';
+}
+
+function viewPharmacyOrderDetail(orderId) {
+  let state = getDemoState();
+  let o = state.orders.find(x => x.id === orderId);
+  if (!o) return;
+  let sup = o.supplier_snapshot?.supplier_name || o.payload.items[0]?.supplier_name || 'Supplier';
+  let eta = o.supplier_snapshot?.eta_label || 'Soon';
+  let itemsSummary = o.payload.items.map(i => `• ${i.product_name || i.raw_text} (${i.fulfilled_quantity || i.quantity} units @ ₹${i.unit_price || 0})`).join('\n');
+  alert(`Order ID: ${o.id}\nSupplier: ${sup}\nStatus: ${o.status}\nExpected Delivery: ${eta}\n\nItems:\n${itemsSummary}`);
 }
 
 async function viewReconciliation(orderId) {
@@ -2303,10 +2910,15 @@ function openSupplierOrder(orderId) {
     let inv = o.invoice;
     $('#so-invoice-preview').innerHTML = `
       <div class="flex-between mb-2">
-        <strong>${inv.invoice_id}</strong>
-        <span>Total: ₹${inv.grand_total}</span>
+        <div>
+          <strong style="font-size:15px;">${inv.invoice_id}</strong>
+          <div class="tiny">${inv.lines.length} items · Total: <b>₹${inv.grand_total}</b></div>
+        </div>
+        <div class="flex-gap">
+          <button class="btn-primary" onclick="viewFullInvoiceModal('${inv.invoice_id}')" style="font-size:12px; padding:6px 12px;">📄 View Tax Invoice</button>
+          <button class="btn-outline" onclick="downloadInvoiceJSON('${inv.invoice_id}')" style="font-size:12px; padding:6px 12px;">📥 JSON</button>
+        </div>
       </div>
-      <div class="tiny">${inv.lines.length} lines · <span class="badge badge-neutral">Demo supplier network</span></div>
     `;
   } else {
     toggle('#so-invoice-section', false);

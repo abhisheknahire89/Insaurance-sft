@@ -59,11 +59,15 @@ def classify_number_roles(text: str) -> List[dict]:
             out.append({'text':m.group(0),'role':'GAUGE','start':m.start(),'end':m.end()})
     for m in _PRICE.finditer(text or ''):
         out.append({'text':m.group(0),'role':'PRICE','start':m.start(),'end':m.end()})
+    for m in _QTY_S_SUFFIX.finditer(text or ''):
+        out.append({'text':m.group(0),'role':'PACK_SIZE','start':m.start(),'end':m.end()})
     for rx in (_QTY_X,_QTY_X_SUFFIX,_QTY_PREFIX,_QTY_UNIT):
         for m in rx.finditer(text or ''):
             out.append({'text':m.group(0),'role':'QUANTITY','start':m.start(),'end':m.end()})
     out.sort(key=lambda x:(x['start'],x['end']))
     return out
+
+_QTY_S_SUFFIX = re.compile(r"\b(\d+(?:\.\d+)?)\s*['’]?s\b", re.I)
 
 def extract_quantity(text: str) -> Tuple[Optional[float], Optional[str], str]:
     raw=text or ''
@@ -75,6 +79,9 @@ def extract_quantity(text: str) -> Tuple[Optional[float], Optional[str], str]:
     if q: return float(q.group(1)), None, 'EXPLICIT_QTY_LABEL'
     q=_QTY_UNIT.search(raw)
     if q: return float(q.group(1)), UNITS.get(q.group(2).lower()), 'NUMBER_WITH_ORDER_UNIT'
+    q=_QTY_S_SUFFIX.search(raw)
+    if q and not re.search(r"\b(?:mg|mcg|g|gm|ml|iu|%|rs|mrp)\b", q.group(0), re.I):
+        return None, None, 'PACK_SIZE'
     # Word + unit, but never treat bare numbers as quantity.
     uw='|'.join(sorted(map(re.escape,UNITS), key=len, reverse=True))
     m=re.search(rf"\b({'|'.join(map(re.escape,NUMBER_WORDS))})\s+({uw})\b", raw, re.I)

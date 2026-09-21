@@ -114,9 +114,16 @@ async def text_requirement(text:str=Form(...)):
     return JSONResponse(process_text_requirement(text,app.state.catalog,app.state.catalog_index,None))
 
 @app.get('/api/suppliers')
-def suppliers(master_product_id:str,quantity:float=1):
-    opts=supplier_options_demo(master_product_id,quantity)
-    return {'options':opts}
+def suppliers(master_product_id: str | None = None, quantity: float = 1):
+    if not master_product_id or not str(master_product_id).strip():
+        raise HTTPException(400, "PRODUCT_NOT_IN_CATALOGUE")
+    mid = str(master_product_id).strip()
+    catalog = getattr(app.state, 'catalog', [])
+    valid_ids = {c.master_product_id for c in catalog} if catalog else {f"SKU{i:04d}" for i in range(1, 85)}
+    if mid not in valid_ids:
+        raise HTTPException(400, "PRODUCT_NOT_IN_CATALOGUE")
+    opts = supplier_options_demo(mid, quantity)
+    return {'options': opts}
 
 @app.post('/api/suppliers/compare')
 async def suppliers_compare(payload: dict):

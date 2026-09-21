@@ -155,15 +155,13 @@ def compare_suppliers(items: list[dict]) -> dict:
             'lines': lines,
         })
 
-    # Rank: FULL > PARTIAL > UNAVAILABLE; then ETA asc; then price asc
+    # Rank: FULL > PARTIAL > UNAVAILABLE; then full_line_count desc; then ETA asc; then price asc
     def rank_key(s: dict):
         cov_order = {'FULL': 0, 'PARTIAL': 1, 'UNAVAILABLE': 2}
         cov_rank = cov_order.get(s['coverage_status'], 2)
-        # For PARTIAL, rank by line_coverage_ratio desc (negate)
         return (
             cov_rank,
-            -s['line_coverage_ratio'],
-            -s['quantity_coverage_ratio'],
+            -s['full_line_count'],
             s['eta_date'],
             s['estimated_total'],
         )

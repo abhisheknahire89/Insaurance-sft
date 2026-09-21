@@ -3,7 +3,7 @@ import urllib.request
 import urllib.error
 import subprocess
 
-proc = subprocess.Popen(["venv/bin/uvicorn", "app:app", "--host", "127.0.0.1", "--port", "8000"])
+proc = subprocess.Popen(["venv/bin/uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000"])
 try:
     for i in range(20):
         try:
