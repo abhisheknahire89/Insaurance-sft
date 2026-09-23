@@ -85,24 +85,47 @@ def save_upload(file:UploadFile,allowed:set[str])->Path:
 @app.get('/',response_class=HTMLResponse)
 def home(): return (BASE/'static'/'index.html').read_text(encoding='utf-8')
 
+def ensure_catalog_ready_sync():
+    if not getattr(app.state, 'catalog', None) or not getattr(app.state, 'catalog_status', {}).get('loaded'):
+        cat_path = DATA/'medicine_master_demo.csv'
+        if cat_path.exists():
+            catalog = load_catalog(str(cat_path))
+            idx = CatalogIndex(catalog)
+            active = sum(1 for c in catalog if not c.is_discontinued)
+            app.state.catalog = catalog
+            app.state.catalog_index = idx
+            app.state.catalog_status = {
+                'loaded': True,
+                'loading': False,
+                'source': 'data/medicine_master_demo.csv',
+                'rows': len(catalog),
+                'active': active,
+                'discontinued': len(catalog) - active,
+                'index_ready': True,
+                'build_time_ms': 0,
+                'catalog_version': hashlib.md5(cat_path.read_bytes()).hexdigest()[:8],
+                'last_loaded_at': time.time()
+            }
+
 @app.get('/api/health')
 def health():
     return {'ok':True,'sarvam_key_configured':bool(os.getenv('SARVAM_API_KEY'))}
 
 @app.get('/api/catalog/status')
 def catalog_status():
+    ensure_catalog_ready_sync()
     return app.state.catalog_status
 
 @app.get('/api/warmup')
 async def warmup():
-    while app.state.catalog_status.get('loading'):
-        await asyncio.sleep(0.5)
+    ensure_catalog_ready_sync()
     if app.state.catalog_status.get('loaded'):
         return {'ready': True, 'rows': app.state.catalog_status['rows']}
     raise HTTPException(503, "Failed to load catalog")
 
 @app.post('/api/wantslip')
 async def wantslip(file:UploadFile=File(...),language:str=Form('en-IN'),accuracy_mode:str=Form('maximum')):
+    ensure_catalog_ready_sync()
     if not app.state.catalog_status.get('loaded'): raise HTTPException(503, "MEDICINE_MASTER_NOT_LOADED")
     p=save_upload(file,{'.png','.jpg','.jpeg'})
     try:return JSONResponse(process_wantslip(str(p),app.state.catalog,app.state.catalog_index,None,language,accuracy_mode,str(p.parent),None))
@@ -110,6 +133,7 @@ async def wantslip(file:UploadFile=File(...),language:str=Form('en-IN'),accuracy
 
 @app.post('/api/text-requirement')
 async def text_requirement(text:str=Form(...)):
+    ensure_catalog_ready_sync()
     if not app.state.catalog_status.get('loaded'): raise HTTPException(503, "MEDICINE_MASTER_NOT_LOADED")
     return JSONResponse(process_text_requirement(text,app.state.catalog,app.state.catalog_index,None))
 

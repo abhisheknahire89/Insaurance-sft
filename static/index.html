@@ -282,6 +282,76 @@ tr:last-child td { border-bottom: none; }
   #printable-invoice-container { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
   .no-print { display: none !important; }
 }
+
+/* Glassmorphic Sample Testing Buttons */
+.sample-testing-section {
+  position: relative;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--line);
+}
+.sample-btn {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.sample-btn:hover:not(:disabled) {
+  background: #FFFFFF;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(26, 115, 232, 0.14);
+}
+.sample-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+.sample-btn-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--blue-bg);
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-bottom: 4px;
+  letter-spacing: 0.2px;
+}
+.sample-btn-icon {
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 2px;
+  transition: transform 0.2s ease;
+}
+.sample-btn:hover:not(:disabled) .sample-btn-icon {
+  transform: scale(1.18);
+}
+.sample-btn-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.sample-btn-sub {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
 </style>
 </head>
 <body>
@@ -392,7 +462,41 @@ tr:last-child td { border-bottom: none; }
             <input type="file" name="file" id="slipFile" accept="image/png,image/jpeg" required>
             <button type="button" id="btn-read-wantslip" class="btn-primary btn-large">Read want slip</button>
           </form>
-          <div class="tiny">For best results: Keep the whole slip visible and avoid shadows.</div>
+          <div class="tiny" style="margin-bottom: 16px;">For best results: Keep the whole slip visible and avoid shadows.</div>
+
+          <!-- Instant Sample Testing Buttons -->
+          <div class="sample-testing-section">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <span style="font-size: 11px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 6px var(--primary);"></span>
+                Instant Sample Testing
+              </span>
+              <span class="badge badge-neutral" style="font-size: 10px; font-weight: 600; padding: 2px 6px;">3 Preloaded Slips</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+              <button type="button" class="sample-btn" id="btn-sample-1" onclick="processSampleWantSlip('WANT_SLIP_001.png', 1)" title="Test Sample 1: Standard Rx List">
+                <div class="sample-btn-badge">Sample 1</div>
+                <div class="sample-btn-icon">📄</div>
+                <div class="sample-btn-title">Standard Rx</div>
+                <div class="sample-btn-sub">Dolo • Pan • Allegra</div>
+              </button>
+
+              <button type="button" class="sample-btn" id="btn-sample-2" onclick="processSampleWantSlip('WANT_SLIP_002.png', 2)" title="Test Sample 2: Mixed Handwriting List">
+                <div class="sample-btn-badge">Sample 2</div>
+                <div class="sample-btn-icon">📝</div>
+                <div class="sample-btn-title">Mixed List</div>
+                <div class="sample-btn-sub">Azithral • Pantop</div>
+              </button>
+
+              <button type="button" class="sample-btn" id="btn-sample-3" onclick="processSampleWantSlip('WANT_SLIP_003.png', 3)" title="Test Sample 3: Urgent Rx Order">
+                <div class="sample-btn-badge">Sample 3</div>
+                <div class="sample-btn-icon">⚡</div>
+                <div class="sample-btn-title">Urgent Rx</div>
+                <div class="sample-btn-sub">Crocin • U Wash</div>
+              </button>
+            </div>
+          </div>
         </div>
         
         <div class="card">
@@ -1939,6 +2043,80 @@ async function handleWantSlipUpload() {
   } finally {
     btn.disabled = false;
     btn.textContent = 'Read want slip';
+  }
+}
+
+async function processSampleWantSlip(sampleFileName, sampleNum) {
+  const btn = document.getElementById(`btn-sample-${sampleNum}`);
+  const originalHtml = btn ? btn.innerHTML : '';
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.style.opacity = '0.75';
+  }
+
+  showOverlay([], 'wantslip');
+
+  try {
+    await ensureCatalogReady();
+
+    const sampleUrl = `/samples/wantslips/${sampleFileName}`;
+    const response = await fetch(sampleUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to load sample image (${response.status})`);
+    }
+
+    const blob = await response.blob();
+    const file = new File([blob], sampleFileName, { type: 'image/png' });
+
+    currentImageSrc = URL.createObjectURL(file);
+    const imgPreview = document.getElementById('source-image-preview');
+    if (imgPreview) {
+      imgPreview.src = currentImageSrc;
+      imgPreview.classList.remove('hidden');
+    }
+    const noImgText = document.getElementById('no-image-text');
+    if (noImgText) noImgText.classList.add('hidden');
+    if (typeof window.resetImageZoom === 'function') window.resetImageZoom();
+
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+
+    const apiRes = await fetch('/api/wantslip', {
+      method: 'POST',
+      body: fd
+    });
+
+    const bodyText = await apiRes.text();
+    let data;
+    try {
+      data = JSON.parse(bodyText);
+    } catch {
+      throw new Error(`Invalid server response (${apiRes.status})`);
+    }
+
+    if (!apiRes.ok) {
+      throw new Error(data.detail || data.error || `Want-slip processing failed (${apiRes.status})`);
+    }
+
+    processRequirementResult(data);
+
+    let readyCount = currentItems.filter(isReady).length;
+    let notFoundCount = currentItems.filter(isExcluded).length;
+    let reviewCount = currentItems.filter(isNeedsReview).length;
+
+    hideOverlay({ total: currentItems.length, ready: readyCount, review: reviewCount, notfound: notFoundCount });
+
+  } catch (error) {
+    console.error('Sample want-slip processing failed', error);
+    hideOverlay();
+    alert('Sample test failed: ' + (error.message || error));
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.innerHTML = originalHtml;
+    }
   }
 }
 
